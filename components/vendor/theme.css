@@ -1,0 +1,16 @@
+/*
+  BOOK YOUR VIBES — Vendor Flow Design Tokens
+  ---------------------------------------------
+  Imported globally from app/globals.css.
+*/
+
+:root {
+  --byv-pitch: #0c1912;
+  --byv-pitch-deep: #142a1e;
+  --byv-lime: #a6ff3c;
+  --byv-amber: #ffb020;
+  --byv-chalk: #f6f3ea;
+  --byv-ink: #10241a;
+  --byv-ink-soft: #3f5449;
+  --byv-border: #e4ded0;
+}
