@@ -1898,6 +1898,17 @@ function LocationStep({ draft, update }: StepProps) {
   const [cityInput, setCityInput] = useState("");
   const [locating, setLocating] = useState(false);
   const [locError, setLocError] = useState<string | null>(null);
+  const venueRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (venueRef.current && !venueRef.current.contains(event.target as Node)) {
+        setSuggestions([]);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   /** Fill address / city / state from the device's GPS — the Zomato/Instamart "use current location" flow. */
   function useCurrentLocation() {
@@ -1975,13 +1986,15 @@ function LocationStep({ draft, update }: StepProps) {
         headers: { "Accept-Language": "en" },
         referrerPolicy: "origin",
       })
-        .then((res) => res.json())
+        .then((res) => (res.ok ? res.json() : []))
         .then((data) => {
           if (Array.isArray(data)) {
             setSuggestions(data);
+          } else {
+            setSuggestions([]);
           }
         })
-        .catch((err) => console.error(err))
+        .catch(() => setSuggestions([]))
         .finally(() => setLoadingSuggestions(false));
     }, 450);
 
@@ -2043,12 +2056,16 @@ function LocationStep({ draft, update }: StepProps) {
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
-        <div className="relative">
+        <div ref={venueRef} className="relative">
           <FieldLabel>Destination venue *</FieldLabel>
           <div className="relative">
             <input
               value={venueInput}
-              onChange={(e) => setVenueInput(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setVenueInput(val);
+                update("address", val);
+              }}
               placeholder="Search venue (e.g. Urban Square Mall, Udaipur...)"
               className={inputClass}
             />

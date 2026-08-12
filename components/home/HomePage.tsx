@@ -33,7 +33,6 @@ import { SignupModal } from "./modals/SignupModal";
 import { MobileHome } from "./mobile/MobileHome";
 import { useVenueFilters } from "./useVenueFilters";
 import { useCustomerAuth } from "@/components/providers/CustomerAuthProvider";
-import { OnboardingFlow } from "./OnboardingFlow";
 import { SPORTS_CATALOG } from "./data";
 
 
@@ -55,30 +54,7 @@ export default function HomePage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [challengeOpen, setChallengeOpen] = useState(false);
   const [joinInviteOpen, setJoinInviteOpen] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
   const filters = useVenueFilters(venues, search);
-
-  useEffect(() => {
-    if (status === "loading") return;
-
-    if (status === "authenticated") {
-      setShowOnboarding(false);
-      return;
-    }
-
-    if (typeof window === "undefined") return;
-    try {
-      const seen = sessionStorage.getItem("onboarding_seen");
-      if (!seen) {
-        sessionStorage.setItem("onboarding_seen", "true");
-        setShowOnboarding(true);
-      } else {
-        setShowOnboarding(false);
-      }
-    } catch {
-      setShowOnboarding(false);
-    }
-  }, [status]);
 
   useEffect(() => {
     if (status === "guest" && new URLSearchParams(window.location.search).get("join") === "player") {
@@ -143,25 +119,8 @@ export default function HomePage() {
     return filters.filteredVenues.length;
   }, [search, filters.activeFilterCount, filters.filteredVenues]);
 
-  const handleOnboardingComplete = useCallback(() => {
-    if (typeof window !== "undefined") {
-      try {
-        sessionStorage.setItem("onboarding_seen", "true");
-      } catch {
-        // Storage unavailable
-      }
-    }
-    setShowOnboarding(false);
-  }, []);
-
-  if (showOnboarding === null) {
-    return <div className="min-h-screen bg-slate-900" />;
-  }
-
   return (
     <div className="min-h-screen bg-[#f3f4fb] font-sans text-slate-950">
-      {showOnboarding && <OnboardingFlow onComplete={handleOnboardingComplete} />}
-      
       <SiteHeader />
       <Hero
         searchValue={search}

@@ -49,6 +49,7 @@ export function QuickAddEventModal({
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [venue, setVenue] = useState<{ address: string; city: string; state: string } | null>(null);
+  const venueRef = useRef<HTMLDivElement>(null);
 
   const [posterUrl, setPosterUrl] = useState("");
   const [uploadingPoster, setUploadingPoster] = useState(false);
@@ -57,6 +58,16 @@ export function QuickAddEventModal({
 
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (venueRef.current && !venueRef.current.contains(event.target as Node)) {
+        setSuggestions([]);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (venueInput.length < 3 || venue) {
@@ -72,9 +83,9 @@ export function QuickAddEventModal({
         // Referer must be forced or Nominatim silently 403s — see project convention.
         { headers: { "Accept-Language": "en" }, referrerPolicy: "origin" }
       )
-        .then((res) => res.json())
-        .then((data) => Array.isArray(data) && setSuggestions(data))
-        .catch(() => {})
+        .then((res) => (res.ok ? res.json() : []))
+        .then((data) => Array.isArray(data) ? setSuggestions(data) : setSuggestions([]))
+        .catch(() => setSuggestions([]))
         .finally(() => setLoadingSuggestions(false));
     }, 400);
     return () => clearTimeout(t);
@@ -108,8 +119,9 @@ export function QuickAddEventModal({
       setError("Give your event a name.");
       return;
     }
-    if (!venue) {
-      setError("Search and select a venue from the dropdown.");
+    const finalAddress = venue ? venue.address : venueInput.trim();
+    if (!finalAddress) {
+      setError("Enter a venue address.");
       return;
     }
     const priceNum = price === "" ? 0 : Number(price);
@@ -141,11 +153,11 @@ export function QuickAddEventModal({
         coverImage: posterUrl,
         images: posterUrl ? [{ id: `img-${now.getTime()}`, url: posterUrl, label: "Poster" }] : [],
         country: "India",
-        city: venue.city,
-        state: venue.state,
+        city: venue?.city || "",
+        state: venue?.state || "",
         cityMode: "single",
         cities: [],
-        address: venue.address,
+        address: venue?.address || venueInput.trim(),
         reportingStartTime: startTime,
         reportingEndTime: endTime,
         description: `More event details coming soon for ${title.trim()}.`,
@@ -282,7 +294,7 @@ export function QuickAddEventModal({
             </select>
           </div>
 
-          <div className="relative">
+          <div ref={venueRef} className="relative">
             <label className={fieldLabelClass}>Venue *</label>
             <div className="relative">
               <MapPin size={14} className="pointer-events-none absolute left-3 top-3.5 text-ink-faint" />

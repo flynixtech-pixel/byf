@@ -747,6 +747,17 @@ function LocationStep({ draft, update, updateMany }: StepProps) {
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [coords, setCoords] = useState<{ lat: string; lon: string } | null>(null);
   const [cityInput, setCityInput] = useState("");
+  const venueRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (venueRef.current && !venueRef.current.contains(event.target as Node)) {
+        setSuggestions([]);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (venueInput.length < 3) {
@@ -763,13 +774,15 @@ function LocationStep({ draft, update, updateMany }: StepProps) {
         // Force the Referer header — see note in PackageStudio's identical call.
         { headers: { "Accept-Language": "en" }, referrerPolicy: "origin" }
       )
-        .then((res) => res.json())
+        .then((res) => (res.ok ? res.json() : []))
         .then((data) => {
           if (Array.isArray(data)) {
             setSuggestions(data);
+          } else {
+            setSuggestions([]);
           }
         })
-        .catch((err) => console.error(err))
+        .catch(() => setSuggestions([]))
         .finally(() => setLoadingSuggestions(false));
     }, 450);
 
@@ -844,12 +857,16 @@ function LocationStep({ draft, update, updateMany }: StepProps) {
 
       <div className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
         <div className="relative space-y-4">
-          <div>
+          <div ref={venueRef} className="relative">
             <FieldLabel>Destination venue *</FieldLabel>
             <div className="relative">
               <input
                 value={venueInput}
-                onChange={(e) => setVenueInput(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setVenueInput(val);
+                  update("address", val);
+                }}
                 placeholder="Search venue (e.g. Urban Square Mall, Udaipur...)"
                 className={inputClass}
               />
@@ -873,7 +890,7 @@ function LocationStep({ draft, update, updateMany }: StepProps) {
               </div>
             )}
             <p className="mt-1.5 text-[11px] text-ink-faint">
-              Type venue name to search and auto-fill coordinates, state, and city.
+              Type venue name to search or auto-fill coordinates, state, and city. Custom venue names are allowed.
             </p>
           </div>
 
