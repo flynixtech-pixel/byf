@@ -916,7 +916,7 @@ function LocationStep({ draft, update, updateMany }: StepProps) {
           </div>
 
           <div>
-            <div className="mb-1.5 flex items-center justify-between">
+            <div className="mb-2 flex items-center justify-between">
               <FieldLabel>Choose city *</FieldLabel>
               <ToggleGroup
                 value={draft.cityMode ?? "single"}
@@ -924,35 +924,68 @@ function LocationStep({ draft, update, updateMany }: StepProps) {
                   { value: "single", label: "Single city" },
                   { value: "multiple", label: "Multiple cities" },
                 ]}
-                onChange={(v) => update("cityMode", v)}
+                onChange={(v) => {
+                  update("cityMode", v);
+                  if (v === "single") {
+                    const firstCity = draft.cities?.[0] || draft.city || "";
+                    updateMany({ city: firstCity, cities: [] });
+                  } else {
+                    if (draft.city && (!draft.cities || draft.cities.length === 0)) {
+                      updateMany({ cities: [draft.city] });
+                    }
+                  }
+                }}
               />
             </div>
             <div className="mb-2 flex flex-wrap gap-2">
               {draft.cityMode === "multiple"
                 ? (draft.cities ?? []).map((c) => (
-                    <span key={c} className="inline-flex items-center gap-1.5 rounded-full bg-vibe-violet/10 px-2.5 py-1 text-xs font-medium text-vibe-violet">
+                    <span key={c} className="inline-flex items-center gap-1.5 rounded-full bg-vibe-violet/10 border border-vibe-violet/20 px-3 py-1 text-xs font-extrabold text-vibe-violet">
                       {c}
-                      <button type="button" onClick={() => update("cities", (draft.cities ?? []).filter((x) => x !== c))}>
+                      <button type="button" onClick={() => update("cities", (draft.cities ?? []).filter((x) => x !== c))} className="hover:text-rose-600 transition cursor-pointer">
                         <X size={12} />
                       </button>
                     </span>
                   ))
                 : draft.city && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-vibe-violet/10 px-2.5 py-1 text-xs font-medium text-vibe-violet">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-vibe-violet/10 border border-vibe-violet/20 px-3 py-1 text-xs font-extrabold text-vibe-violet">
                       {draft.city}
-                      <button type="button" onClick={() => update("city", "")}>
+                      <button type="button" onClick={() => update("city", "")} className="hover:text-rose-600 transition cursor-pointer">
                         <X size={12} />
                       </button>
                     </span>
                   )}
             </div>
-            <input
-              value={cityInput}
-              onChange={(e) => setCityInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCity())}
-              placeholder="Search and choose city..."
-              className={inputClass}
-            />
+
+            <div className="flex items-center gap-2">
+              <input
+                value={cityInput}
+                onChange={(e) => setCityInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCity())}
+                placeholder={draft.cityMode === "multiple" ? "Search or type city name and click + Add..." : "Search or type single city..."}
+                className={inputClass}
+              />
+              {draft.cityMode === "multiple" ? (
+                <button
+                  type="button"
+                  onClick={() => addCity()}
+                  disabled={!cityInput.trim()}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-vibe-violet px-4 py-3 text-xs font-extrabold text-white shadow-xs hover:bg-vibe-violet/90 transition disabled:opacity-40 shrink-0 cursor-pointer"
+                >
+                  <Plus size={14} /> Add
+                </button>
+              ) : (
+                cityInput.trim() && (
+                  <button
+                    type="button"
+                    onClick={() => addCity()}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-vibe-violet px-4 py-3 text-xs font-extrabold text-white shadow-xs hover:bg-vibe-violet/90 transition shrink-0 cursor-pointer"
+                  >
+                    Set City
+                  </button>
+                )
+              )}
+            </div>
           </div>
         </div>
 
@@ -1202,8 +1235,12 @@ function BookingStep({ draft, updateMany, vendorProfile }: StepProps & { vendorP
                 <input
                   type="number"
                   min="1"
-                  value={row.slots}
-                  onChange={(e) => updateRow(idx, { slots: parseInt(e.target.value) || 0 })}
+                  value={row.slots === 0 ? "" : row.slots}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => {
+                    const cleaned = e.target.value.replace(/^0+(?=\d)/, "");
+                    updateRow(idx, { slots: cleaned === "" ? 0 : parseInt(cleaned, 10) || 0 });
+                  }}
                   className={inputClass}
                 />
               </div>
@@ -1374,8 +1411,12 @@ function PricingStep({ draft, update, updateMany }: StepProps) {
                 <input
                   type="number"
                   min="0"
-                  value={tier.amount}
-                  onChange={(e) => updateTier(idx, { amount: Number(e.target.value) || 0 })}
+                  value={tier.amount === 0 ? "" : tier.amount}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => {
+                    const cleaned = e.target.value.replace(/^0+(?=\d)/, "");
+                    updateTier(idx, { amount: cleaned === "" ? 0 : Number(cleaned) || 0 });
+                  }}
                   className={inputClass}
                 />
               </div>
@@ -1431,8 +1472,12 @@ function PricingStep({ draft, update, updateMany }: StepProps) {
                 />
                 <input
                   type="number"
-                  value={a.price}
-                  onChange={(e) => updateAddOn(i, { price: Number(e.target.value) })}
+                  value={a.price === 0 ? "" : a.price}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => {
+                    const cleaned = e.target.value.replace(/^0+(?=\d)/, "");
+                    updateAddOn(i, { price: cleaned === "" ? 0 : Number(cleaned) || 0 });
+                  }}
                   placeholder="₹ Price"
                   className={`${inputClass} w-28`}
                 />
@@ -1477,8 +1522,12 @@ function PricingStep({ draft, update, updateMany }: StepProps) {
                   <div className="flex shrink-0 items-center gap-1">
                     <input
                       type="number"
-                      value={c.discountPercent}
-                      onChange={(e) => updateCoupon(i, { discountPercent: Number(e.target.value) })}
+                      value={c.discountPercent === 0 ? "" : c.discountPercent}
+                      onFocus={(e) => e.target.select()}
+                      onChange={(e) => {
+                        const cleaned = e.target.value.replace(/^0+(?=\d)/, "");
+                        updateCoupon(i, { discountPercent: cleaned === "" ? 0 : Number(cleaned) || 0 });
+                      }}
                       className={`${inputClass} w-16`}
                     />
                     <span className="text-xs text-ink-faint">%</span>
@@ -1720,7 +1769,7 @@ export function EventStudio({
     const finalDraft = {
       ...draft,
       title: finalTitle,
-      coverImage: draft.images[0]?.url || "",
+      coverImage: draft.images[0]?.url ? draft.images[0].url : undefined,
     };
 
     if (finalDraft.categories.length === 0 || !finalDraft.categories[0] || finalDraft.categories[0] === "") {

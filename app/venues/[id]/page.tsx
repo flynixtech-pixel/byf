@@ -161,7 +161,7 @@ export default function VenueDetailPage() {
   const [reviewComment, setReviewComment] = useState("");
   const [reviewSuccess, setReviewSuccess] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
-  
+
   // Gallery interactivity
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -175,7 +175,7 @@ export default function VenueDetailPage() {
   useEffect(() => {
     getVenueReviews(id)
       .then((res) => setReviews(res))
-      .catch(() => {});
+      .catch(() => { });
   }, [id]);
 
   const handleAddReview = async (e: React.FormEvent) => {
@@ -201,7 +201,7 @@ export default function VenueDetailPage() {
       setReviewName("");
       setReviewComment("");
       setReviewRating(5);
-      
+
       // Update local listing rating/count dynamically
       if (venue) {
         const newCount = (venue.reviewCount || 0) + 1;
@@ -241,13 +241,7 @@ export default function VenueDetailPage() {
   const fallbackUrl = venue ? getListingImage(venue, "fallback") : "";
   const galleryImages = allImageUrls.length > 0 ? allImageUrls.slice(0, 10) : (fallbackUrl ? [fallbackUrl] : []);
 
-  useEffect(() => {
-    if (galleryImages.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % galleryImages.length);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, [galleryImages.length]);
+
 
   if (loading) {
     return (
@@ -290,11 +284,6 @@ export default function VenueDetailPage() {
     return { label: item, Icon: match?.icon ?? Layers };
   });
   const categoryText = venue.categories.map(categoryLabel).join(", ") || "General";
-  
-  // Cards elsewhere show the poster. The detail-page hero shows a scrollable
-  // gallery built from the banner + any extra gallery photos, falling back to
-  // the universal/poster image alone when nothing else was uploaded.
-  console.log("DEBUG VENUE:", venue.title, "images:", venue.images, "allImageUrls:", allImageUrls, "galleryImages:", galleryImages);
 
   const reviewProps = {
     reviews,
@@ -312,9 +301,7 @@ export default function VenueDetailPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="hidden sm:block">
-        <SiteHeader />
-      </div>
+      <SiteHeader />
 
       <div className="sm:hidden">
         <MobileVenueDetail
@@ -353,7 +340,7 @@ export default function VenueDetailPage() {
             <button
               type="button"
               onClick={() => {
-                navigator.clipboard?.writeText(window.location.href).catch(() => {});
+                navigator.clipboard?.writeText(window.location.href).catch(() => { });
               }}
               className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm transition hover:border-brand-300 hover:text-brand-600 cursor-pointer"
             >
@@ -365,21 +352,21 @@ export default function VenueDetailPage() {
         <div className="grid gap-6 lg:grid-cols-[2fr_1fr] lg:gap-8">
           {/* LEFT — details */}
           <div className="min-w-0">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
               className="mb-6 group"
             >
               <div className="relative h-[400px] lg:h-[480px] w-full overflow-hidden rounded-3xl bg-slate-900 shadow-sm cursor-pointer">
                 <AnimatePresence initial={false}>
-                  <motion.img 
+                  <motion.img
                     key={currentImageIndex}
-                    src={galleryImages[currentImageIndex] || "https://placehold.co/800x400/1e293b/fff?text=No+Image"} 
-                    alt={venue.title} 
+                    src={galleryImages[currentImageIndex] || "https://placehold.co/800x400/1e293b/fff?text=No+Image"}
+                    alt={venue.title}
                     className="absolute inset-0 h-full w-full object-cover"
                     initial={{ scale: 1, opacity: 0 }}
                     animate={{ scale: 1.03, opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ 
+                    transition={{
                       scale: { duration: 8, ease: "linear", repeat: Infinity, repeatType: "reverse" },
                       opacity: { duration: 0.8 }
                     }}
@@ -392,21 +379,14 @@ export default function VenueDetailPage() {
                     }}
                   />
                 </AnimatePresence>
-                
-                {/* Hover overlay with "View Photos ->" */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none z-10">
-                  <span className="translate-y-4 group-hover:translate-y-0 transition-all duration-300 rounded-full bg-white/20 backdrop-blur-md px-6 py-2.5 text-sm font-bold text-white shadow-xl">
-                    View Photos &rarr;
-                  </span>
-                </div>
-                
+
                 {/* 18+ Photos overlay */}
                 <span className="absolute bottom-[92px] right-4 flex items-center gap-1.5 rounded-xl bg-black/65 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-md z-20 shadow-md">
-                   <Camera className="h-4 w-4" /> {galleryImages.length > 0 ? `${galleryImages.length}+ Photos` : "18+ Photos"}
+                  <Camera className="h-4 w-4" /> {galleryImages.length > 0 ? `${galleryImages.length}+ Photos` : "18+ Photos"}
                 </span>
 
                 {/* Left/Right Arrows */}
-                <motion.button 
+                <motion.button
                   whileHover={{ scale: 1.1, x: -2 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={(e) => {
@@ -417,7 +397,7 @@ export default function VenueDetailPage() {
                 >
                   <ChevronDown className="h-5 w-5 rotate-90" />
                 </motion.button>
-                <motion.button 
+                <motion.button
                   whileHover={{ scale: 1.1, x: 2 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={(e) => {
@@ -433,8 +413,8 @@ export default function VenueDetailPage() {
                 {galleryImages.length > 1 && (
                   <div className="absolute bottom-0 left-0 flex w-full h-20 gap-1 bg-gradient-to-t from-black/80 to-transparent p-1 z-20">
                     {galleryImages.slice(0, 4).map((src, i) => (
-                      <div 
-                        key={i} 
+                      <div
+                        key={i}
                         onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i); }}
                         className={`relative h-full w-1/4 overflow-hidden rounded-xl cursor-pointer transition-opacity duration-300 ${currentImageIndex === i ? "opacity-100 ring-2 ring-brand-500" : "opacity-60 hover:opacity-100"}`}
                       >
@@ -476,7 +456,7 @@ export default function VenueDetailPage() {
           </div>
 
           {/* RIGHT — sticky booking card */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
@@ -588,72 +568,72 @@ export default function VenueDetailPage() {
         </div>
 
         <div className="mt-4">
-            {/* Same info the mobile view shows — specs, weather, sports, amenities, players, reviews. */}
-            {!isEvent && (
-              <VenueInfoSections
-                venue={venue}
-                highlights={highlights}
-                amenities={desktopAmenities}
-                onPickSport={(sport) => {
-                  setSelectedSport(sport);
-                  setSelectedSportForBooking(sport);
-                  setBooking(true);
-                }}
-                reviewProps={reviewProps}
-              />
-            )}
+          {/* Same info the mobile view shows — specs, weather, sports, amenities, players, reviews. */}
+          {!isEvent && (
+            <VenueInfoSections
+              venue={venue}
+              highlights={highlights}
+              amenities={desktopAmenities}
+              onPickSport={(sport) => {
+                setSelectedSport(sport);
+                setSelectedSportForBooking(sport);
+                setBooking(true);
+              }}
+              reviewProps={reviewProps}
+            />
+          )}
 
-            {isEvent && (
-              <>
-                {/* Highlights */}
-                <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-                  <h2 className="flex items-center gap-2 text-lg font-extrabold text-slate-900">
-                    <CheckCircle2 className="h-5 w-5 text-brand-500" /> Highlights
-                  </h2>
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    {highlights.map((h) => (
-                      <div key={h} className="flex items-center gap-2 text-sm text-slate-700">
-                        <CheckCircle2 className="h-4 w-4 shrink-0 text-brand-500" />
-                        {h}
-                      </div>
+          {isEvent && (
+            <>
+              {/* Highlights */}
+              <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+                <h2 className="flex items-center gap-2 text-lg font-extrabold text-slate-900">
+                  <CheckCircle2 className="h-5 w-5 text-brand-500" /> Highlights
+                </h2>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {highlights.map((h) => (
+                    <div key={h} className="flex items-center gap-2 text-sm text-slate-700">
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-brand-500" />
+                      {h}
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Inclusions / exclusions */}
+              <section className="mt-4 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+                  <h3 className="flex items-center gap-2 text-base font-extrabold text-slate-900">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-500" /> What&apos;s Included
+                  </h3>
+                  <ul className="mt-3 space-y-2">
+                    {inclusions.map((i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm text-slate-700">
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                        {i}
+                      </li>
                     ))}
-                  </div>
-                </section>
+                  </ul>
+                </div>
+                <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+                  <h3 className="flex items-center gap-2 text-base font-extrabold text-slate-900">
+                    <XCircle className="h-5 w-5 text-accent-500" /> What&apos;s Not Included
+                  </h3>
+                  <ul className="mt-3 space-y-2">
+                    {exclusions.map((e) => (
+                      <li key={e} className="flex items-center gap-2 text-sm text-slate-700">
+                        <XCircle className="h-4 w-4 shrink-0 text-accent-400" />
+                        {e}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </section>
 
-                {/* Inclusions / exclusions */}
-                <section className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-                    <h3 className="flex items-center gap-2 text-base font-extrabold text-slate-900">
-                      <CheckCircle2 className="h-5 w-5 text-emerald-500" /> What&apos;s Included
-                    </h3>
-                    <ul className="mt-3 space-y-2">
-                      {inclusions.map((i) => (
-                        <li key={i} className="flex items-center gap-2 text-sm text-slate-700">
-                          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
-                          {i}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-                    <h3 className="flex items-center gap-2 text-base font-extrabold text-slate-900">
-                      <XCircle className="h-5 w-5 text-accent-500" /> What&apos;s Not Included
-                    </h3>
-                    <ul className="mt-3 space-y-2">
-                      {exclusions.map((e) => (
-                        <li key={e} className="flex items-center gap-2 text-sm text-slate-700">
-                          <XCircle className="h-4 w-4 shrink-0 text-accent-400" />
-                          {e}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </section>
-
-                {/* Itinerary + FAQs from the event form */}
-                <EventItineraryFaqs itinerary={venue.itinerary} faqs={venue.faqs} />
-              </>
-            )}
+              {/* Itinerary + FAQs from the event form */}
+              <EventItineraryFaqs itinerary={venue.itinerary} faqs={venue.faqs} />
+            </>
+          )}
 
 
         </div>
@@ -702,7 +682,7 @@ export default function VenueDetailPage() {
       </main>
 
       {/* Mobile Sticky Booking Bar */}
-      <motion.div 
+      <motion.div
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
@@ -978,7 +958,7 @@ function VenueInfoSections({
   return (
     <>
       {/* 1. Status Pills Bar */}
-      <motion.div 
+      <motion.div
         variants={{
           hidden: { opacity: 0 },
           show: { opacity: 1, transition: { staggerChildren: 0.08 } }
@@ -986,49 +966,90 @@ function VenueInfoSections({
         initial="hidden"
         whileInView="show"
         viewport={{ once: true }}
-        className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4"
+        className="mt-4 grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4"
       >
-        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-50">
-          <Clock className="h-5 w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
+        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-2 sm:gap-3 rounded-2xl bg-white px-2.5 py-3 sm:px-4 sm:py-3.5 shadow-sm border border-slate-100 min-w-0">
+          <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
           <div className="min-w-0 flex-1">
-            <span className="block text-xs font-extrabold text-slate-900 truncate">
+            <span className="block text-[11px] sm:text-xs font-extrabold text-slate-900 leading-tight">
               Open Today
             </span>
-            <span className="block text-[10px] font-medium text-slate-500">
+            <span className="block text-[9px] sm:text-[10px] font-medium text-slate-500 truncate mt-0.5">
               {venue.reportingStartTime ?? "06:00 AM"} – {venue.reportingEndTime ?? "11:00 PM"}
             </span>
           </div>
-          <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-emerald-600 border border-emerald-100">
+          <span className="shrink-0 rounded-md bg-emerald-50 px-1 py-0.5 text-[7px] sm:text-[8px] font-black uppercase tracking-wider text-emerald-600 border border-emerald-100">
             OPEN
           </span>
         </motion.div>
-        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-50">
-          <LayoutGrid className="h-5 w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
-          <div>
-            <span className="block text-xs font-extrabold text-slate-900">
+        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-2 sm:gap-3 rounded-2xl bg-white px-2.5 py-3 sm:px-4 sm:py-3.5 shadow-sm border border-slate-100 min-w-0">
+          <LayoutGrid className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
+          <div className="min-w-0 flex-1">
+            <span className="block text-[11px] sm:text-xs font-extrabold text-slate-900 leading-tight">
               {activeCourts.length > 0 ? `${activeCourts.length} Court` : "1 Court"}
             </span>
-            <span className="block text-[10px] font-medium text-slate-500">Available</span>
+            <span className="block text-[9px] sm:text-[10px] font-medium text-slate-500 truncate mt-0.5">Available</span>
           </div>
         </motion.div>
-        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-50">
-          <Zap className="h-5 w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
-          <div>
-            <span className="block text-xs font-extrabold text-slate-900">Instant Booking</span>
-            <span className="block text-[10px] font-medium text-slate-500">Quick &amp; easy</span>
+        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-2 sm:gap-3 rounded-2xl bg-white px-2.5 py-3 sm:px-4 sm:py-3.5 shadow-sm border border-slate-100 min-w-0">
+          <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
+          <div className="min-w-0 flex-1">
+            <span className="block text-[11px] sm:text-xs font-extrabold text-slate-900 leading-tight">Instant Booking</span>
+            <span className="block text-[9px] sm:text-[10px] font-medium text-slate-500 truncate mt-0.5">Quick &amp; easy</span>
           </div>
         </motion.div>
-        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-50">
-          <ShieldCheck className="h-5 w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
-          <div>
-            <span className="block text-xs font-extrabold text-slate-900">Confirmed</span>
-            <span className="block text-[10px] font-medium text-slate-500">Real-time availability</span>
+        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-2 sm:gap-3 rounded-2xl bg-white px-2.5 py-3 sm:px-4 sm:py-3.5 shadow-sm border border-slate-100 min-w-0">
+          <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
+          <div className="min-w-0 flex-1">
+            <span className="block text-[11px] sm:text-xs font-extrabold text-slate-900 leading-tight">Confirmed</span>
+            <span className="block text-[9px] sm:text-[10px] font-medium text-slate-500 truncate mt-0.5">Real-time availability</span>
           </div>
         </motion.div>
       </motion.div>
 
-      {/* 2. Highlights & Packages 2-Column Grid */}
-      <motion.div 
+      {/* 2. Location Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.5 }}
+        className="mt-5 rounded-3xl border border-slate-100 bg-white p-5 shadow-sm"
+      >
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-brand-600 shrink-0" />
+              <h2 className="text-sm font-extrabold text-slate-900">Location</h2>
+            </div>
+            {(venue.address || venue.city) && (
+              <p className="mt-0.5 text-xs text-slate-500 truncate">{venue.address || venue.city}</p>
+            )}
+          </div>
+          <a
+            href={`https://maps.google.com/?q=${encodeURIComponent(venue.address || venue.city)}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-slate-800 transition shrink-0"
+          >
+            Get Directions &rarr;
+          </a>
+        </div>
+        <div className="relative h-44 w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+          <motion.iframe
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            title="Venue Map"
+            src={`https://maps.google.com/maps?q=${encodeURIComponent(venue.address || venue.city)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+            className="absolute inset-0 h-full w-full border-0"
+            loading="lazy"
+          />
+        </div>
+      </motion.div>
+
+      {/* 3. Highlights & Packages 2-Column Grid */}
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
@@ -1065,9 +1086,9 @@ function VenueInfoSections({
 
         {/* Packages Card */}
         <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-1.5">
             <h2 className="text-sm font-extrabold text-slate-900">Packages</h2>
-            <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-200/60">
+            <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[9px] sm:text-[10px] font-bold text-amber-700 border border-amber-200/60">
               Same owner-configured booking format
             </span>
           </div>
@@ -1077,9 +1098,9 @@ function VenueInfoSections({
               { id: "2", label: "Weekday (Night)", time: "06:00 PM – 11:00 PM", amount: Math.round(venue.price * 1.25) },
               { id: "3", label: "Weekend", time: "All Day", amount: Math.round(venue.price * 1.5) },
             ]).map((tier: any) => (
-              <motion.div 
+              <motion.div
                 whileHover="hover"
-                key={tier.id || tier.label} 
+                key={tier.id || tier.label}
                 className="group flex items-center justify-between p-3.5 bg-white transition hover:bg-red-50/50 cursor-pointer"
               >
                 <div>
@@ -1087,7 +1108,7 @@ function VenueInfoSections({
                   <p className="text-[10px] font-medium text-slate-500">{tier.time || "06:00 AM - 11:00 PM"}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <motion.p 
+                  <motion.p
                     variants={{ hover: { scale: 1.04 } }}
                     className="text-sm font-black text-slate-900 origin-right"
                   >
@@ -1103,8 +1124,8 @@ function VenueInfoSections({
         </div>
       </motion.div>
 
-      {/* 3. Amenities Bar */}
-      <motion.div 
+      {/* 4. Amenities Bar */}
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
@@ -1124,13 +1145,13 @@ function VenueInfoSections({
         </div>
       </motion.div>
 
-      {/* 4. Specs + Weather + Location 3-Column Grid */}
-      <motion.div 
+      {/* 5. Specs + Weather 2-Column Grid */}
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.5 }}
-        className="mt-5 grid gap-5 lg:grid-cols-3 items-start"
+        className="mt-5 grid gap-5 md:grid-cols-2 items-start"
       >
         {/* Specs */}
         <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
@@ -1161,7 +1182,7 @@ function VenueInfoSections({
             <h2 className="text-sm font-extrabold text-white/90">Local Weather</h2>
             <div className="mt-4 flex items-center justify-between">
               <div>
-                <motion.p 
+                <motion.p
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -1198,39 +1219,10 @@ function VenueInfoSections({
             </div>
           </div>
         </div>
-
-        {/* Location */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm flex flex-col justify-between">
-          <div>
-            <h2 className="text-sm font-extrabold text-slate-900">Location</h2>
-            <p className="mt-1 text-xs font-semibold text-slate-700">{venue.address || `${venue.city}, Rajasthan`}</p>
-            <p className="text-[10px] text-slate-400">{venue.city} District</p>
-          </div>
-          <div className="mt-3 relative h-40 w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
-            <motion.iframe
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              title="Venue Map"
-              src={`https://maps.google.com/maps?q=${encodeURIComponent(venue.address || venue.city)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
-              className="absolute inset-0 h-full w-full border-0"
-              loading="lazy"
-            />
-            <a
-              href={`https://maps.google.com/?q=${encodeURIComponent(venue.address || venue.city)}`}
-              target="_blank"
-              rel="noreferrer"
-              className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-xl bg-white/90 px-3 py-1.5 text-[10px] font-bold text-slate-900 shadow-md backdrop-blur-md hover:bg-white z-10"
-            >
-              Open in Google Maps ↗
-            </a>
-          </div>
-        </div>
       </motion.div>
 
       {/* 5. Reviews + Write Form + Summary 3-Column Grid */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
@@ -1245,13 +1237,13 @@ function VenueInfoSections({
               <button className="text-xs font-bold text-brand-600 hover:text-brand-700 transition">View all reviews →</button>
             )}
           </div>
-          
+
           <div className="flex items-start gap-5">
             <div className="shrink-0">
               <p className="text-3xl font-black text-slate-900 leading-none">{venue.rating?.toFixed(1) || "4.8"}</p>
-              <motion.div 
-                variants={{ show: { transition: { staggerChildren: 0.08 } } }} 
-                initial="hidden" whileInView="show" viewport={{ once: true }} 
+              <motion.div
+                variants={{ show: { transition: { staggerChildren: 0.08 } } }}
+                initial="hidden" whileInView="show" viewport={{ once: true }}
                 className="flex items-center gap-0.5 mt-1.5 mb-1"
               >
                 {[1, 2, 3, 4, 5].map((s) => (
@@ -1264,7 +1256,7 @@ function VenueInfoSections({
                 {reviewProps.reviews.length || venue.reviewCount || 0} Reviews
               </div>
             </div>
-            
+
             <div className="flex-1">
               {reviewProps.reviews.length > 0 ? (
                 <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
@@ -1307,7 +1299,7 @@ function VenueInfoSections({
             <h3 className="text-sm font-extrabold text-slate-900">Be the first to review this venue</h3>
             <p className="mt-1 text-xs text-slate-500">Your experience helps other players choose better.</p>
           </div>
-          
+
           <form onSubmit={reviewProps.onSubmitReview} className="mt-4 space-y-3" noValidate>
             <div className="flex items-center gap-2">
               {[1, 2, 3, 4, 5].map((star) => (
@@ -1341,7 +1333,7 @@ function VenueInfoSections({
                 className={`w-full rounded-xl border ${reviewProps.reviewError?.includes('comment') || reviewProps.reviewError?.includes('all fields') ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'} p-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:bg-white resize-none transition-colors`}
               />
             </div>
-            
+
             {reviewProps.reviewError && (
               <p className="text-[10px] font-bold text-red-500">{reviewProps.reviewError}</p>
             )}
@@ -1405,9 +1397,8 @@ function SportPickerSheet({
                   onSelect(sportName);
                   onContinue(sportName);
                 }}
-                className={`flex w-full items-center justify-between rounded-2xl border p-4 transition hover:border-[#0b9c65] cursor-pointer ${
-                  isSelected ? "border-[#0b9c65] bg-[#0b9c65]/5" : "border-slate-100 bg-white"
-                }`}
+                className={`flex w-full items-center justify-between rounded-2xl border p-4 transition hover:border-[#0b9c65] cursor-pointer ${isSelected ? "border-[#0b9c65] bg-[#0b9c65]/5" : "border-slate-100 bg-white"
+                  }`}
               >
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-2xl shadow-sm">
@@ -1641,7 +1632,7 @@ function MobileVenueDetail({
   return (
     <div className="pb-24">
       {/* Hero gallery with floating header */}
-      <div className="relative h-72 w-full bg-slate-900">
+      <div className="relative h-72 w-full bg-slate-900 overflow-hidden rounded-b-3xl">
         <ImageCarousel images={galleryImages} alt={venue.title} className="h-full w-full" />
         <div className="absolute inset-x-0 top-0 flex items-center justify-between p-4">
           <button
@@ -1663,7 +1654,7 @@ function MobileVenueDetail({
             </button>
             <button
               type="button"
-              onClick={() => navigator.clipboard?.writeText(window.location.href).catch(() => {})}
+              onClick={() => navigator.clipboard?.writeText(window.location.href).catch(() => { })}
               aria-label="Share venue"
               className="flex h-9 w-9 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm"
             >
@@ -1673,7 +1664,7 @@ function MobileVenueDetail({
         </div>
       </div>
 
-      <div className="rounded-t-3xl -mt-5 relative bg-slate-50 px-4 pt-5">
+      <div className="rounded-t-[2.25rem] -mt-6 relative z-10 bg-white px-5 pt-6 shadow-[0_-12px_30px_-5px_rgba(0,0,0,0.08)] border-t border-slate-100/60">
         <div className="flex items-start justify-between gap-3">
           <h1 className="text-xl font-extrabold text-slate-900">{venue.title}</h1>
           {venue.reviewCount && venue.reviewCount > 0 ? (
@@ -1686,10 +1677,6 @@ function MobileVenueDetail({
             </span>
           )}
         </div>
-        <p className="mt-1 flex items-center gap-1 text-xs text-slate-500">
-          <MapPin className="h-3.5 w-3.5 shrink-0" /> {venue.city}
-          {venue.address ? ` · ${venue.address}` : ""}
-        </p>
 
         {/* Price + Book Now — the only price/booking CTA on this page (no separate sticky bar) */}
         <div id="price-block" className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
@@ -1729,9 +1716,8 @@ function MobileVenueDetail({
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`rounded-xl py-2 text-[10px] font-bold uppercase tracking-wide transition ${
-                  currentTab === tab.id ? "bg-white text-brand-600 shadow-sm" : "text-slate-500"
-                }`}
+                className={`rounded-xl py-2 text-[10px] font-bold uppercase tracking-wide transition ${currentTab === tab.id ? "bg-white text-brand-600 shadow-sm" : "text-slate-500"
+                  }`}
               >
                 {tab.label}
               </button>
@@ -1824,31 +1810,30 @@ function MobileVenueDetail({
                     </div>
                   </section>
                 )}
+                {/* Map Location — shown for event listings */}
+                {venue.address && (
+                  <div className="mt-5 space-y-2">
+                    <p className="flex items-start gap-2 text-sm font-medium text-slate-700">
+                      <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" /> {venue.address}
+                    </p>
+                    <div className="relative h-48 w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+                      <iframe
+                        title="Venue Location Map"
+                        src={`https://maps.google.com/maps?q=${mapsQuery}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                        className="absolute inset-0 h-full w-full border-0"
+                        loading="lazy"
+                      />
+                      <span className="absolute right-2 top-2 rounded-full bg-black/55 px-2 py-1 text-[10px] font-bold uppercase text-white">
+                        Satellite View
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Summary — placed at the end for events */}
+                <VenueSummaryCard description={venue.description} title={venue.title} />
               </>
             )}
-
-            {/* Map Location — shown for all types */}
-            {venue.address && (
-              <div className="mt-5 space-y-2">
-                <p className="flex items-start gap-2 text-sm font-medium text-slate-700">
-                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-500" /> {venue.address}
-                </p>
-                <div className="relative h-48 w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
-                  <iframe
-                    title="Venue Location Map"
-                    src={`https://maps.google.com/maps?q=${mapsQuery}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
-                    className="absolute inset-0 h-full w-full border-0"
-                    loading="lazy"
-                  />
-                  <span className="absolute right-2 top-2 rounded-full bg-black/55 px-2 py-1 text-[10px] font-bold uppercase text-white">
-                    Satellite View
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Summary — placed at the end after map */}
-            <VenueSummaryCard description={venue.description} title={venue.title} />
 
             {/* Video — shown for all types when videoUrl exists */}
 

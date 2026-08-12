@@ -24,22 +24,33 @@ export interface VendorPublicProfile {
 }
 
 export function getListingImage(
-  listing: {
-    posterImage?: { url?: string };
-    bannerImage?: { url?: string };
-    universalImages?: Array<{ url?: string }>;
-    images?: Array<{ url?: string }>;
-    coverImage?: string;
-  },
-  type: "poster" | "banner" | "fallback"
+  listing: any,
+  type: "poster" | "banner" | "fallback" = "fallback"
 ): string | undefined {
+  if (!listing) return undefined;
+
+  const extractUrl = (val: any): string | undefined => {
+    if (!val) return undefined;
+    if (typeof val === "string" && val.trim().length > 0) return val.trim();
+    if (typeof val.url === "string" && val.url.trim().length > 0) return val.url.trim();
+    if (typeof val.src === "string" && val.src.trim().length > 0) return val.src.trim();
+    return undefined;
+  };
+
+  const cover = extractUrl(listing.coverImage);
+  const poster = extractUrl(listing.posterImage);
+  const banner = extractUrl(listing.bannerImage);
+  const firstUniversal = extractUrl(listing.universalImages?.[0]);
+  const firstImage = extractUrl(listing.images?.[0]);
+  const secondImage = extractUrl(listing.images?.[1]);
+
   if (type === "poster") {
-    return listing.posterImage?.url || listing.universalImages?.[0]?.url || listing.images?.[0]?.url || listing.coverImage;
+    return poster || cover || firstUniversal || firstImage;
   }
   if (type === "banner") {
-    return listing.bannerImage?.url || listing.universalImages?.[0]?.url || listing.images?.[1]?.url || listing.images?.[0]?.url || listing.coverImage;
+    return banner || cover || firstUniversal || secondImage || firstImage;
   }
-  return listing.universalImages?.[0]?.url || listing.images?.[0]?.url || listing.coverImage;
+  return cover || poster || banner || firstUniversal || firstImage;
 }
 
 // The admin/vendor package studio only ever saves uploads into `images`

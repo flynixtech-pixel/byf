@@ -335,7 +335,8 @@ export function QuickAddEventModal({
                 type="number"
                 min="0"
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => setPrice(e.target.value.replace(/^0+(?=\d)/, ""))}
                 placeholder="0 for free entry"
                 className={inputClass}
               />

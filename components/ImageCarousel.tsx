@@ -11,11 +11,13 @@ export function ImageCarousel({
   alt,
   className = "",
   autoPlayMs = 4000,
+  sizes = "(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 800px",
 }: {
   images: string[];
   alt: string;
   className?: string;
   autoPlayMs?: number;
+  sizes?: string;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
@@ -76,9 +78,9 @@ export function ImageCarousel({
               alt={`${alt} ${i + 1}`}
               fill
               draggable={false}
-              sizes="100vw"
+              sizes={sizes}
               priority={i === 0}
-              className="object-contain z-10"
+              className="object-cover z-10"
             />
           </div>
         ))}

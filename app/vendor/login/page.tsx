@@ -10,6 +10,8 @@ import {
   Camera,
   ChevronRight,
   CreditCard,
+  Eye,
+  EyeOff,
   Megaphone,
   Ticket,
   Trophy,
@@ -182,25 +184,26 @@ function VendorLoginInner() {
           </div>
         </div>
 
-        <div className="w-full max-w-md rounded-3xl bg-[#f6f3ea] p-8 shadow-2xl">
-          <h2 className="text-2xl font-[600] text-[#10241a]" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+        <div className="w-full max-w-md rounded-3xl bg-[#0c1912]/85 backdrop-blur-xl border border-[#a6ff3c]/30 p-7 sm:p-9 shadow-[0_0_60px_rgba(166,255,60,0.12)] text-white">
+          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
             Partner Login
           </h2>
-          <p className="mt-1 text-xs font-bold uppercase tracking-wide text-[#3f5449]">Access your professional dashboard.</p>
+          <p className="mt-1 text-xs font-extrabold uppercase tracking-wider text-[#a6ff3c]">Access your professional dashboard.</p>
 
-          <div className="mt-6 grid grid-cols-2 gap-1.5 rounded-xl bg-[#eef2e4] p-1.5 text-xs font-bold uppercase shadow-inner">
+          <div className="mt-6 grid grid-cols-2 gap-1 rounded-2xl bg-black/40 border border-white/10 p-1 text-xs font-bold uppercase">
             {TABS.map((t) => (
               <button
                 key={t.id}
+                type="button"
                 onClick={() => {
                   setTab(t.id);
                   setError("");
                   setOtpSent(false);
                 }}
-                className={`rounded-lg py-2.5 transition-all duration-300 ease-in-out ${
+                className={`rounded-xl py-2.5 transition-all duration-200 cursor-pointer ${
                   tab === t.id 
-                    ? "bg-white text-[#10241a] shadow-sm" 
-                    : "text-[#3f5449] hover:bg-black/5 hover:text-[#10241a]"
+                    ? "bg-[#a6ff3c] text-[#0c1912] font-black shadow-md" 
+                    : "text-slate-300 hover:text-white"
                 }`}
               >
                 {t.label}
@@ -210,20 +213,20 @@ function VendorLoginInner() {
 
           <div className="mt-6 space-y-4">
             <div>
-              <label className="text-xs font-bold uppercase tracking-wide text-[#3f5449]">{identifierLabel}</label>
+              <label className="text-xs font-extrabold uppercase tracking-wider text-[#a6ff3c]">{identifierLabel}</label>
               <input
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 placeholder={identifierPlaceholder}
-                className="mt-2 w-full rounded-xl border-2 border-[#e4ded0] bg-white px-4 py-3 text-sm text-[#10241a] outline-none transition-all focus:border-[#a6ff3c] focus:ring-4 focus:ring-[#a6ff3c]/20"
+                className="mt-2 w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 text-sm font-semibold text-white placeholder:text-slate-500 outline-none transition-all focus:border-[#a6ff3c] focus:bg-white/10 focus:ring-4 focus:ring-[#a6ff3c]/20"
               />
             </div>
 
             {tab === "phone" && otpSent ? (
               <div>
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold uppercase tracking-wide text-[#3f5449]">OTP</label>
-                  <button onClick={() => setOtpSent(false)} className="text-xs font-bold text-[#3f7d3f]">
+                  <label className="text-xs font-extrabold uppercase tracking-wider text-[#a6ff3c]">OTP</label>
+                  <button type="button" onClick={() => setOtpSent(false)} className="text-xs font-bold text-[#a6ff3c] hover:underline">
                     Change number
                   </button>
                 </div>
@@ -231,47 +234,52 @@ function VendorLoginInner() {
                   value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
                   placeholder="••••••"
-                  className="mt-2 w-full rounded-xl border-2 border-[#e4ded0] bg-white px-4 py-3 font-mono text-lg tracking-[0.3em] text-[#10241a] outline-none transition-all focus:border-[#a6ff3c] focus:ring-4 focus:ring-[#a6ff3c]/20"
+                  className="mt-2 w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 font-mono text-lg tracking-[0.3em] text-white outline-none transition-all focus:border-[#a6ff3c] focus:bg-white/10 focus:ring-4 focus:ring-[#a6ff3c]/20"
                 />
               </div>
             ) : tab !== "phone" ? (
               <div>
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold uppercase tracking-wide text-[#3f5449]">Password</label>
-                  <Link href="/vendor/forgot-password" className="text-xs font-bold text-[#3f7d3f]">
+                  <label className="text-xs font-extrabold uppercase tracking-wider text-[#a6ff3c]">Password</label>
+                  <Link href="/vendor/forgot-password" className="text-xs font-bold text-[#a6ff3c] hover:underline">
                     Forgot?
                   </Link>
                 </div>
-                <div className="mt-2 flex items-center gap-2 rounded-xl border-2 border-[#e4ded0] bg-white px-4 py-1 transition-all focus-within:border-[#a6ff3c] focus-within:ring-4 focus-within:ring-[#a6ff3c]/20">
+                <div className="relative mt-2">
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-transparent py-2 text-sm text-[#10241a] outline-none"
+                    className="w-full rounded-2xl border border-white/15 bg-white/5 px-4 py-3.5 pr-12 text-sm font-semibold text-white placeholder:text-slate-500 outline-none transition-all focus:border-[#a6ff3c] focus:bg-white/10 focus:ring-4 focus:ring-[#a6ff3c]/20"
                   />
-                  <button onClick={() => setShowPassword((s) => !s)} className="text-xs font-bold text-[#3f5449] transition-colors hover:text-[#10241a]">
-                    {showPassword ? "Hide" : "Show"}
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((s) => !s)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center justify-center p-1 text-slate-400 hover:text-[#a6ff3c] transition cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                   </button>
                 </div>
               </div>
             ) : null}
 
-            {error && <p className="text-xs text-red-600">{error}</p>}
+            {error && <p className="text-xs font-bold text-rose-400">{error}</p>}
 
             <button
+              type="button"
               onClick={handleLogin}
               disabled={loading}
-              className="group flex w-full items-center justify-center gap-2 rounded-xl bg-[#0c1912] py-3.5 text-sm font-bold text-[#a6ff3c] transition-all hover:-translate-y-0.5 hover:bg-[#152a1e] hover:shadow-lg active:translate-y-0 disabled:opacity-60 disabled:hover:translate-y-0 disabled:hover:shadow-none"
+              className="group flex w-full items-center justify-center gap-2 rounded-2xl bg-[#a6ff3c] py-3.5 text-sm font-black text-[#0c1912] shadow-lg transition-all hover:bg-[#b5ff54] hover:shadow-[0_0_30px_rgba(166,255,60,0.35)] active:scale-[0.99] disabled:opacity-60 cursor-pointer"
             >
               {loading ? "Logging in…" : tab === "phone" && !otpSent ? "Send OTP" : "Login"}
               {!loading && <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />}
             </button>
           </div>
 
-          <p className="mt-6 text-center text-xs text-[#3f5449]">
+          <p className="mt-6 text-center text-xs font-medium text-slate-300">
             Not a partner yet?{" "}
-            <Link href="/vendor/register" className="font-bold text-[#3f7d3f] underline">
+            <Link href="/vendor/register" className="font-black text-[#a6ff3c] hover:underline">
               Apply here
             </Link>
           </p>

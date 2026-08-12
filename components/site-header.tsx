@@ -54,10 +54,10 @@ export function SiteHeader() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-slate-100 bg-white/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2 sm:gap-4 sm:px-6">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-2.5 py-2 sm:gap-4 sm:px-6">
         <BrandLogo
-          className="shrink-0"
-          logoBoxClassName="h-9 w-9 sm:h-10 sm:w-10 rounded-xl"
+          className="shrink min-w-0"
+          logoBoxClassName="h-8 w-8 sm:h-10 sm:w-10 rounded-xl shrink-0"
           imageClassName="p-1"
           priority
         />
@@ -76,7 +76,7 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
           <CustomerNotificationBell />
           <Link
             href="/vendor/register"
@@ -84,26 +84,18 @@ export function SiteHeader() {
           >
             List Your Games
           </Link>
-          <Link
-            href="/admin/login"
-            aria-label="Admin Panel"
-            title="Admin Panel"
-            className="hidden h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition hover:border-brand-300 hover:text-brand-600 lg:flex"
-          >
-            <ShieldCheck size={16} />
-          </Link>
 
           {status === "loading" ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <div className="h-8 w-8 animate-pulse rounded-full bg-slate-200" />
             </div>
           ) : status === "authenticated" ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <Link
                 href="/profile"
                 aria-label="My Profile"
                 title="My Profile"
-                className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-brand-100 text-xs font-bold text-brand-700 transition hover:bg-brand-200 border border-brand-200 shadow-sm"
+                className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-brand-100 text-xs font-bold text-brand-700 transition hover:bg-brand-200 border border-brand-200 shadow-sm shrink-0"
               >
                 {customer?.avatarUrl && !imgError ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -134,7 +126,7 @@ export function SiteHeader() {
                 onClick={() => setAuthView("login")}
                 aria-label="Profile / Login"
                 title="Profile / Login"
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition active:scale-95 sm:hidden"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition active:scale-95 sm:hidden shrink-0"
               >
                 <User className="h-4 w-4 text-slate-700" />
               </button>
@@ -142,7 +134,7 @@ export function SiteHeader() {
           )}
 
           <button
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-600 lg:hidden"
+            className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-slate-200 text-slate-600 lg:hidden shrink-0 cursor-pointer"
             onClick={() => setMobileOpen((v) => !v)}
             aria-label="Toggle menu"
           >
@@ -213,14 +205,6 @@ export function SiteHeader() {
                 </button>
               </div>
             )}
-
-            <Link
-              href="/admin/login"
-              onClick={() => setMobileOpen(false)}
-              className="mt-1 inline-flex items-center justify-center gap-1.5 rounded-full border border-slate-200 px-4 py-2.5 text-center text-xs font-semibold text-slate-600"
-            >
-              <ShieldCheck size={14} /> Admin Panel
-            </Link>
           </nav>
         </div>
       )}

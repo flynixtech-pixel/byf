@@ -138,17 +138,23 @@ export default function EventListingsPage() {
           {listings.map((l) => (
             <div key={l._id} className="overflow-hidden rounded-xl2 border border-surface-border bg-white shadow-panel">
               <div className="h-32 w-full bg-cream-300 relative">
-                {getListingImage(l as any, "poster") ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={getListingImage(l as any, "poster")} alt={l.title} className="h-full w-full object-cover"
-            loading="lazy"
-            decoding="async"
-          />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-ink-faint">
-                    <Ticket size={28} />
-                  </div>
-                )}
+                {(() => {
+                  const img = getListingImage(l, "poster") || getListingImage(l, "fallback");
+                  return img ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={img}
+                      alt={l.title}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-ink-faint">
+                      <Ticket size={28} />
+                    </div>
+                  );
+                })()}
                 <button
                   type="button"
                   onClick={() => {

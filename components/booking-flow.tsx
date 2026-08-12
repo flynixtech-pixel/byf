@@ -134,12 +134,12 @@ function finalSlotPrice(slot: { price: number; boostPct?: number }): number {
 function courtSlotPrice(slot: { price: number; courtBoostPct?: Record<string, number>; candidates?: any[] }, courtId: string | undefined, matchSport: string | undefined): number {
   let basePrice = slot.price;
   if (slot.candidates && courtId) {
-     let best = null;
-     if (matchSport) best = slot.candidates.find(c => c.sport?.toLowerCase() === matchSport && c.courtId === courtId);
-     if (!best) best = slot.candidates.find(c => !c.sport && c.courtId === courtId);
-     if (!best && matchSport) best = slot.candidates.find(c => c.sport?.toLowerCase() === matchSport && !c.courtId);
-     if (!best) best = slot.candidates.find(c => !c.sport && !c.courtId);
-     if (best && typeof best.price === "number" && best.price > 0) basePrice = best.price;
+    let best = null;
+    if (matchSport) best = slot.candidates.find(c => c.sport?.toLowerCase() === matchSport && c.courtId === courtId);
+    if (!best) best = slot.candidates.find(c => !c.sport && c.courtId === courtId);
+    if (!best && matchSport) best = slot.candidates.find(c => c.sport?.toLowerCase() === matchSport && !c.courtId);
+    if (!best) best = slot.candidates.find(c => !c.sport && !c.courtId);
+    if (best && typeof best.price === "number" && best.price > 0) basePrice = best.price;
   }
   const pct = (courtId && slot.courtBoostPct?.[courtId]) || 0;
   return pct > 0 ? boostedPrice(basePrice, pct) : basePrice;
@@ -148,12 +148,12 @@ function courtSlotPrice(slot: { price: number; courtBoostPct?: Record<string, nu
 function courtSlotBasePrice(slot: { price: number; candidates?: any[] }, courtId: string | undefined, matchSport: string | undefined): number {
   let basePrice = slot.price;
   if (slot.candidates && courtId) {
-     let best = null;
-     if (matchSport) best = slot.candidates.find(c => c.sport?.toLowerCase() === matchSport && c.courtId === courtId);
-     if (!best) best = slot.candidates.find(c => !c.sport && c.courtId === courtId);
-     if (!best && matchSport) best = slot.candidates.find(c => c.sport?.toLowerCase() === matchSport && !c.courtId);
-     if (!best) best = slot.candidates.find(c => !c.sport && !c.courtId);
-     if (best && typeof best.price === "number" && best.price > 0) basePrice = best.price;
+    let best = null;
+    if (matchSport) best = slot.candidates.find(c => c.sport?.toLowerCase() === matchSport && c.courtId === courtId);
+    if (!best) best = slot.candidates.find(c => !c.sport && c.courtId === courtId);
+    if (!best && matchSport) best = slot.candidates.find(c => c.sport?.toLowerCase() === matchSport && !c.courtId);
+    if (!best) best = slot.candidates.find(c => !c.sport && !c.courtId);
+    if (best && typeof best.price === "number" && best.price > 0) basePrice = best.price;
   }
   return basePrice;
 }
@@ -794,8 +794,8 @@ export default function BookingFlow({
         for (const seg of range.segments) {
           const overlap = Math.min(seg.end, slotEnd) - Math.max(seg.start, slotStart);
           if (overlap > 0) {
-             priceRaw += (overlap / 60) * seg.hourly;
-             segmentCandidates = seg.candidates; // Use candidates from the matching segment
+            priceRaw += (overlap / 60) * seg.hourly;
+            segmentCandidates = seg.candidates; // Use candidates from the matching segment
           }
         }
         const price = Math.round(priceRaw) || baseHourlyRate;
@@ -1659,12 +1659,13 @@ function ReviewStep(props: {
     return `${first.startTime12} – ${last.endTime12}`;
   }, [selectedSlotIndices, generatedSlots]);
 
-  // Full month grid (Monday start) matching Image 2
+  // Full month grid (Monday start)
   const monthGrid = useMemo(() => {
     const firstDayIndex = (new Date(visibleYear, visibleMonth, 1).getDay() + 6) % 7;
     const daysInMonth = new Date(visibleYear, visibleMonth + 1, 0).getDate();
+    const prevDaysInMonth = new Date(visibleYear, visibleMonth, 0).getDate();
     const minIso = todayISO();
-    const cells: ({
+    const cells: {
       iso: string;
       dayNum: number;
       isPast: boolean;
@@ -1672,9 +1673,26 @@ function ReviewStep(props: {
       isHoliday: boolean;
       holidayName?: string;
       price: string;
-    } | null)[] = [];
+      isOtherMonth?: boolean;
+    }[] = [];
 
-    for (let i = 0; i < firstDayIndex; i++) cells.push(null);
+    // Leading days from previous month to eliminate empty gap above month dates
+    for (let i = firstDayIndex - 1; i >= 0; i--) {
+      const d = prevDaysInMonth - i;
+      const prevMonth = visibleMonth === 0 ? 11 : visibleMonth - 1;
+      const prevYear = visibleMonth === 0 ? visibleYear - 1 : visibleYear;
+      const iso = `${prevYear}-${String(prevMonth + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+      cells.push({
+        iso,
+        dayNum: d,
+        isPast: true,
+        isWeekend: false,
+        isHoliday: false,
+        price: "",
+        isOtherMonth: true,
+      });
+    }
+
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(visibleYear, visibleMonth, d);
       const iso = `${visibleYear}-${String(visibleMonth + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
@@ -1701,6 +1719,7 @@ function ReviewStep(props: {
         isHoliday,
         holidayName,
         price,
+        isOtherMonth: false,
       });
     }
     return cells;
@@ -1747,7 +1766,7 @@ function ReviewStep(props: {
         </div>
       )}
 
-      <div className={embedded ? "" : "overflow-y-auto p-4 pt-3 pb-28 sm:p-6 lg:p-8"}>
+      <div className={embedded ? "" : "overflow-y-auto scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden p-4 pt-3 pb-28 sm:p-6 lg:p-8"}>
         {!embedded && <h2 className="hidden lg:block text-xl font-extrabold text-slate-900 mb-2">Review &amp; Confirm Your Booking</h2>}
 
         <div className="mt-2 lg:mt-4 flex flex-col gap-4 lg:gap-6 lg:flex-row">
@@ -1813,10 +1832,10 @@ function ReviewStep(props: {
               </div>
 
               {calendarExpanded ? (
-                /* Full month calendar — matching Image 2 */
-                <div className="mt-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-lg">
+                /* Full month calendar */
+                <div className="mt-3 rounded-3xl border border-slate-200 bg-white p-3.5 sm:p-5 shadow-lg">
                   {/* Month Pills Strip */}
-                  <div className="flex gap-1.5 overflow-x-auto pb-3 scrollbar-none border-b border-slate-100 mb-3">
+                  <div className="flex gap-1.5 overflow-x-auto pb-2.5 scrollbar-none border-b border-slate-100 mb-3">
                     {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((mName, mIdx) => {
                       const isCurrentMonth = visibleMonth === mIdx;
                       return (
@@ -1824,8 +1843,8 @@ function ReviewStep(props: {
                           key={mName}
                           type="button"
                           onClick={() => setVisibleMonth(mIdx)}
-                          className={`rounded-2xl px-3.5 py-1.5 text-xs font-black transition shrink-0 ${isCurrentMonth
-                            ? "bg-slate-900 text-white shadow-md"
+                          className={`rounded-full px-3 py-1 text-xs font-bold transition shrink-0 ${isCurrentMonth
+                            ? "bg-slate-900 text-white shadow-sm"
                             : "bg-slate-50 text-slate-600 hover:bg-slate-100"
                             }`}
                         >
@@ -1843,52 +1862,57 @@ function ReviewStep(props: {
                   </div>
 
                   {/* Calendar Grid */}
-                  <div className="grid grid-cols-7 gap-1.5">
-                    {monthGrid.map((cell, i) => {
-                      if (!cell) return <div key={`blank-${i}`} className="min-h-[58px]" />;
+                  <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
+                    {monthGrid.map((cell) => {
                       const isSelected = date === cell.iso;
 
-                      let bgClass = "bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-400";
+                      let bgClass = "bg-white border-slate-200 text-slate-700 hover:border-slate-400";
                       let textClass = "text-slate-900";
-                      let badgeClass = "bg-slate-100 text-slate-600 font-bold";
+                      let priceClass = "text-slate-500 font-semibold";
 
-                      if (cell.isPast) {
-                        bgClass = "bg-slate-50/50 border-slate-100 text-slate-300 cursor-not-allowed opacity-40";
+                      if (cell.isOtherMonth) {
+                        bgClass = "bg-slate-50/20 border-transparent text-slate-300 pointer-events-none opacity-20";
                         textClass = "text-slate-300";
-                        badgeClass = "text-slate-300";
+                        priceClass = "text-transparent";
+                      } else if (cell.isPast) {
+                        bgClass = "bg-slate-50/50 border-slate-100 text-slate-300 cursor-not-allowed opacity-30";
+                        textClass = "text-slate-300";
+                        priceClass = "text-slate-300";
                       } else if (isSelected) {
-                        bgClass = "bg-emerald-800 border-emerald-600 text-white shadow-lg ring-2 ring-emerald-400";
+                        bgClass = "bg-emerald-600 border-emerald-600 text-white shadow-md ring-2 ring-emerald-500/40";
                         textClass = "text-white font-black";
-                        badgeClass = "bg-emerald-600 text-white font-black";
+                        priceClass = "text-emerald-100 font-bold";
                       } else if (cell.isHoliday) {
-                        bgClass = "bg-amber-50 border-amber-300 text-amber-900";
-                        textClass = "text-amber-800 font-black";
-                        badgeClass = "bg-amber-200 text-amber-900 font-extrabold";
+                        bgClass = "bg-amber-50/80 border-amber-200 text-amber-900 hover:border-amber-300";
+                        textClass = "text-amber-900 font-black";
+                        priceClass = "text-amber-700 font-bold";
                       } else if (cell.isWeekend) {
-                        bgClass = "bg-rose-50/80 border-rose-200 text-rose-600";
+                        bgClass = "bg-rose-50/60 border-rose-200 text-rose-600 hover:border-rose-300";
                         textClass = "text-rose-600 font-black";
-                        badgeClass = "bg-rose-100 text-rose-700 font-bold";
+                        priceClass = "text-rose-600 font-semibold";
                       } else {
-                        bgClass = "bg-sky-50/50 border-sky-100 text-sky-900";
+                        bgClass = "bg-sky-50/40 border-sky-100 text-sky-900 hover:border-sky-300";
                         textClass = "text-sky-900 font-bold";
-                        badgeClass = "bg-sky-100 text-sky-800 font-semibold";
+                        priceClass = "text-sky-700 font-semibold";
                       }
 
                       return (
                         <button
                           key={cell.iso}
                           type="button"
-                          disabled={cell.isPast}
+                          disabled={cell.isPast || cell.isOtherMonth}
                           onClick={() => {
                             setDate(cell.iso);
                             setDateSelected(true);
                           }}
-                          className={`flex flex-col items-center justify-between rounded-2xl border p-1.5 min-h-[58px] transition ${bgClass}`}
+                          className={`relative flex flex-col items-center justify-center rounded-xl border py-1.5 px-0.5 sm:py-2 min-h-[46px] sm:min-h-[52px] transition ${bgClass}`}
                         >
-                          <span className={`text-xs font-black ${textClass}`}>{cell.dayNum}</span>
-                          <span className={`mt-1 rounded-full px-1.5 py-0.5 text-[8.5px] leading-none uppercase ${badgeClass}`}>
-                            {isSelected ? `SELECTED ${cell.price}` : cell.holidayName ? cell.holidayName.slice(0, 7) : cell.price}
-                          </span>
+                          <span className={`text-xs sm:text-sm font-black leading-none ${textClass}`}>{cell.dayNum}</span>
+                          {!cell.isOtherMonth && (
+                            <span className={`mt-1 text-[9px] sm:text-[10px] leading-none ${priceClass}`}>
+                              {cell.price}
+                            </span>
+                          )}
                         </button>
                       );
                     })}
@@ -2072,28 +2096,25 @@ function ReviewStep(props: {
                                       if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(10);
                                       onToggleSlotSelection(slot.originalIndex);
                                     }}
-                                    className={`relative flex flex-col items-center justify-center rounded-2xl px-2.5 py-2 transition-all duration-200 cursor-pointer border min-h-[54px] col-span-2 sm:col-span-2 ${
-                                      isSelected
+                                    className={`relative flex flex-col items-center justify-center rounded-2xl px-2.5 py-2 transition-all duration-200 cursor-pointer border min-h-[54px] col-span-2 sm:col-span-2 ${isSelected
                                         ? "bg-[#0b9c65] text-white border-[#0b9c65] shadow-md shadow-[#0b9c65]/30 ring-2 ring-[#0b9c65]/30 scale-[1.02]"
                                         : available
                                           ? "bg-gradient-to-r from-emerald-50/90 via-teal-50/80 to-white text-slate-900 border-emerald-300 hover:border-[#0b9c65] hover:bg-emerald-100/70 shadow-2xs"
                                           : "bg-slate-100/80 text-slate-400 border-slate-200/60 cursor-not-allowed opacity-50"
-                                    }`}
+                                      }`}
                                   >
                                     <span
-                                      className={`rounded-full px-2.5 py-0.5 text-[8px] font-black uppercase tracking-wider mb-1 ${
-                                        isSelected
+                                      className={`rounded-full px-2.5 py-0.5 text-[8px] font-black uppercase tracking-wider mb-1 ${isSelected
                                           ? "bg-white text-[#0b9c65]"
                                           : "bg-emerald-100 text-emerald-900 border border-emerald-300/80 shadow-2xs"
-                                      }`}
+                                        }`}
                                     >
                                       🏷️ CLUB SLOT ({formatDurationText(slot.durationMinutes || 120)})
                                     </span>
 
                                     <span
-                                      className={`text-[11px] font-black whitespace-pre-wrap break-words text-center tracking-tight leading-tight ${
-                                        isSelected ? "text-white" : available ? "text-slate-900" : "text-slate-400 line-through"
-                                      }`}
+                                      className={`text-[11px] font-black whitespace-pre-wrap break-words text-center tracking-tight leading-tight ${isSelected ? "text-white" : available ? "text-slate-900" : "text-slate-400 line-through"
+                                        }`}
                                     >
                                       {timeRangeText}
                                     </span>
@@ -2160,7 +2181,7 @@ function ReviewStep(props: {
                                         >
                                           ₹{finalPrice.toLocaleString("en-IN")}
                                         </span>
-                                         {displayBoostPct > 0 && (
+                                        {displayBoostPct > 0 && (
                                           <span className={`text-[8.5px] line-through ${isSelected ? "text-white/70" : "text-slate-400"}`}>
                                             ₹{finalOriginalPrice}
                                           </span>
@@ -2337,9 +2358,8 @@ function ReviewStep(props: {
 
           {/* RIGHT COLUMN */}
           <div
-            className={`flex flex-col gap-5 shrink-0 ${
-              listing.type === "Event" ? "w-full max-w-2xl mx-auto lg:w-full" : "w-full lg:w-80 lg:max-w-xs xl:max-w-sm"
-            } ${mobileStep === "slots" ? "hidden lg:flex" : "flex"}`}
+            className={`flex flex-col gap-5 shrink-0 ${listing.type === "Event" ? "w-full max-w-2xl mx-auto lg:w-full" : "w-full lg:w-80 lg:max-w-xs xl:max-w-sm"
+              } ${mobileStep === "slots" ? "hidden lg:flex" : "flex"}`}
           >
             {/* Checkout Header Card */}
             <div className="rounded-3xl border border-slate-100 bg-white p-5 lg:p-6">
@@ -2450,9 +2470,9 @@ function ReviewStep(props: {
                                   src={addOn.image.url}
                                   alt={addOn.label}
                                   className="h-14 w-14 shrink-0 rounded-lg object-cover"
-            loading="lazy"
-            decoding="async"
-          />
+                                  loading="lazy"
+                                  decoding="async"
+                                />
                               ) : (
                                 <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-300">
                                   <ImageIcon className="h-5 w-5" />
@@ -2744,16 +2764,16 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
     }
   }
 
-  return (
-    <div className={embedded ? "w-full text-center" : "relative w-full max-w-md rounded-3xl bg-white p-6 text-center shadow-2xl"}>
-      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-        <Check className="h-7 w-7" strokeWidth={3} />
+  const innerCard = (
+    <div className="w-full max-w-md mx-auto rounded-[2rem] bg-white p-4 sm:p-6 text-center shadow-2xl border border-slate-100/80 animate-in zoom-in-95 duration-200">
+      <div className="mx-auto flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+        <Check className="h-6 w-6 sm:h-7 sm:w-7" strokeWidth={3} />
       </div>
-      <h2 className="mt-3 text-xl font-extrabold text-slate-900">Booking Confirmed!</h2>
-      <p className="mt-1 text-sm text-slate-500">Your slot at {listing.title} is locked in.</p>
+      <h2 className="mt-2.5 sm:mt-3 text-lg sm:text-xl font-extrabold text-slate-900">Booking Confirmed!</h2>
+      <p className="mt-0.5 text-xs sm:text-sm text-slate-500">Your slot at {listing.title} is locked in.</p>
 
-      <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-left text-sm">
-        <Row label="Order ID" value={<span className="font-mono font-bold">{booking.orderId}</span>} />
+      <div className="mt-3.5 sm:mt-4 rounded-2xl border border-slate-100 bg-slate-50/80 p-3 sm:p-4 text-left text-xs sm:text-sm">
+        <Row label="Order ID" value={<span className="font-mono font-bold break-all text-slate-900">{booking.orderId}</span>} />
         <Row label="Venue" value={`${listing.title} · ${listing.categories.map(categoryLabel).join(", ") || listing.type}`} />
         <Row label="Date & Time" value={new Date(booking.dateTime).toLocaleString("en-GB")} />
         {(booking.courtNames?.length || booking.courtName) && (
@@ -2830,7 +2850,7 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
         <button
           type="button"
           onClick={shareNow}
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-2.5 text-xs font-bold text-slate-600 transition hover:border-brand-300 hover:text-brand-600"
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-2.5 text-xs font-bold text-slate-600 transition hover:border-brand-300 hover:text-brand-600 cursor-pointer"
         >
           <Share2 className="h-3.5 w-3.5" /> Share Now
         </button>
@@ -2838,7 +2858,7 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
           type="button"
           onClick={downloadTicket}
           disabled={downloading}
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-2.5 text-xs font-bold text-slate-600 transition hover:border-brand-300 hover:text-brand-600 disabled:opacity-60"
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-2.5 text-xs font-bold text-slate-600 transition hover:border-brand-300 hover:text-brand-600 disabled:opacity-60 cursor-pointer"
         >
           <Download className="h-3.5 w-3.5" /> {downloading ? "Saving..." : "Download"}
         </button>
@@ -2848,18 +2868,26 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
         <button
           type="button"
           onClick={onClose}
-          className="mt-2 w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-3 text-sm font-semibold text-white shadow-md shadow-brand-500/30 transition hover:scale-[1.02]"
+          className="mt-3 w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-3.5 text-sm font-bold text-white shadow-md shadow-brand-500/30 transition hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
         >
           Done
         </button>
       )}
     </div>
   );
-}
 
-/* ------------------------------------------------------------------ */
-/*  SHARED BITS                                                        */
-/* ------------------------------------------------------------------ */
+  if (!embedded) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-md p-2.5 sm:p-4 overflow-y-auto scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden animate-in fade-in duration-200">
+        <div className="w-full max-w-md my-auto">
+          {innerCard}
+        </div>
+      </div>
+    );
+  }
+
+  return innerCard;
+}
 
 function Row({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
   return (

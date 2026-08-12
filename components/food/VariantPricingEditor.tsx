@@ -33,8 +33,12 @@ export function VariantPricingEditor({
             <input
               type="number"
               min={0}
-              value={v.price || ""}
-              onChange={(e) => update(i, { price: Number(e.target.value) || 0 })}
+              value={v.price === 0 ? "" : v.price}
+              onFocus={(e) => e.target.select()}
+              onChange={(e) => {
+                const cleaned = e.target.value.replace(/^0+(?=\d)/, "");
+                update(i, { price: cleaned === "" ? 0 : Number(cleaned) || 0 });
+              }}
               placeholder="0"
               className="w-20 bg-transparent text-sm outline-none"
             />

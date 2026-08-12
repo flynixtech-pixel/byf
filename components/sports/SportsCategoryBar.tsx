@@ -77,7 +77,7 @@ export function SportsCategoryBar({
   return (
     <div
       ref={scrollRef}
-      className={`-mx-4 flex items-center gap-2.5 overflow-x-auto px-4 py-2 scroll-smooth scrollbar-none sm:mx-0 sm:px-0 ${className}`}
+      className={`-mx-4 flex items-center gap-2.5 overflow-x-auto px-4 py-2 scroll-smooth scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0 ${className}`}
     >
       {itemsOrder.map((cat) => {
         const isSelected = cat.id === activeId;
@@ -88,31 +88,31 @@ export function SportsCategoryBar({
               key={cat.id}
               type="button"
               onClick={() => handleCategoryClick(cat.id)}
-              className={`group relative flex h-[78px] w-[76px] shrink-0 flex-col items-center justify-center gap-1.5 rounded-[18px] border p-2 text-center transition-all duration-300 ease-in-out transform active:scale-95 cursor-pointer ${
+              className={`group relative flex h-[72px] min-w-[76px] shrink-0 flex-col items-center justify-center gap-1 rounded-[16px] border px-2.5 py-1.5 text-center transition-all duration-300 ease-in-out transform active:scale-95 cursor-pointer ${
                 isSelected
-                  ? "border-[#0b9c65] bg-emerald-50/50 ring-2 ring-[#0b9c65]/30 shadow-md shadow-[#0b9c65]/15 scale-[1.03]"
+                  ? "border-brand-600 bg-brand-50/50 ring-2 ring-brand-500/20 shadow-md shadow-brand-500/10 scale-[1.02]"
                   : "border-slate-100 bg-white text-slate-700 hover:border-slate-300 hover:shadow-xs"
               } ${pillClassName}`}
             >
-              <span className="flex items-center justify-center text-[34px] leading-none transition group-hover:scale-110">
+              <span className="flex items-center justify-center text-[22px] leading-none transition group-hover:scale-110">
                 {cat.emoji ? (
                   <span>{cat.emoji}</span>
                 ) : cat.image ? (
                   <Image
                     src={cat.image}
                     alt={cat.label}
-                    width={34}
-                    height={34}
+                    width={24}
+                    height={24}
                     unoptimized
-                    className="h-8.5 w-8.5 object-contain"
+                    className="h-5.5 w-5.5 object-contain"
                   />
                 ) : cat.icon ? (
-                  <cat.icon className={`h-8 w-8 ${isSelected ? "text-[#0b9c65]" : "text-slate-500"}`} />
+                  <cat.icon className={`h-5 w-5 ${isSelected ? "text-brand-600" : "text-slate-500"}`} />
                 ) : null}
               </span>
               <span
-                className={`text-[11px] font-extrabold tracking-tight truncate w-full ${
-                  isSelected ? "text-[#0b9c65]" : "text-slate-800"
+                className={`text-[10.5px] font-extrabold tracking-tight whitespace-nowrap ${
+                  isSelected ? "text-brand-600 font-black" : "text-slate-800"
                 }`}
               >
                 {cat.label}

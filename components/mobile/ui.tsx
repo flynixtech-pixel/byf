@@ -154,13 +154,6 @@ export function MobileTopBar() {
               >
                 <Store className="h-4 w-4 text-brand-500" /> Vendor Panel
               </Link>
-              <Link
-                href="/admin/login"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-700"
-              >
-                <ShieldCheck className="h-4 w-4 text-brand-500" /> Admin Panel
-              </Link>
             </div>
           </div>
         </>

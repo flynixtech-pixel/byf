@@ -2122,7 +2122,7 @@ function LocationStep({ draft, update }: StepProps) {
           </div>
 
           <div className="mt-4">
-            <div className="mb-1.5 flex items-center justify-between">
+            <div className="mb-2 flex items-center justify-between">
               <FieldLabel>Choose city *</FieldLabel>
               <ToggleGroup
                 value={draft.cityMode ?? "single"}
@@ -2130,38 +2130,69 @@ function LocationStep({ draft, update }: StepProps) {
                   { value: "single", label: "Single city" },
                   { value: "multiple", label: "Multiple cities" },
                 ]}
-                onChange={(v) => update("cityMode", v)}
+                onChange={(v) => {
+                  update("cityMode", v);
+                  if (v === "single") {
+                    const firstCity = draft.cities?.[0] || draft.city || "";
+                    update("city", firstCity);
+                    update("cities", []);
+                  } else {
+                    if (draft.city && (!draft.cities || draft.cities.length === 0)) {
+                      update("cities", [draft.city]);
+                    }
+                  }
+                }}
               />
             </div>
             <div className="mb-2 flex flex-wrap gap-2">
               {draft.cityMode === "multiple"
                 ? (draft.cities ?? []).map((c) => (
-                  <span key={c} className="inline-flex items-center gap-1.5 rounded-full bg-vibe-violet/10 px-2.5 py-1 text-xs font-medium text-vibe-violet">
+                  <span key={c} className="inline-flex items-center gap-1.5 rounded-full bg-vibe-violet/10 border border-vibe-violet/20 px-3 py-1 text-xs font-extrabold text-vibe-violet">
                     {c}
-                    <button onClick={() => update("cities", (draft.cities ?? []).filter((x) => x !== c))}>
+                    <button type="button" onClick={() => update("cities", (draft.cities ?? []).filter((x) => x !== c))} className="hover:text-rose-600 transition cursor-pointer">
                       <X size={12} />
                     </button>
                   </span>
                 ))
                 : draft.city && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-vibe-violet/10 px-2.5 py-1 text-xs font-medium text-vibe-violet">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-vibe-violet/10 border border-vibe-violet/20 px-3 py-1 text-xs font-extrabold text-vibe-violet">
                     {draft.city}
-                    <button onClick={() => update("city", "")}>
+                    <button type="button" onClick={() => update("city", "")} className="hover:text-rose-600 transition cursor-pointer">
                       <X size={12} />
                     </button>
                   </span>
                 )}
             </div>
-            <input
-              value={cityInput}
-              onChange={(e) => setCityInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCity())}
-              placeholder="Type city name and press Enter..."
-              className={inputClass}
-            />
-            <p className="mt-1.5 text-[11px] text-ink-faint">
-              Press enter to add the city.
-            </p>
+
+            <div className="flex items-center gap-2">
+              <input
+                value={cityInput}
+                onChange={(e) => setCityInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCity())}
+                placeholder={draft.cityMode === "multiple" ? "Search or type city name and click + Add..." : "Search or type single city..."}
+                className={inputClass}
+              />
+              {draft.cityMode === "multiple" ? (
+                <button
+                  type="button"
+                  onClick={() => addCity()}
+                  disabled={!cityInput.trim()}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-vibe-violet px-4 py-3 text-xs font-extrabold text-white shadow-xs hover:bg-vibe-violet/90 transition disabled:opacity-40 shrink-0 cursor-pointer"
+                >
+                  <Plus size={14} /> Add
+                </button>
+              ) : (
+                cityInput.trim() && (
+                  <button
+                    type="button"
+                    onClick={() => addCity()}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-vibe-violet px-4 py-3 text-xs font-extrabold text-white shadow-xs hover:bg-vibe-violet/90 transition shrink-0 cursor-pointer"
+                  >
+                    Set City
+                  </button>
+                )
+              )}
+            </div>
           </div>
         </div>
 
@@ -3836,7 +3867,14 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
             <div className="flex flex-wrap items-center gap-3">
               <div className="w-48">
                 <FieldLabel>Enter Price (₹) *</FieldLabel>
-                <input type="number" value={priceInput} onChange={(e) => setPriceInput(e.target.value)} placeholder="e.g. 1000" className={`${inputClass} text-xs`} />
+                <input
+                  type="number"
+                  value={priceInput}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => setPriceInput(e.target.value.replace(/^0+(?=\d)/, ""))}
+                  placeholder="e.g. 1000"
+                  className={`${inputClass} text-xs`}
+                />
               </div>
               <button type="button" onClick={handleSetPrice} disabled={selectedKeys.length === 0}
                 className="rounded-xl bg-vibe-violet px-5 py-2.5 text-xs font-bold text-white hover:opacity-90 disabled:opacity-50 transition cursor-pointer">
@@ -3995,7 +4033,11 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
                   <input
                     type="number"
                     value={tier.amount === 0 ? "" : tier.amount}
-                    onChange={(e) => updateTier(i, { amount: Number(e.target.value) })}
+                    onFocus={(e) => e.target.select()}
+                    onChange={(e) => {
+                      const cleaned = e.target.value.replace(/^0+(?=\d)/, "");
+                      updateTier(i, { amount: cleaned === "" ? 0 : Number(cleaned) || 0 });
+                    }}
                     className={inputClass}
                   />
                 </div>
@@ -4095,7 +4137,11 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
                       <input
                         type="number"
                         value={c.discountPercent === 0 ? "" : c.discountPercent}
-                        onChange={(e) => updateCoupon(i, { discountPercent: Number(e.target.value) })}
+                        onFocus={(e) => e.target.select()}
+                        onChange={(e) => {
+                          const cleaned = e.target.value.replace(/^0+(?=\d)/, "");
+                          updateCoupon(i, { discountPercent: cleaned === "" ? 0 : Number(cleaned) || 0 });
+                        }}
                         className={`${inputClass} w-20`}
                         placeholder="%"
                       />

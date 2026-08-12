@@ -141,9 +141,9 @@ export function CustomerNotificationBell({
 
       {open && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} aria-hidden />
+          <div className="fixed inset-0 z-40 bg-black/20 sm:bg-transparent backdrop-blur-xs sm:backdrop-blur-none" onClick={() => setOpen(false)} aria-hidden />
 
-          <div className="absolute right-0 top-11 z-50 w-80 sm:w-96 rounded-3xl border border-slate-100 bg-white p-4 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="fixed inset-x-3 top-14 sm:absolute sm:inset-auto sm:right-0 sm:top-11 z-50 w-auto sm:w-96 max-w-sm rounded-3xl border border-slate-100 bg-white p-4 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
                 <Bell className="h-4 w-4 text-brand-600" />
