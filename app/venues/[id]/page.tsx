@@ -8,6 +8,7 @@
 /* ------------------------------------------------------------------ */
 
 import { Suspense, useCallback, useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -160,6 +161,9 @@ export default function VenueDetailPage() {
   const [reviewComment, setReviewComment] = useState("");
   const [reviewSuccess, setReviewSuccess] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
+  
+  // Gallery interactivity
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const handleDeal = useCallback((ctx: DealContext) => {
     setDealContext(ctx);
@@ -231,6 +235,20 @@ export default function VenueDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  const bannerUrl = venue ? getListingImage(venue, "banner") : "";
+  const galleryPhotos = venue ? venue.images.map((img) => img.url).filter(Boolean) : [];
+  const allImageUrls = Array.from(new Set([bannerUrl, ...galleryPhotos].filter(Boolean))) as string[];
+  const fallbackUrl = venue ? getListingImage(venue, "fallback") : "";
+  const galleryImages = allImageUrls.length > 0 ? allImageUrls.slice(0, 10) : (fallbackUrl ? [fallbackUrl] : []);
+
+  useEffect(() => {
+    if (galleryImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % galleryImages.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [galleryImages.length]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50">
@@ -272,14 +290,10 @@ export default function VenueDetailPage() {
     return { label: item, Icon: match?.icon ?? Layers };
   });
   const categoryText = venue.categories.map(categoryLabel).join(", ") || "General";
+  
   // Cards elsewhere show the poster. The detail-page hero shows a scrollable
   // gallery built from the banner + any extra gallery photos, falling back to
   // the universal/poster image alone when nothing else was uploaded.
-  const bannerUrl = getListingImage(venue, "banner");
-  const galleryPhotos = venue.images.map((img) => img.url).filter(Boolean);
-  const allImageUrls = Array.from(new Set([bannerUrl, ...galleryPhotos].filter(Boolean))) as string[];
-  const fallbackUrl = getListingImage(venue, "fallback");
-  const galleryImages = allImageUrls.length > 0 ? allImageUrls.slice(0, 10) : (fallbackUrl ? [fallbackUrl] : []);
   console.log("DEBUG VENUE:", venue.title, "images:", venue.images, "allImageUrls:", allImageUrls, "galleryImages:", galleryImages);
 
   const reviewProps = {
@@ -320,7 +334,13 @@ export default function VenueDetailPage() {
       </div>
 
       <main className="mx-auto hidden max-w-[1360px] px-4 py-6 sm:block sm:px-6 sm:py-8">
-        <div className="mb-4 flex items-center justify-end">
+        <div className="mb-4 flex items-center justify-between">
+          <Link
+            href="/venues"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900 transition"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back to venues
+          </Link>
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -342,26 +362,89 @@ export default function VenueDetailPage() {
           </div>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[2.2fr_1fr]">
+        <div className="grid gap-6 lg:grid-cols-[2fr_1fr] lg:gap-8">
           {/* LEFT — details */}
           <div className="min-w-0">
-            <div className="mb-6">
-              <div className="relative h-[400px] w-full overflow-hidden rounded-3xl bg-slate-900 shadow-sm">
-                <img src={galleryImages[0] || "https://placehold.co/800x400/1e293b/fff?text=No+Image"} alt={venue.title} className="h-full w-full object-cover transition duration-500 hover:scale-105" />
-                <span className="absolute bottom-4 right-4 flex items-center gap-1.5 rounded-xl bg-black/65 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-md z-10 shadow-md">
-                  <Camera className="h-4 w-4" /> {galleryImages.length > 0 ? `${galleryImages.length}+ Photos` : "18+ Photos"}
-                </span>
-              </div>
-              {galleryImages.length > 1 && (
-                <div className="mt-2.5 grid grid-cols-4 gap-3">
-                  {galleryImages.slice(0, 4).map((src, i) => (
-                    <div key={i} className="relative h-24 overflow-hidden rounded-2xl border border-slate-100 bg-slate-100 cursor-pointer transition hover:border-brand-500 hover:shadow-md">
-                      <img src={src} alt="" className="h-full w-full object-cover transition duration-300 hover:scale-110" />
-                    </div>
-                  ))}
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
+              className="mb-6 group"
+            >
+              <div className="relative h-[400px] lg:h-[480px] w-full overflow-hidden rounded-3xl bg-slate-900 shadow-sm cursor-pointer">
+                <AnimatePresence initial={false}>
+                  <motion.img 
+                    key={currentImageIndex}
+                    src={galleryImages[currentImageIndex] || "https://placehold.co/800x400/1e293b/fff?text=No+Image"} 
+                    alt={venue.title} 
+                    className="absolute inset-0 h-full w-full object-cover"
+                    initial={{ scale: 1, opacity: 0 }}
+                    animate={{ scale: 1.03, opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ 
+                      scale: { duration: 8, ease: "linear", repeat: Infinity, repeatType: "reverse" },
+                      opacity: { duration: 0.8 }
+                    }}
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.2}
+                    onDragEnd={(e, { offset, velocity }) => {
+                      if (offset.x < -50) setCurrentImageIndex((prev) => (prev + 1) % galleryImages.length);
+                      if (offset.x > 50) setCurrentImageIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
+                    }}
+                  />
+                </AnimatePresence>
+                
+                {/* Hover overlay with "View Photos ->" */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none z-10">
+                  <span className="translate-y-4 group-hover:translate-y-0 transition-all duration-300 rounded-full bg-white/20 backdrop-blur-md px-6 py-2.5 text-sm font-bold text-white shadow-xl">
+                    View Photos &rarr;
+                  </span>
                 </div>
-              )}
-            </div>
+                
+                {/* 18+ Photos overlay */}
+                <span className="absolute bottom-[92px] right-4 flex items-center gap-1.5 rounded-xl bg-black/65 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-md z-20 shadow-md">
+                   <Camera className="h-4 w-4" /> {galleryImages.length > 0 ? `${galleryImages.length}+ Photos` : "18+ Photos"}
+                </span>
+
+                {/* Left/Right Arrows */}
+                <motion.button 
+                  whileHover={{ scale: 1.1, x: -2 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImageIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
+                  }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md transition hover:bg-black/70 z-20 cursor-pointer"
+                >
+                  <ChevronDown className="h-5 w-5 rotate-90" />
+                </motion.button>
+                <motion.button 
+                  whileHover={{ scale: 1.1, x: 2 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImageIndex((prev) => (prev + 1) % galleryImages.length);
+                  }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md transition hover:bg-black/70 z-20 cursor-pointer"
+                >
+                  <ChevronDown className="h-5 w-5 -rotate-90" />
+                </motion.button>
+
+                {/* Thumbnails overlaying at the bottom */}
+                {galleryImages.length > 1 && (
+                  <div className="absolute bottom-0 left-0 flex w-full h-20 gap-1 bg-gradient-to-t from-black/80 to-transparent p-1 z-20">
+                    {galleryImages.slice(0, 4).map((src, i) => (
+                      <div 
+                        key={i} 
+                        onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(i); }}
+                        className={`relative h-full w-1/4 overflow-hidden rounded-xl cursor-pointer transition-opacity duration-300 ${currentImageIndex === i ? "opacity-100 ring-2 ring-brand-500" : "opacity-60 hover:opacity-100"}`}
+                      >
+                        <img src={src} alt="" className="h-full w-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
 
             {venue.videoUrl && (
               <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
@@ -389,6 +472,122 @@ export default function VenueDetailPage() {
               </section>
             )}
 
+
+          </div>
+
+          {/* RIGHT — sticky booking card */}
+          <motion.div 
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="lg:sticky lg:top-24 lg:self-start min-w-0"
+          >
+            <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-200/40">
+              <div className="flex items-start justify-between gap-3">
+                <div className="relative">
+                  <h1 className="text-2xl font-extrabold text-slate-900 leading-tight">
+                    {venue.title}
+                  </h1>
+                </div>
+                {venue.reviewCount && venue.reviewCount > 0 ? (
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-sm font-bold text-amber-700">
+                    <Star className="h-4 w-4 fill-amber-500 text-amber-500" /> {venue.rating?.toFixed(1)} <span className="text-amber-700/80 font-semibold">({venue.reviewCount})</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-500">
+                    <Star className="h-3 w-3" /> No ratings
+                  </span>
+                )}
+              </div>
+              <p className="mt-1.5 text-xs font-bold uppercase tracking-widest text-brand-700">
+                {categoryText} • {venue.city}
+              </p>
+
+              <p className="mt-5 text-3xl font-black text-slate-900">
+                ₹{venue.price.toLocaleString("en-IN")}
+              </p>
+              <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">Starting price</p>
+
+              <div className="mt-4 space-y-2 border-y border-slate-100 py-4 text-sm text-slate-600">
+                {isEvent && venue.availableFrom && (
+                  <p className="flex items-center gap-2 font-semibold text-slate-800">
+                    <CalendarDays className="h-4 w-4 text-brand-500" />
+                    {new Date(venue.availableFrom).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+                    {(venue.reportingStartTime || venue.reportingEndTime) && (
+                      <span className="text-slate-500">
+                        · {venue.reportingStartTime ?? "—"}{venue.reportingEndTime ? `–${venue.reportingEndTime}` : ""}
+                      </span>
+                    )}
+                  </p>
+                )}
+                <p className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 text-brand-500 shrink-0 mt-0.5" />
+                  <span>
+                    <span className="block font-semibold text-slate-800">{venue.address || `${venue.city}, Rajasthan`}</span>
+                    <span className="block text-xs text-slate-400">{venue.city} District</span>
+                  </span>
+                </p>
+              </div>
+
+              <motion.button
+                whileHover={{ y: -2, boxShadow: "0 10px 25px -5px rgba(220, 38, 38, 0.4)" }}
+                type="button"
+                onClick={() => {
+                  const sports = venueSports(venue);
+                  if (!isEvent && sports.length > 1) {
+                    setSportModalOpen(true);
+                  } else {
+                    setSelectedSportForBooking(sports.length === 1 ? categoryLabel(sports[0]) : "");
+                    setBooking(true);
+                  }
+                }}
+                className="group mt-6 flex w-full items-center justify-between rounded-xl bg-brand-800 px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-brand-900 shadow-md shadow-brand-900/20 cursor-pointer"
+              >
+                <span>Book Now</span>
+                <ChevronDown className="h-4 w-4 -rotate-90 group-hover:translate-x-1 transition-transform" />
+              </motion.button>
+            </div>
+
+            {venue.vendorId && (
+              <Link
+                href={`/venues/vendor/${venue.vendorId}`}
+                className="mt-4 flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-4 transition hover:border-slate-200 shadow-sm hover:shadow"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+                    <Store className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <span className="block text-sm font-bold text-slate-900">View vendor profile</span>
+                    <span className="block text-xs font-medium text-slate-500">See all turfs &amp; games from this vendor</span>
+                  </div>
+                </div>
+                <ChevronDown className="h-5 w-5 -rotate-90 text-slate-400" />
+              </Link>
+            )}
+
+            {/* Coaching belongs to a venue, not to an Event — same rule as the Academy tab. */}
+            {venue.type !== "Event" && (
+              <Link
+                href="/coaches"
+                className="mt-3 flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-4 transition hover:border-slate-200 shadow-sm hover:shadow"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+                    <UserRoundCog className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <span className="block text-sm font-bold text-slate-900">Want a coach here?</span>
+                    <span className="block text-xs font-medium text-slate-500">Browse coaches and book a session</span>
+                  </div>
+                </div>
+                <ChevronDown className="h-5 w-5 -rotate-90 text-slate-400" />
+              </Link>
+            )}
+          </motion.div>
+        </div>
+
+        <div className="mt-4">
             {/* Same info the mobile view shows — specs, weather, sports, amenities, players, reviews. */}
             {!isEvent && (
               <VenueInfoSections
@@ -457,118 +656,6 @@ export default function VenueDetailPage() {
             )}
 
 
-
-            {/* Summary — placed at the end after map */}
-            <VenueSummaryCard description={venue.description} title={venue.title} />
-          </div>
-
-          {/* RIGHT — sticky booking card */}
-          <div className="lg:sticky lg:top-24 lg:self-start min-w-0">
-            <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-200/40">
-              <div className="flex items-start justify-between gap-3">
-                <div className="relative">
-                  <h1 className="text-2xl font-extrabold text-slate-900 leading-tight relative z-10 inline-block">
-                    {venue.title}
-                  </h1>
-                  <div className="absolute -bottom-1 left-0 h-[2.5px] w-full rounded-full bg-gradient-to-r from-brand-600 via-amber-400 to-brand-600 bg-[length:200%_auto] animate-pulse" />
-                </div>
-                {venue.reviewCount && venue.reviewCount > 0 ? (
-                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
-                    <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" /> {venue.rating?.toFixed(1)} <span className="text-amber-600/80 font-semibold">({venue.reviewCount})</span>
-                  </span>
-                ) : (
-                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500">
-                    <Star className="h-3 w-3" /> No ratings
-                  </span>
-                )}
-              </div>
-              <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-brand-600">
-                {categoryText} · {venue.city}
-              </p>
-
-              <p className="mt-5 text-2xl font-black text-slate-900">
-                ₹{venue.price.toLocaleString("en-IN")}
-              </p>
-              <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">Starting price</p>
-
-              <div className="mt-4 space-y-2 border-y border-slate-100 py-4 text-sm text-slate-600">
-                {isEvent && venue.availableFrom && (
-                  <p className="flex items-center gap-2 font-semibold text-slate-800">
-                    <CalendarDays className="h-4 w-4 text-brand-500" />
-                    {new Date(venue.availableFrom).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
-                    {(venue.reportingStartTime || venue.reportingEndTime) && (
-                      <span className="text-slate-500">
-                        · {venue.reportingStartTime ?? "—"}{venue.reportingEndTime ? `–${venue.reportingEndTime}` : ""}
-                      </span>
-                    )}
-                  </p>
-                )}
-                <p className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 text-brand-500 shrink-0 mt-0.5" />
-                  <span>
-                    <span className="block font-semibold text-slate-800">{venue.address || `${venue.city}, Rajasthan`}</span>
-                    <span className="block text-xs text-slate-400">{venue.city} District</span>
-                  </span>
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  // Always let the player pick the sport first — even without scrolling
-                  // to "Sports Available" they must know what they're booking.
-                  const sports = venueSports(venue);
-                  if (!isEvent && sports.length > 1) {
-                    setSportModalOpen(true);
-                  } else {
-                    setSelectedSportForBooking(sports.length === 1 ? categoryLabel(sports[0]) : "");
-                    setBooking(true);
-                  }
-                }}
-                className="mt-6 flex w-full items-center justify-between rounded-xl bg-brand-800 px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-brand-900 shadow-md shadow-brand-900/20"
-              >
-                <span>Book Now</span>
-                <ChevronDown className="h-4 w-4 -rotate-90" />
-              </button>
-            </div>
-
-            {venue.vendorId && (
-              <Link
-                href={`/venues/vendor/${venue.vendorId}`}
-                className="mt-4 flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-4 transition hover:border-slate-200 shadow-sm hover:shadow"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
-                    <Store className="h-5 w-5" />
-                  </span>
-                  <div>
-                    <span className="block text-sm font-bold text-slate-900">View vendor profile</span>
-                    <span className="block text-xs font-medium text-slate-500">See all turfs &amp; games from this vendor</span>
-                  </div>
-                </div>
-                <ChevronDown className="h-5 w-5 -rotate-90 text-slate-400" />
-              </Link>
-            )}
-
-            {/* Coaching belongs to a venue, not to an Event — same rule as the Academy tab. */}
-            {venue.type !== "Event" && (
-              <Link
-                href="/coaches"
-                className="mt-3 flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-4 transition hover:border-slate-200 shadow-sm hover:shadow"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
-                    <UserRoundCog className="h-5 w-5" />
-                  </span>
-                  <div>
-                    <span className="block text-sm font-bold text-slate-900">Want a coach here?</span>
-                    <span className="block text-xs font-medium text-slate-500">Browse coaches and book a session</span>
-                  </div>
-                </div>
-                <ChevronDown className="h-5 w-5 -rotate-90 text-slate-400" />
-              </Link>
-            )}
-          </div>
         </div>
 
         {/* Bottom Feature Footer Bar */}
@@ -613,6 +700,36 @@ export default function VenueDetailPage() {
           </div>
         </div>
       </main>
+
+      {/* Mobile Sticky Booking Bar */}
+      <motion.div 
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="fixed bottom-0 left-0 right-0 z-50 lg:hidden border-t border-slate-200 bg-white px-4 py-3 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)] pb-safe"
+      >
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Starting at</p>
+            <p className="text-xl font-black text-slate-900 leading-tight">₹{venue.price.toLocaleString("en-IN")}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const sports = venueSports(venue);
+              if (!isEvent && sports.length > 1) {
+                setSportModalOpen(true);
+              } else {
+                setSelectedSportForBooking(sports.length === 1 ? categoryLabel(sports[0]) : "");
+                setBooking(true);
+              }
+            }}
+            className="flex-1 rounded-xl bg-brand-800 px-6 py-3.5 text-xs font-bold uppercase tracking-wide text-white transition hover:bg-brand-900 shadow-md shadow-brand-900/20 text-center"
+          >
+            Book Now
+          </button>
+        </div>
+      </motion.div>
 
       {/* Desktop sport picker — mobile renders its own inside MobileVenueDetail. */}
       {sportModalOpen && (
@@ -728,27 +845,28 @@ function getVenueHighlights(venue: Listing): string[] {
   return items;
 }
 
+
 function VenueSummaryCard({ description, title }: { description?: string; title?: string }) {
   const [expanded, setExpanded] = useState(false);
   const text = description?.trim() || `Welcome to ${title || "this venue"}. Book court slots live with instant confirmation.`;
-  const isLong = text.length > 150;
+  const isLong = text.length > 250;
 
   return (
-    <section className="mt-5 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+    <section className="mt-5 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm h-full">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-extrabold text-slate-900">Summary</h2>
+        <h2 className="text-sm font-extrabold text-slate-900">About this venue</h2>
         {isLong && (
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
             className="text-xs font-bold text-brand-600 hover:text-brand-700 transition"
           >
-            {expanded ? "Show Less ↑" : "Show More ↓"}
+            {expanded ? "Show Less ↑" : "Show More →"}
           </button>
         )}
       </div>
       <p className="mt-2 text-xs sm:text-sm leading-relaxed text-slate-600">
-        {isLong && !expanded ? `${text.slice(0, 150).trim()}…` : text}
+        {isLong && !expanded ? `${text.slice(0, 250).trim()}…` : text}
       </p>
     </section>
   );
@@ -860,8 +978,17 @@ function VenueInfoSections({
   return (
     <>
       {/* 1. Status Pills Bar */}
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-50">
+      <motion.div 
+        variants={{
+          hidden: { opacity: 0 },
+          show: { opacity: 1, transition: { staggerChildren: 0.08 } }
+        }}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true }}
+        className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4"
+      >
+        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-50">
           <Clock className="h-5 w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
           <div className="min-w-0 flex-1">
             <span className="block text-xs font-extrabold text-slate-900 truncate">
@@ -874,8 +1001,8 @@ function VenueInfoSections({
           <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-emerald-600 border border-emerald-100">
             OPEN
           </span>
-        </div>
-        <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-50">
+        </motion.div>
+        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-50">
           <LayoutGrid className="h-5 w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
           <div>
             <span className="block text-xs font-extrabold text-slate-900">
@@ -883,25 +1010,31 @@ function VenueInfoSections({
             </span>
             <span className="block text-[10px] font-medium text-slate-500">Available</span>
           </div>
-        </div>
-        <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-50">
+        </motion.div>
+        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-50">
           <Zap className="h-5 w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
           <div>
             <span className="block text-xs font-extrabold text-slate-900">Instant Booking</span>
             <span className="block text-[10px] font-medium text-slate-500">Quick &amp; easy</span>
           </div>
-        </div>
-        <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-50">
+        </motion.div>
+        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-50">
           <ShieldCheck className="h-5 w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
           <div>
             <span className="block text-xs font-extrabold text-slate-900">Confirmed</span>
             <span className="block text-[10px] font-medium text-slate-500">Real-time availability</span>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* 2. Highlights & Packages 2-Column Grid */}
-      <div className="mt-5 grid gap-5 md:grid-cols-2 items-start">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.5 }}
+        className="mt-5 grid gap-5 md:grid-cols-2 items-start"
+      >
         {/* Highlights Card */}
         <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
           <h2 className="text-sm font-extrabold text-slate-900">Highlights</h2>
@@ -938,41 +1071,67 @@ function VenueInfoSections({
               Same owner-configured booking format
             </span>
           </div>
-          <div className="mt-4 flex flex-col divide-y divide-slate-100">
+          <div className="mt-4 flex flex-col border border-slate-100 divide-y divide-slate-100 rounded-xl overflow-hidden">
             {(venue.priceTiers.length > 0 ? venue.priceTiers : [
               { id: "1", label: "Weekday (Day)", time: "06:00 AM – 06:00 PM", amount: venue.price },
               { id: "2", label: "Weekday (Night)", time: "06:00 PM – 11:00 PM", amount: Math.round(venue.price * 1.25) },
               { id: "3", label: "Weekend", time: "All Day", amount: Math.round(venue.price * 1.5) },
             ]).map((tier: any) => (
-              <div key={tier.id || tier.label} className="flex items-center justify-between py-3.5">
+              <motion.div 
+                whileHover="hover"
+                key={tier.id || tier.label} 
+                className="group flex items-center justify-between p-3.5 bg-white transition hover:bg-red-50/50 cursor-pointer"
+              >
                 <div>
                   <p className="text-xs font-extrabold text-slate-900">{tier.label}</p>
                   <p className="text-[10px] font-medium text-slate-500">{tier.time || "06:00 AM - 11:00 PM"}</p>
                 </div>
-                <p className="text-sm font-black text-slate-900">₹{tier.amount.toLocaleString("en-IN")}</p>
-              </div>
+                <div className="flex items-center gap-2">
+                  <motion.p 
+                    variants={{ hover: { scale: 1.04 } }}
+                    className="text-sm font-black text-slate-900 origin-right"
+                  >
+                    ₹{tier.amount.toLocaleString("en-IN")}
+                  </motion.p>
+                  <motion.div variants={{ hover: { x: 4 } }}>
+                    <ChevronDown className="h-4 w-4 -rotate-90 text-brand-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </motion.div>
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* 3. Amenities Bar */}
-      <div className="mt-5 rounded-3xl bg-white p-5 shadow-sm flex items-center gap-6 overflow-x-auto border border-slate-50">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.5 }}
+        className="mt-5 rounded-3xl bg-white p-5 shadow-sm flex items-center gap-6 overflow-x-auto border border-slate-50"
+      >
         <div className="flex items-center gap-2 text-xs font-extrabold text-slate-900 shrink-0">
           <UserRoundCog className="h-4 w-4 text-brand-600" /> Amenities
         </div>
         <div className="h-4 w-px bg-slate-200 shrink-0" />
         <div className="flex items-center gap-8 text-xs font-bold text-slate-700 shrink-0">
           {amenities.slice(0, 5).map(({ label, Icon }) => (
-            <span key={label} className="flex items-center gap-2">
+            <motion.span whileHover={{ scale: 1.08, rotate: -3 }} key={label} className="flex items-center gap-2 cursor-pointer">
               <Icon className="h-4 w-4 text-brand-600" /> {label}
-            </span>
+            </motion.span>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* 4. Specs + Weather + Location 3-Column Grid */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-3 items-start">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.5 }}
+        className="mt-5 grid gap-5 lg:grid-cols-3 items-start"
+      >
         {/* Specs */}
         <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
           <h2 className="text-sm font-extrabold text-slate-900">Technical Specifications</h2>
@@ -1002,10 +1161,23 @@ function VenueInfoSections({
             <h2 className="text-sm font-extrabold text-white/90">Local Weather</h2>
             <div className="mt-4 flex items-center justify-between">
               <div>
-                <p className="text-4xl font-black">24°</p>
+                <motion.p 
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6 }}
+                  className="text-4xl font-black"
+                >
+                  24°
+                </motion.p>
                 <p className="text-xs font-semibold text-white/80 mt-1">Cloudy</p>
               </div>
-              <Cloud className="h-10 w-10 text-white/90" strokeWidth={1.5} />
+              <motion.div
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Cloud className="h-10 w-10 text-white/90" strokeWidth={1.5} />
+              </motion.div>
             </div>
           </div>
           <div className="mt-6 flex items-center justify-between border-t border-white/20 pt-4 text-center">
@@ -1035,7 +1207,11 @@ function VenueInfoSections({
             <p className="text-[10px] text-slate-400">{venue.city} District</p>
           </div>
           <div className="mt-3 relative h-40 w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
-            <iframe
+            <motion.iframe
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
               title="Venue Map"
               src={`https://maps.google.com/maps?q=${encodeURIComponent(venue.address || venue.city)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
               className="absolute inset-0 h-full w-full border-0"
@@ -1045,84 +1221,149 @@ function VenueInfoSections({
               href={`https://maps.google.com/?q=${encodeURIComponent(venue.address || venue.city)}`}
               target="_blank"
               rel="noreferrer"
-              className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-xl bg-white/90 px-3 py-1.5 text-[10px] font-bold text-slate-900 shadow-md backdrop-blur-md hover:bg-white"
+              className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-xl bg-white/90 px-3 py-1.5 text-[10px] font-bold text-slate-900 shadow-md backdrop-blur-md hover:bg-white z-10"
             >
               Open in Google Maps ↗
             </a>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* 5. Top Players + Reviews + Write Form 3-Column Grid */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-3 items-start">
-        {/* Top Players */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm flex flex-col items-center justify-center text-center">
-          <h2 className="w-full text-left text-sm font-extrabold text-slate-900 mb-4">Top Players</h2>
-          <Users2 className="h-10 w-10 text-brand-300" />
-          <p className="mt-3 text-xs font-semibold text-slate-500 max-w-[200px]">No frequent players tracked here yet.</p>
-        </div>
-
-        {/* Player Reviews */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm flex flex-col items-center justify-center text-center">
-          <h2 className="w-full text-left text-sm font-extrabold text-slate-900 mb-4">Player Reviews</h2>
-          <MessageSquareText className="h-10 w-10 text-brand-300" />
-          <p className="mt-3 text-xs font-semibold text-slate-500 max-w-[200px]">No reviews yet — be the first to play &amp; review!</p>
+      {/* 5. Reviews + Write Form + Summary 3-Column Grid */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.5 }}
+        className="mt-5 grid gap-5 lg:grid-cols-3 items-stretch"
+      >
+        {/* Reviews & Community */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm flex flex-col">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-extrabold text-slate-900">Reviews &amp; Community</h2>
+            {reviewProps.reviews.length > 0 && (
+              <button className="text-xs font-bold text-brand-600 hover:text-brand-700 transition">View all reviews →</button>
+            )}
+          </div>
+          
+          <div className="flex items-start gap-5">
+            <div className="shrink-0">
+              <p className="text-3xl font-black text-slate-900 leading-none">{venue.rating?.toFixed(1) || "4.8"}</p>
+              <motion.div 
+                variants={{ show: { transition: { staggerChildren: 0.08 } } }} 
+                initial="hidden" whileInView="show" viewport={{ once: true }} 
+                className="flex items-center gap-0.5 mt-1.5 mb-1"
+              >
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <motion.div key={s} variants={{ hidden: { opacity: 0, scale: 0.5 }, show: { opacity: 1, scale: 1 } }}>
+                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                  </motion.div>
+                ))}
+              </motion.div>
+              <div className="flex text-[10px] font-semibold text-slate-500">
+                {reviewProps.reviews.length || venue.reviewCount || 0} Reviews
+              </div>
+            </div>
+            
+            <div className="flex-1">
+              {reviewProps.reviews.length > 0 ? (
+                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                  {reviewProps.reviews.slice(0, 3).map((r, i) => (
+                    <div key={i}>
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-100 text-[10px] font-bold text-brand-700 uppercase">
+                          {r.customerName.charAt(0) || "U"}
+                        </span>
+                        <div>
+                          <p className="text-xs font-bold text-slate-900 leading-none">{r.customerName}</p>
+                          <div className="flex items-center gap-0.5 mt-0.5">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <Star key={s} className={`h-2.5 w-2.5 ${s <= (r.rating || 5) ? "fill-amber-400 text-amber-400" : "text-slate-200"}`} />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <p className="mt-2 text-xs text-slate-600 leading-relaxed">{r.comment}</p>
+                    </div>
+                  ))}
+                  {reviewProps.reviews.length > 3 && (
+                    <p className="text-xs font-bold text-brand-600 text-center cursor-pointer">View {reviewProps.reviews.length - 3} more reviews...</p>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center text-center py-6 text-slate-400">
+                  <Star className="h-8 w-8 text-slate-200 mb-2" />
+                  <p className="text-xs font-semibold">No reviews yet.</p>
+                  <p className="text-[10px]">Be the first to share your experience!</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Write Review Form */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
-          <h3 className="text-sm font-extrabold text-slate-900">Write a Review</h3>
-          <p className="mt-0.5 text-[10px] text-slate-400">Share your experience with other players.</p>
-          <form onSubmit={reviewProps.onSubmitReview} className="mt-3 space-y-2.5">
+        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 className="text-sm font-extrabold text-slate-900">Be the first to review this venue</h3>
+            <p className="mt-1 text-xs text-slate-500">Your experience helps other players choose better.</p>
+          </div>
+          
+          <form onSubmit={reviewProps.onSubmitReview} className="mt-4 space-y-3" noValidate>
+            <div className="flex items-center gap-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => reviewProps.onRatingChange(star)}
+                  className="p-0 cursor-pointer transition hover:scale-110"
+                >
+                  <Star
+                    className={`h-5 w-5 ${star <= reviewProps.reviewRating ? "fill-amber-400 text-amber-400" : "text-slate-200"}`}
+                  />
+                </button>
+              ))}
+            </div>
             <div>
-              <label className="block text-[10px] font-bold text-slate-600">Your Name</label>
               <input
                 type="text"
-                required
                 value={reviewProps.reviewName}
                 onChange={(e) => reviewProps.onNameChange(e.target.value)}
-                placeholder="e.g. Aman Sharma"
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:bg-white"
+                placeholder="Your Name (e.g. Aman Sharma)"
+                className={`w-full rounded-xl border ${reviewProps.reviewError?.includes('Name') || reviewProps.reviewError?.includes('all fields') ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'} p-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:bg-white transition-colors`}
               />
             </div>
             <div>
-              <span className="block text-[10px] font-bold text-slate-600">Rating</span>
-              <div className="mt-1 flex gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => reviewProps.onRatingChange(star)}
-                    className="p-0.5 cursor-pointer"
-                  >
-                    <Star
-                      className={`h-4 w-4 ${star <= reviewProps.reviewRating ? "fill-amber-400 text-amber-400" : "text-slate-300"}`}
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label className="block text-[10px] font-bold text-slate-600">Your Review</label>
               <textarea
-                required
                 rows={2}
                 value={reviewProps.reviewComment}
                 onChange={(e) => reviewProps.onCommentChange(e.target.value)}
-                placeholder="Tell us about turf quality, lighting, parking..."
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:bg-white resize-none"
+                placeholder="Tell us about your experience..."
+                className={`w-full rounded-xl border ${reviewProps.reviewError?.includes('comment') || reviewProps.reviewError?.includes('all fields') ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'} p-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:bg-white resize-none transition-colors`}
               />
             </div>
+            
+            {reviewProps.reviewError && (
+              <p className="text-[10px] font-bold text-red-500">{reviewProps.reviewError}</p>
+            )}
+            {reviewProps.reviewSuccess && (
+              <p className="text-[10px] font-bold text-emerald-500">Review submitted successfully! Thank you.</p>
+            )}
+
             <button
               type="submit"
               disabled={reviewProps.submittingReview}
-              className="w-full rounded-xl bg-brand-700 hover:bg-brand-800 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-md transition cursor-pointer"
+              className="w-full rounded-xl bg-brand-800 hover:bg-brand-900 py-2.5 text-xs font-bold text-white shadow-md transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {reviewProps.submittingReview ? "Submitting..." : "SUBMIT REVIEW"}
+              {reviewProps.submittingReview ? "Submitting..." : "Write a Review"}
             </button>
           </form>
         </div>
-      </div>
+
+        {/* About this venue Summary */}
+        <div className="h-full">
+          <VenueSummaryCard description={venue.description} title={venue.title} />
+        </div>
+      </motion.div>
     </>
   );
 }

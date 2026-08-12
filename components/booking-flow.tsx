@@ -1747,14 +1747,14 @@ function ReviewStep(props: {
         </div>
       )}
 
-      <div className={embedded ? "" : "overflow-y-auto p-3 pt-2.5 pb-28 sm:p-5"}>
-        {!embedded && <h2 className="hidden lg:block text-lg font-extrabold text-slate-900">Review &amp; Confirm Your Booking</h2>}
+      <div className={embedded ? "" : "overflow-y-auto p-4 pt-3 pb-28 sm:p-6 lg:p-8"}>
+        {!embedded && <h2 className="hidden lg:block text-xl font-extrabold text-slate-900 mb-2">Review &amp; Confirm Your Booking</h2>}
 
-        <div className="mt-1 lg:mt-3 flex flex-col gap-2.5 lg:gap-3 lg:flex-row">
+        <div className="mt-2 lg:mt-4 flex flex-col gap-4 lg:gap-6 lg:flex-row">
           {/* LEFT COLUMN */}
-          <div className={`flex flex-col gap-3 flex-1 min-w-0 ${listing.type === "Event" ? "hidden" : mobileStep === "checkout" ? "hidden lg:flex" : "flex"}`}>
+          <div className={`flex flex-col gap-5 flex-1 min-w-0 ${listing.type === "Event" ? "hidden" : mobileStep === "checkout" ? "hidden lg:flex" : "flex"}`}>
             {/* Venue info (Desktop only — mobile already displays venue in header) */}
-            <div className="hidden lg:flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+            <div className="hidden lg:flex items-center gap-4 rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-50 to-sky-50 text-xl ring-1 ring-slate-100">
                 {sportEmoji(listing.categories[0] ? categoryLabel(listing.categories[0]) : listing.type)}
               </span>
@@ -1771,7 +1771,7 @@ function ReviewStep(props: {
 
 
             {/* Date & Time section */}
-            <div className="rounded-2xl border border-slate-100 bg-white p-4">
+            <div className="rounded-3xl border border-slate-100 bg-white p-5 lg:p-6">
               <p className={selectedSport ? "text-xl font-extrabold text-slate-900" : "text-base font-extrabold text-slate-900"}>
                 {selectedSport ? "Select Slots" : "Select Date & Time"}
               </p>
@@ -2053,7 +2053,7 @@ function ReviewStep(props: {
                           </div>
 
                           {/* Time slots — compact, ultra-sleek, single-line pills grid */}
-                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 max-h-[280px] overflow-y-auto pr-1 text-center">
+                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 max-h-[320px] overflow-y-auto pr-2 text-center">
                             {orderedSlots.map((slot) => {
                               const isSelected = selectedSlotIndices.includes(slot.originalIndex);
                               const available = slot.status === "Available";
@@ -2337,12 +2337,12 @@ function ReviewStep(props: {
 
           {/* RIGHT COLUMN */}
           <div
-            className={`flex flex-col gap-3 shrink-0 ${
-              listing.type === "Event" ? "w-full max-w-2xl mx-auto lg:w-full" : "w-full lg:w-80"
+            className={`flex flex-col gap-5 shrink-0 ${
+              listing.type === "Event" ? "w-full max-w-2xl mx-auto lg:w-full" : "w-full lg:w-80 lg:max-w-xs xl:max-w-sm"
             } ${mobileStep === "slots" ? "hidden lg:flex" : "flex"}`}
           >
             {/* Checkout Header Card */}
-            <div className="rounded-2xl border border-slate-100 bg-white p-4">
+            <div className="rounded-3xl border border-slate-100 bg-white p-5 lg:p-6">
               <div className="flex items-start justify-between">
                 <div>
                   <h3 className="text-sm font-extrabold text-slate-900">{listing.title}</h3>
@@ -2386,7 +2386,7 @@ function ReviewStep(props: {
             </div>
 
             {/* Apply Coupon Code */}
-            <button type="button" className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-4 transition hover:bg-slate-50">
+            <button type="button" className="flex items-center justify-between rounded-3xl border border-slate-100 bg-white p-5 lg:p-6 transition hover:bg-slate-50">
               <div className="flex items-center gap-2">
                 <div className="text-brand-500 text-lg">🏷️</div>
                 <span className="text-sm font-bold text-slate-800">Apply Coupon Code</span>
@@ -2395,7 +2395,7 @@ function ReviewStep(props: {
             </button>
 
             {/* Game Reminders */}
-            <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-4">
+            <div className="flex items-center justify-between rounded-3xl border border-slate-100 bg-white p-5 lg:p-6">
               <div>
                 <p className="text-sm font-bold text-slate-800 flex items-center gap-1.5">Game Reminders <span className="text-orange-500 text-sm">🔔</span></p>
                 <p className="text-xs text-slate-500 mt-1">Get an SMS/Push notification 1 hr before your slot.</p>
@@ -2407,7 +2407,7 @@ function ReviewStep(props: {
             </div>
 
             {/* Play Protect */}
-            <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4">
+            <div className="rounded-3xl border border-indigo-100 bg-indigo-50/50 p-5 lg:p-6">
               <label className="flex items-start gap-3 cursor-pointer">
                 <input type="checkbox" checked={playProtect} onChange={(e) => setPlayProtect(e.target.checked)} className="mt-1 h-4 w-4 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-600 accent-indigo-600" />
                 <div>
@@ -2424,7 +2424,7 @@ function ReviewStep(props: {
               if (allAddOns.length === 0) return null;
               const filteredAddOns = allAddOns.filter((addOn) => isAddOnForSport(addOn, selectedSport));
               return (
-                <div className="rounded-2xl border border-slate-100 bg-white p-4">
+                <div className="rounded-3xl border border-slate-100 bg-white p-5 lg:p-6">
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-sm font-bold text-slate-800">Add-ons &amp; Equipment</p>
                     {selectedSport && (
@@ -2483,7 +2483,7 @@ function ReviewStep(props: {
             })()}
 
             {/* Payment Option Selection & Breakdown */}
-            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm space-y-3">
+            <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:p-6 shadow-sm space-y-4">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                 <div className="flex items-center gap-2">
                   <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 text-white text-xs font-bold shadow-xs">
