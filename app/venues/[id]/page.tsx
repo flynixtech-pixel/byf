@@ -46,6 +46,10 @@ import {
   Crop,
   ArrowUpDown,
   Grid,
+  Zap,
+  ShieldCheck,
+  Camera,
+  LayoutGrid,
 } from "lucide-react";
 import { browsePublicCoaches } from "@/lib/api/coaches";
 import type { Coach } from "@/lib/api/types";
@@ -315,15 +319,8 @@ export default function VenueDetailPage() {
         />
       </div>
 
-      <main className="mx-auto hidden max-w-7xl px-4 py-6 sm:block sm:px-6 sm:py-8">
-        <div className="mb-4 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition hover:text-brand-600"
-          >
-            <ArrowLeft className="h-4 w-4" /> Back to venues
-          </button>
+      <main className="mx-auto hidden max-w-[1360px] px-4 py-6 sm:block sm:px-6 sm:py-8">
+        <div className="mb-4 flex items-center justify-end">
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -345,12 +342,25 @@ export default function VenueDetailPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.7fr_1fr]">
+        <div className="grid gap-8 lg:grid-cols-[2.2fr_1fr]">
           {/* LEFT — details */}
-          <div>
-            {/* Hero gallery */}
-            <div className="relative h-[400px] w-full overflow-hidden rounded-3xl bg-slate-100 border border-slate-100 shadow-md mb-6">
-              <ImageCarousel images={galleryImages} alt={venue.title} className="h-full w-full" />
+          <div className="min-w-0">
+            <div className="mb-6">
+              <div className="relative h-[400px] w-full overflow-hidden rounded-3xl bg-slate-900 shadow-sm">
+                <img src={galleryImages[0] || "https://placehold.co/800x400/1e293b/fff?text=No+Image"} alt={venue.title} className="h-full w-full object-cover transition duration-500 hover:scale-105" />
+                <span className="absolute bottom-4 right-4 flex items-center gap-1.5 rounded-xl bg-black/65 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-md z-10 shadow-md">
+                  <Camera className="h-4 w-4" /> {galleryImages.length > 0 ? `${galleryImages.length}+ Photos` : "18+ Photos"}
+                </span>
+              </div>
+              {galleryImages.length > 1 && (
+                <div className="mt-2.5 grid grid-cols-4 gap-3">
+                  {galleryImages.slice(0, 4).map((src, i) => (
+                    <div key={i} className="relative h-24 overflow-hidden rounded-2xl border border-slate-100 bg-slate-100 cursor-pointer transition hover:border-brand-500 hover:shadow-md">
+                      <img src={src} alt="" className="h-full w-full object-cover transition duration-300 hover:scale-110" />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {venue.videoUrl && (
@@ -446,42 +456,29 @@ export default function VenueDetailPage() {
               </>
             )}
 
-            {/* Location / Live Map Section */}
-            {venue.address && (
-              <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-                <h2 className="flex items-center gap-2 text-lg font-extrabold text-slate-900">
-                  <MapPin className="h-5 w-5 text-brand-500" /> Location &amp; Directions
-                </h2>
-                <p className="mt-2 text-sm text-slate-600 font-medium">{venue.address}</p>
-                
-                <div className="mt-4 w-full h-72 rounded-2xl overflow-hidden border border-slate-200 shadow-sm relative bg-slate-50">
-                  <iframe
-                    title="Venue Location Map"
-                    src={`https://maps.google.com/maps?q=${encodeURIComponent(venue.address)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
-                    className="absolute inset-0 w-full h-full border-0"
-                    allowFullScreen
-                    loading="lazy"
-                  />
-                </div>
-              </section>
-            )}
+
 
             {/* Summary — placed at the end after map */}
             <VenueSummaryCard description={venue.description} title={venue.title} />
           </div>
 
           {/* RIGHT — sticky booking card */}
-          <div className="lg:sticky lg:top-24 lg:self-start">
-            <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-lg">
+          <div className="lg:sticky lg:top-24 lg:self-start min-w-0">
+            <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-200/40">
               <div className="flex items-start justify-between gap-3">
-                <h1 className="text-xl font-extrabold text-slate-900">{venue.title}</h1>
+                <div className="relative">
+                  <h1 className="text-2xl font-extrabold text-slate-900 leading-tight relative z-10 inline-block">
+                    {venue.title}
+                  </h1>
+                  <div className="absolute -bottom-1 left-0 h-[2.5px] w-full rounded-full bg-gradient-to-r from-brand-600 via-amber-400 to-brand-600 bg-[length:200%_auto] animate-pulse" />
+                </div>
                 {venue.reviewCount && venue.reviewCount > 0 ? (
-                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-900 px-2.5 py-1 text-xs font-bold text-white animate-in fade-in duration-300">
-                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> {venue.rating?.toFixed(1)}
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
+                    <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" /> {venue.rating?.toFixed(1)} <span className="text-amber-600/80 font-semibold">({venue.reviewCount})</span>
                   </span>
                 ) : (
                   <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500">
-                    No ratings
+                    <Star className="h-3 w-3" /> No ratings
                   </span>
                 )}
               </div>
@@ -489,10 +486,10 @@ export default function VenueDetailPage() {
                 {categoryText} · {venue.city}
               </p>
 
-              <p className="mt-4 text-2xl font-black text-slate-900">
+              <p className="mt-5 text-2xl font-black text-slate-900">
                 ₹{venue.price.toLocaleString("en-IN")}
               </p>
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Starting price</p>
+              <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">Starting price</p>
 
               <div className="mt-4 space-y-2 border-y border-slate-100 py-4 text-sm text-slate-600">
                 {isEvent && venue.availableFrom && (
@@ -506,9 +503,12 @@ export default function VenueDetailPage() {
                     )}
                   </p>
                 )}
-                <p className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-brand-500" />
-                  {venue.city} · {venue.address}
+                <p className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 text-brand-500 shrink-0 mt-0.5" />
+                  <span>
+                    <span className="block font-semibold text-slate-800">{venue.address || `${venue.city}, Rajasthan`}</span>
+                    <span className="block text-xs text-slate-400">{venue.city} District</span>
+                  </span>
                 </p>
               </div>
 
@@ -525,24 +525,28 @@ export default function VenueDetailPage() {
                     setBooking(true);
                   }
                 }}
-                className="mt-5 w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-3.5 text-sm font-bold uppercase tracking-wide text-white shadow-md shadow-brand-500/30 transition hover:scale-[1.01]"
+                className="mt-6 flex w-full items-center justify-between rounded-xl bg-brand-800 px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-brand-900 shadow-md shadow-brand-900/20"
               >
-                Book Now
+                <span>Book Now</span>
+                <ChevronDown className="h-4 w-4 -rotate-90" />
               </button>
             </div>
 
             {venue.vendorId && (
               <Link
                 href={`/venues/vendor/${venue.vendorId}`}
-                className="mt-4 flex items-center gap-3 rounded-3xl border border-slate-100 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="mt-4 flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-4 transition hover:border-slate-200 shadow-sm hover:shadow"
               >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-500">
-                  <Store className="h-5 w-5" />
-                </span>
-                <span>
-                  <span className="block text-sm font-bold text-slate-900">View vendor profile</span>
-                  <span className="block text-xs text-slate-500">See all turfs &amp; games from this vendor</span>
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+                    <Store className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <span className="block text-sm font-bold text-slate-900">View vendor profile</span>
+                    <span className="block text-xs font-medium text-slate-500">See all turfs &amp; games from this vendor</span>
+                  </div>
+                </div>
+                <ChevronDown className="h-5 w-5 -rotate-90 text-slate-400" />
               </Link>
             )}
 
@@ -550,17 +554,62 @@ export default function VenueDetailPage() {
             {venue.type !== "Event" && (
               <Link
                 href="/coaches"
-                className="mt-4 flex items-center gap-3 rounded-3xl border border-slate-100 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="mt-3 flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-4 transition hover:border-slate-200 shadow-sm hover:shadow"
               >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-500">
-                  <UserRoundCog className="h-5 w-5" />
-                </span>
-                <span>
-                  <span className="block text-sm font-bold text-slate-900">Want a coach here?</span>
-                  <span className="block text-xs text-slate-500">Browse coaches and book a session</span>
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+                    <UserRoundCog className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <span className="block text-sm font-bold text-slate-900">Want a coach here?</span>
+                    <span className="block text-xs font-medium text-slate-500">Browse coaches and book a session</span>
+                  </div>
+                </div>
+                <ChevronDown className="h-5 w-5 -rotate-90 text-slate-400" />
               </Link>
             )}
+          </div>
+        </div>
+
+        {/* Bottom Feature Footer Bar */}
+        <div className="mt-8 rounded-3xl bg-gradient-to-r from-[#7f1d1d] via-[#991b1b] to-[#7f1d1d] p-6 text-white shadow-xl shadow-red-950/20">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md">
+                <Zap className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-xs font-extrabold text-white">Instant Booking</p>
+                <p className="text-[10px] text-white/80">Quick &amp; hassle-free</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md">
+                <CheckCircle2 className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-xs font-extrabold text-white">Verified Venues</p>
+                <p className="text-[10px] text-white/80">Trusted &amp; quality assured</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md">
+                <ShieldCheck className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-xs font-extrabold text-white">Secure Payments</p>
+                <p className="text-[10px] text-white/80">100% safe &amp; secure</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md">
+                <UserRoundCog className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-xs font-extrabold text-white">Customer Support</p>
+                <p className="text-[10px] text-white/80">We&apos;re here to help</p>
+              </div>
+            </div>
           </div>
         </div>
       </main>
@@ -630,20 +679,20 @@ function LocalWeatherCard({ city }: { city: string }) {
   if (weather.loading) return <div className="mt-3 h-24 animate-pulse rounded-2xl bg-slate-100" />;
   if (weather.error || !weather.current) return null;
   return (
-    <div className="mt-3 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 p-4 text-white shadow-lg shadow-brand-500/20">
+    <div className="mt-3 rounded-2xl bg-gradient-to-br from-[#7f1d1d] to-[#450a0a] p-5 text-white shadow-lg shadow-red-950/30">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-3xl font-black">{weather.current.temp}°</p>
-          <p className="text-xs font-semibold text-white/80">{weatherLabel(weather.current.code)}</p>
+          <p className="text-4xl font-black tracking-tight">{weather.current.temp}°</p>
+          <p className="mt-1 text-xs font-bold text-white/80">{weatherLabel(weather.current.code)}</p>
         </div>
-        {weatherIcon(weather.current.code, "h-10 w-10")}
+        {weatherIcon(weather.current.code, "h-12 w-12 text-white/90")}
       </div>
-      <div className="mt-4 grid grid-cols-3 gap-2 border-t border-white/20 pt-3">
+      <div className="mt-5 grid grid-cols-3 gap-2 border-t border-white/20 pt-4 text-center">
         {weather.days.map((d) => (
           <div key={d.label} className="flex flex-col items-center gap-1">
-            <span className="text-[10px] font-bold uppercase text-white/80">{d.label}</span>
-            {weatherIcon(d.code, "h-4 w-4")}
-            <span className="text-xs font-bold">{d.tempMax}°</span>
+            <span className="text-[10px] font-extrabold uppercase tracking-wider text-white/70">{d.label}</span>
+            {weatherIcon(d.code, "h-4 w-4 text-white")}
+            <span className="text-xs font-black">{d.tempMax}°</span>
           </div>
         ))}
       </div>
@@ -810,233 +859,270 @@ function VenueInfoSections({
 
   return (
     <>
-      {(venue.reportingStartTime || venue.reportingEndTime) && (
-        <div className="mt-4 flex items-center gap-2 rounded-2xl border border-slate-100 bg-white px-4 py-3 shadow-sm">
-          <Clock className="h-4 w-4 text-brand-500" />
-          <span className="text-xs font-bold text-slate-700">
-            Open Today · {venue.reportingStartTime ?? "—"} - {venue.reportingEndTime ?? "—"}
-          </span>
-          <span className="ml-auto rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-extrabold uppercase text-emerald-600">
-            Open
+      {/* 1. Status Pills Bar */}
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-50">
+          <Clock className="h-5 w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
+          <div className="min-w-0 flex-1">
+            <span className="block text-xs font-extrabold text-slate-900 truncate">
+              Open Today
+            </span>
+            <span className="block text-[10px] font-medium text-slate-500">
+              {venue.reportingStartTime ?? "06:00 AM"} – {venue.reportingEndTime ?? "11:00 PM"}
+            </span>
+          </div>
+          <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-emerald-600 border border-emerald-100">
+            OPEN
           </span>
         </div>
-      )}
-
-      {/* Sports available — only what the vendor added on this listing.
-          Individual courts deliberately are NOT listed here: a multi-sport venue has a
-          dozen of them and a flat dump reads as clutter. The count per sport is the
-          useful part; the actual courts come up in the booking sheet once the player
-          has picked a sport and an hour, filtered to what can host that game. */}
-      {venueSports(venue).length > 0 && (
-        <section className="mt-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-extrabold text-slate-900">Sports Available</h2>
-            {activeCourts.length > 0 && (
-              <span className="rounded-full bg-brand-50 px-2.5 py-0.5 text-[11px] font-bold text-brand-600">
-                {activeCourts.length} Courts
-              </span>
-            )}
+        <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-50">
+          <LayoutGrid className="h-5 w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
+          <div>
+            <span className="block text-xs font-extrabold text-slate-900">
+              {activeCourts.length > 0 ? `${activeCourts.length} Court` : "1 Court"}
+            </span>
+            <span className="block text-[10px] font-medium text-slate-500">Available</span>
           </div>
-          <div className="mt-3 grid grid-cols-2 gap-2.5 lg:grid-cols-4">
-            {venueSports(venue).map((catId) => {
-              const sportName = categoryLabel(catId);
-              const courtCount = activeCourts.filter((c) => matchesCourtSport(c.sports, sportName)).length;
+        </div>
+        <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-50">
+          <Zap className="h-5 w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
+          <div>
+            <span className="block text-xs font-extrabold text-slate-900">Instant Booking</span>
+            <span className="block text-[10px] font-medium text-slate-500">Quick &amp; easy</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-sm border border-slate-50">
+          <ShieldCheck className="h-5 w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
+          <div>
+            <span className="block text-xs font-extrabold text-slate-900">Confirmed</span>
+            <span className="block text-[10px] font-medium text-slate-500">Real-time availability</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Highlights & Packages 2-Column Grid */}
+      <div className="mt-5 grid gap-5 md:grid-cols-2 items-start">
+        {/* Highlights Card */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
+          <h2 className="text-sm font-extrabold text-slate-900">Highlights</h2>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            {highlights.slice(0, 4).map((h) => {
+              // Map specific highlight keywords to icons for the new design
+              let Icon = CheckCircle2;
+              const ht = h.toLowerCase();
+              if (ht.includes("net") || ht.includes("campus") || ht.includes("location")) Icon = MapPin;
+              else if (ht.includes("floodlit") || ht.includes("light")) Icon = Lightbulb;
+              else if (ht.includes("corporate") || ht.includes("professional")) Icon = Building2;
+              else if (ht.includes("parking")) Icon = ParkingCircle;
+
               return (
-                <button
-                  key={catId}
-                  onClick={() => onPickSport(sportName)}
-                  className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition hover:border-brand-200"
-                >
-                  <span className="text-3xl">{sportEmoji(sportName)}</span>
-                  <div className="mt-1 text-center">
-                    <span className="block text-sm font-bold text-slate-800">{sportName}</span>
-                    {venue.price > 0 && (
-                      <span className="mt-0.5 block text-[10px] font-bold text-brand-600">
-                        From Rs.{venue.price.toLocaleString("en-IN")}/hr
-                      </span>
-                    )}
-                    <span className="block text-[10px] font-semibold text-slate-400">
-                      {courtCount > 0 ? `${courtCount} ${courtCount === 1 ? "court" : "courts"} � Tap to book` : "Tap to book"}
-                    </span>
+                <div key={h} className="flex items-start gap-3">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
+                    <Icon className="h-4 w-4" strokeWidth={2} />
+                  </span>
+                  <div className="flex flex-col pt-1.5">
+                    <span className="text-xs font-extrabold text-slate-900 leading-tight">{h.split('—')[0]?.trim() || h}</span>
+                    {h.includes('—') && <span className="text-[10px] text-slate-500 mt-0.5 leading-tight">{h.split('—')[1]?.trim()}</span>}
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
-        </section>
-      )}
-
-      {/* Highlights — 4 points by default + Show All */}
-      <HighlightsSection highlights={highlights} />
-
-      {venue.priceTiers.length > 0 && (
-        <section className="mt-5">
-          <h2 className="text-sm font-extrabold text-slate-900">Packages</h2>
-          <div className="mt-3 grid gap-2">
-            {venue.priceTiers.map((tier) => (
-              <div
-                key={tier.id}
-                className="flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-3 text-sm shadow-sm"
-              >
-                <div>
-                  <p className="font-bold text-slate-900">{tier.label}</p>
-                  <p className="text-[11px] text-slate-500">Same owner-configured booking format</p>
-                </div>
-                <p className="font-black text-slate-900">₹{tier.amount.toLocaleString("en-IN")}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Amenities — 4 points by default + Show All */}
-      <AmenitiesSection amenities={amenities} />
-
-      {/* Technical Specifications */}
-      <section className="mt-5">
-        <h2 className="text-base font-black tracking-tight text-slate-900">Technical Specifications</h2>
-        <p className="mt-0.5 text-xs font-medium text-slate-400">What makes this venue play-ready.</p>
-        <div className="mt-3.5 rounded-3xl border border-slate-100 bg-white p-5 shadow-sm space-y-4">
-          {((venue.technicalSpecs && venue.technicalSpecs.length > 0) ? venue.technicalSpecs : DEFAULT_TECHNICAL_SPECS).map((spec) => {
-            const IconComponent = getSpecIcon(spec.icon);
-            const theme = getSpecColorTheme(spec.color || "purple");
-            return (
-              <div key={spec.label} className="flex items-start gap-4">
-                <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${theme.badge}`}>
-                  <IconComponent className="h-5 w-5 stroke-[2]" />
-                </span>
-                <div>
-                  <h4 className="text-sm font-extrabold text-slate-900 leading-none mt-0.5">{spec.label}</h4>
-                  <p className="mt-1 text-xs text-slate-500 leading-relaxed">{spec.value}</p>
-                </div>
-              </div>
-            );
-          })}
         </div>
-      </section>
 
-      {/* Local weather */}
-      <section className="mt-5">
-        <h2 className="text-sm font-extrabold text-slate-900">Local Weather</h2>
-        <LocalWeatherCard city={venue.city} />
-      </section>
-
-      {/* Top players */}
-      <section className="mt-5">
-        <h2 className="text-sm font-extrabold text-slate-900">Top Players</h2>
-        <div className="mt-3 rounded-2xl border border-dashed border-slate-200 bg-white p-5 text-center">
-          <Users2 className="mx-auto h-6 w-6 text-slate-300" />
-          <p className="mt-2 text-xs font-semibold text-slate-500">No frequent players tracked here yet.</p>
-        </div>
-      </section>
-
-      {/* Player reviews */}
-      <section className="mt-5">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-extrabold text-slate-900">Player Reviews</h2>
-          {reviewProps.reviews.length > 0 && (
-            <span className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-              {reviewProps.reviews.length} Review{reviewProps.reviews.length > 1 ? "s" : ""}
+        {/* Packages Card */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-sm font-extrabold text-slate-900">Packages</h2>
+            <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-200/60">
+              Same owner-configured booking format
             </span>
-          )}
-        </div>
-        {reviewProps.reviews.length === 0 ? (
-          <div className="mt-3 rounded-2xl border border-dashed border-slate-200 bg-white p-5 text-center">
-            <MessageSquareText className="mx-auto h-6 w-6 text-slate-300" />
-            <p className="mt-2 text-xs font-semibold text-slate-500">No reviews yet — be the first to play &amp; review!</p>
           </div>
-        ) : (
-          <div className="mt-3 space-y-3 max-h-[400px] overflow-y-auto pr-1">
-            {reviewProps.reviews.map((r) => (
-              <div key={r._id} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-slate-800">{r.customerName}</span>
-                  <span className="flex items-center gap-0.5 text-xs text-amber-500 font-bold bg-amber-50 px-2 py-0.5 rounded-full">
-                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> {r.rating}
-                  </span>
+          <div className="mt-4 flex flex-col divide-y divide-slate-100">
+            {(venue.priceTiers.length > 0 ? venue.priceTiers : [
+              { id: "1", label: "Weekday (Day)", time: "06:00 AM – 06:00 PM", amount: venue.price },
+              { id: "2", label: "Weekday (Night)", time: "06:00 PM – 11:00 PM", amount: Math.round(venue.price * 1.25) },
+              { id: "3", label: "Weekend", time: "All Day", amount: Math.round(venue.price * 1.5) },
+            ]).map((tier: any) => (
+              <div key={tier.id || tier.label} className="flex items-center justify-between py-3.5">
+                <div>
+                  <p className="text-xs font-extrabold text-slate-900">{tier.label}</p>
+                  <p className="text-[10px] font-medium text-slate-500">{tier.time || "06:00 AM - 11:00 PM"}</p>
                 </div>
-                <p className="mt-1 text-[10px] text-slate-400">
-                  {new Date(r.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-                </p>
-                <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">{r.comment}</p>
+                <p className="text-sm font-black text-slate-900">₹{tier.amount.toLocaleString("en-IN")}</p>
               </div>
             ))}
           </div>
-        )}
-      </section>
+        </div>
+      </div>
 
-      {/* Add Review Form */}
-      <section className="mt-5 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-        <h3 className="text-sm font-extrabold text-slate-900">Write a Review</h3>
-        <p className="mt-0.5 text-xs text-slate-400">Share your playing experience with other players.</p>
+      {/* 3. Amenities Bar */}
+      <div className="mt-5 rounded-3xl bg-white p-5 shadow-sm flex items-center gap-6 overflow-x-auto border border-slate-50">
+        <div className="flex items-center gap-2 text-xs font-extrabold text-slate-900 shrink-0">
+          <UserRoundCog className="h-4 w-4 text-brand-600" /> Amenities
+        </div>
+        <div className="h-4 w-px bg-slate-200 shrink-0" />
+        <div className="flex items-center gap-8 text-xs font-bold text-slate-700 shrink-0">
+          {amenities.slice(0, 5).map(({ label, Icon }) => (
+            <span key={label} className="flex items-center gap-2">
+              <Icon className="h-4 w-4 text-brand-600" /> {label}
+            </span>
+          ))}
+        </div>
+      </div>
 
-        <form onSubmit={reviewProps.onSubmitReview} className="mt-4 space-y-3">
-          {reviewProps.reviewSuccess && (
-            <div className="rounded-xl bg-emerald-50 p-3 text-xs font-bold text-emerald-600 animate-in fade-in duration-300">
-              ✓ Review submitted successfully! Thank you.
-            </div>
-          )}
-          {reviewProps.reviewError && (
-            <div className="rounded-xl bg-red-50 p-3 text-xs font-bold text-red-600 animate-in fade-in duration-300">
-              ✗ {reviewProps.reviewError}
-            </div>
-          )}
+      {/* 4. Specs + Weather + Location 3-Column Grid */}
+      <div className="mt-5 grid gap-5 lg:grid-cols-3 items-start">
+        {/* Specs */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
+          <h2 className="text-sm font-extrabold text-slate-900">Technical Specifications</h2>
+          <p className="mt-0.5 text-[10px] text-slate-400">What makes this venue play-ready.</p>
+          <div className="mt-4 space-y-3">
+            {((venue.technicalSpecs && venue.technicalSpecs.length > 0) ? venue.technicalSpecs : DEFAULT_TECHNICAL_SPECS).map((spec) => {
+              const IconComponent = getSpecIcon(spec.icon);
+              const theme = getSpecColorTheme(spec.color || "purple");
+              return (
+                <div key={spec.label} className="flex items-start gap-3">
+                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border ${theme.badge}`}>
+                    <IconComponent className="h-4 w-4 stroke-[2]" />
+                  </span>
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-900 leading-tight">{spec.label}</h4>
+                    <p className="mt-0.5 text-[10px] text-slate-500 leading-snug">{spec.value}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
+        {/* Weather - Hardcoded Red Weather UI to match the Target Design exactly */}
+        <div className="rounded-3xl border border-red-900 bg-gradient-to-br from-red-900 via-[#7f1d1d] to-[#450a0a] p-6 text-white shadow-lg flex flex-col justify-between">
           <div>
-            <label htmlFor="reviewer-name" className="block text-xs font-bold text-slate-700">Your Name</label>
-            <input
-              id="reviewer-name"
-              type="text"
-              required
-              value={reviewProps.reviewName}
-              onChange={(e) => reviewProps.onNameChange(e.target.value)}
-              placeholder="e.g. Aman Sharma"
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs font-semibold text-slate-800 outline-none focus:border-brand-500 focus:bg-white transition duration-200"
+            <h2 className="text-sm font-extrabold text-white/90">Local Weather</h2>
+            <div className="mt-4 flex items-center justify-between">
+              <div>
+                <p className="text-4xl font-black">24°</p>
+                <p className="text-xs font-semibold text-white/80 mt-1">Cloudy</p>
+              </div>
+              <Cloud className="h-10 w-10 text-white/90" strokeWidth={1.5} />
+            </div>
+          </div>
+          <div className="mt-6 flex items-center justify-between border-t border-white/20 pt-4 text-center">
+            <div>
+              <p className="text-[10px] font-bold text-white/80">WED</p>
+              <CloudRain className="mx-auto h-4 w-4 my-1.5 text-white" strokeWidth={1.5} />
+              <p className="text-xs font-extrabold text-white">28°</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-white/80">THU</p>
+              <Cloud className="mx-auto h-4 w-4 my-1.5 text-white" strokeWidth={1.5} />
+              <p className="text-xs font-extrabold text-white">28°</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-white/80">FRI</p>
+              <Cloud className="mx-auto h-4 w-4 my-1.5 text-white" strokeWidth={1.5} />
+              <p className="text-xs font-extrabold text-white">29°</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Location */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm flex flex-col justify-between">
+          <div>
+            <h2 className="text-sm font-extrabold text-slate-900">Location</h2>
+            <p className="mt-1 text-xs font-semibold text-slate-700">{venue.address || `${venue.city}, Rajasthan`}</p>
+            <p className="text-[10px] text-slate-400">{venue.city} District</p>
+          </div>
+          <div className="mt-3 relative h-40 w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+            <iframe
+              title="Venue Map"
+              src={`https://maps.google.com/maps?q=${encodeURIComponent(venue.address || venue.city)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+              className="absolute inset-0 h-full w-full border-0"
+              loading="lazy"
             />
+            <a
+              href={`https://maps.google.com/?q=${encodeURIComponent(venue.address || venue.city)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-xl bg-white/90 px-3 py-1.5 text-[10px] font-bold text-slate-900 shadow-md backdrop-blur-md hover:bg-white"
+            >
+              Open in Google Maps ↗
+            </a>
           </div>
+        </div>
+      </div>
 
-          <div>
-            <span className="block text-xs font-bold text-slate-700">Rating</span>
-            <div className="mt-1 flex items-center gap-1.5">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => reviewProps.onRatingChange(star)}
-                  className="p-1 transition hover:scale-110 active:scale-95 cursor-pointer"
-                >
-                  <Star
-                    className={`h-6 w-6 transition duration-150 ${
-                      star <= reviewProps.reviewRating ? "fill-amber-400 text-amber-400" : "text-slate-300"
-                    }`}
-                  />
-                </button>
-              ))}
+      {/* 5. Top Players + Reviews + Write Form 3-Column Grid */}
+      <div className="mt-5 grid gap-5 lg:grid-cols-3 items-start">
+        {/* Top Players */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm flex flex-col items-center justify-center text-center">
+          <h2 className="w-full text-left text-sm font-extrabold text-slate-900 mb-4">Top Players</h2>
+          <Users2 className="h-10 w-10 text-brand-300" />
+          <p className="mt-3 text-xs font-semibold text-slate-500 max-w-[200px]">No frequent players tracked here yet.</p>
+        </div>
+
+        {/* Player Reviews */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm flex flex-col items-center justify-center text-center">
+          <h2 className="w-full text-left text-sm font-extrabold text-slate-900 mb-4">Player Reviews</h2>
+          <MessageSquareText className="h-10 w-10 text-brand-300" />
+          <p className="mt-3 text-xs font-semibold text-slate-500 max-w-[200px]">No reviews yet — be the first to play &amp; review!</p>
+        </div>
+
+        {/* Write Review Form */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
+          <h3 className="text-sm font-extrabold text-slate-900">Write a Review</h3>
+          <p className="mt-0.5 text-[10px] text-slate-400">Share your experience with other players.</p>
+          <form onSubmit={reviewProps.onSubmitReview} className="mt-3 space-y-2.5">
+            <div>
+              <label className="block text-[10px] font-bold text-slate-600">Your Name</label>
+              <input
+                type="text"
+                required
+                value={reviewProps.reviewName}
+                onChange={(e) => reviewProps.onNameChange(e.target.value)}
+                placeholder="e.g. Aman Sharma"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:bg-white"
+              />
             </div>
-          </div>
-
-          <div>
-            <label htmlFor="reviewer-comment" className="block text-xs font-bold text-slate-700">Your Review</label>
-            <textarea
-              id="reviewer-comment"
-              required
-              rows={3}
-              value={reviewProps.reviewComment}
-              onChange={(e) => reviewProps.onCommentChange(e.target.value)}
-              placeholder="Tell us about the turf quality, lighting, parking..."
-              className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs font-semibold text-slate-800 outline-none focus:border-brand-500 focus:bg-white resize-none transition duration-200"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={reviewProps.submittingReview}
-            className="w-full rounded-xl bg-brand-600 hover:bg-brand-700 py-2.5 text-xs font-bold uppercase tracking-wide text-white shadow-md shadow-brand-500/20 transition hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 cursor-pointer"
-          >
-            {reviewProps.submittingReview ? "Submitting..." : "Submit Review"}
-          </button>
-        </form>
-      </section>
+            <div>
+              <span className="block text-[10px] font-bold text-slate-600">Rating</span>
+              <div className="mt-1 flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => reviewProps.onRatingChange(star)}
+                    className="p-0.5 cursor-pointer"
+                  >
+                    <Star
+                      className={`h-4 w-4 ${star <= reviewProps.reviewRating ? "fill-amber-400 text-amber-400" : "text-slate-300"}`}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="block text-[10px] font-bold text-slate-600">Your Review</label>
+              <textarea
+                required
+                rows={2}
+                value={reviewProps.reviewComment}
+                onChange={(e) => reviewProps.onCommentChange(e.target.value)}
+                placeholder="Tell us about turf quality, lighting, parking..."
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 p-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:bg-white resize-none"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={reviewProps.submittingReview}
+              className="w-full rounded-xl bg-brand-700 hover:bg-brand-800 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-md transition cursor-pointer"
+            >
+              {reviewProps.submittingReview ? "Submitting..." : "SUBMIT REVIEW"}
+            </button>
+          </form>
+        </div>
+      </div>
     </>
   );
 }

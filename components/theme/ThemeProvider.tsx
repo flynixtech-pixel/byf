@@ -61,7 +61,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
-    if (theme === CUSTOM_THEME_ID && customColors) {
+    if (customColors) {
       applyCustomColors(customColors);
     } else {
       clearCustomColors();

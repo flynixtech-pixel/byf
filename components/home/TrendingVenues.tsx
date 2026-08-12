@@ -19,7 +19,7 @@ function VenueCard({
   onBook: () => void;
 }) {
   return (
-    <div className="group flex w-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
+    <div className="group flex w-full flex-col overflow-hidden rounded-[1.25rem] border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
       <div
         role="button"
         tabIndex={0}
@@ -30,57 +30,56 @@ function VenueCard({
             onView();
           }
         }}
-        className="relative aspect-[4/3] w-full cursor-pointer overflow-hidden bg-slate-100 text-left"
+        className="relative aspect-[16/9] w-full cursor-pointer overflow-hidden bg-slate-100 text-left"
       >
-        {/* next/image (was a CSS background-image): optimised + lazy-loaded, and a 4:3
-            box keeps the photo in a natural shape instead of a cropped letterbox strip. */}
         {venue.image ? (
           <Image
             src={venue.image}
             alt={venue.name}
             fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 320px"
-            className="object-cover transition duration-300 group-hover:scale-105"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 250px"
+            className="object-cover transition duration-500 group-hover:scale-110"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-slate-100">
-            <Building2 className="h-8 w-8 text-slate-300" />
+          <div className="flex h-full w-full items-center justify-center bg-slate-50">
+            <Building2 className="h-6 w-6 text-slate-300" />
           </div>
         )}
-        {/* Keeps the overlaid pills readable on bright photos. */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/15" />
-        <div className="absolute left-3 top-3">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/10 to-transparent" />
+        
+        <div className="absolute left-2.5 top-2.5">
           <StarRating rating={venue.rating} />
         </div>
+        
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             onToggleFavorite();
           }}
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow"
+          className="absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/95 shadow-sm transition hover:scale-110"
           aria-label="Toggle favorite"
         >
-          <Heart className={`h-4 w-4 ${isFavorite ? "fill-accent-500 text-accent-500" : "text-slate-400"}`} />
+          <Heart className={`h-3.5 w-3.5 ${isFavorite ? "fill-red-500 text-red-500" : "text-slate-400"}`} />
         </button>
-        {/* inset-x-3 (not just left-3) bounds the row, so a multi-sport venue listing
-            seven categories truncates to one line instead of stacking over the photo. */}
-        <div className="absolute left-3 bottom-3">
+        
+        <div className="absolute left-2.5 bottom-2.5 scale-90 origin-bottom-left">
           <StatusPill status={venue.status} />
         </div>
       </div>
-      <div className="flex flex-1 flex-col gap-1 p-4">
-        <h3 className="font-bold text-slate-900">{venue.name}</h3>
-        <p className="flex items-center gap-1 text-xs text-slate-500">
-          <MapPin className="h-3.5 w-3.5" aria-hidden /> {venue.area}
+      
+      <div className="flex flex-1 flex-col gap-0.5 p-3 sm:p-3.5">
+        <h3 className="truncate text-sm font-bold text-slate-900" title={venue.name}>{venue.name}</h3>
+        <p className="flex items-center gap-1 text-[11px] text-slate-500">
+          <MapPin className="h-3 w-3" aria-hidden /> <span className="truncate">{venue.area}</span>
         </p>
-        <div className="mt-3 flex items-center justify-between">
+        <div className="mt-2.5 flex items-center justify-between">
           <p className="text-sm font-bold text-slate-900">
             ₹{venue.pricePerHour}
-            <span className="font-normal text-slate-400"> /hour</span>
+            <span className="font-normal text-slate-400 text-[10px]"> /hr</span>
           </p>
-          <PrimaryButton onClick={onBook} className="!px-4 !py-2 text-xs">
-            Book Now
+          <PrimaryButton onClick={onBook} className="!px-3 !py-1.5 text-[11px] font-bold shadow-sm">
+            Book
           </PrimaryButton>
         </div>
       </div>
@@ -106,7 +105,7 @@ export function TrendingVenues({
   if (venues.length === 0) return null;
 
   return (
-    <section id="venues" className="mx-auto mt-16 max-w-7xl px-4 sm:px-6">
+    <section id="venues" className="mx-auto mt-12 max-w-7xl px-4 sm:px-6 lg:px-8">
       <SectionHeading
         eyebrow="Booked the most this week"
         title="Trending Venues"
@@ -115,9 +114,8 @@ export function TrendingVenues({
         actionLabel="View All Venues"
         onAction={onViewAll}
       />
-      {/* Was grid-cols-2 at every width, which stretched each card to ~630px on desktop. */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
-        {venues.slice(0, 4).map((v) => (
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+        {venues.slice(0, 5).map((v) => (
           <VenueCard
             key={v.id}
             venue={v}
@@ -131,7 +129,7 @@ export function TrendingVenues({
       <button
         type="button"
         onClick={onViewAll}
-        className="mt-4 w-full rounded-2xl border border-slate-200 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-brand-300 hover:text-brand-600"
+        className="mt-6 w-full rounded-[1rem] border border-slate-200 py-2.5 text-[13px] font-bold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 sm:hidden"
       >
         View More Venues
       </button>

@@ -15,14 +15,12 @@ import {
 } from "lucide-react";
 import { type Venue, listingToVenue } from "@/lib/venues";
 import { browseVenues } from "@/lib/api/venues";
+import { SiteHeader } from "../site-header";
 import { Hero } from "./Hero";
-import { QuickActionsSection } from "./QuickActionsSection";
 import { FoodAndBeverages } from "./FoodAndBeverages";
-import { FindYourGames } from "./FindYourGames";
 import { TopPlayersRanking } from "./TopPlayersRanking";
+import { TrendingVenues } from "./TrendingVenues";
 import { HowItWorks } from "./HowItWorks";
-import { AdBanner } from "./AdBanner";
-import { LastMinuteDealsSection } from "./LastMinuteDealsSection";
 import { CommunityMatches } from "./CommunityMatches";
 import { EventsAndOffers } from "./EventsAndOffers";
 import { WhyBookYourVibe } from "./WhyBookYourVibe";
@@ -36,22 +34,9 @@ import { MobileHome } from "./mobile/MobileHome";
 import { useVenueFilters } from "./useVenueFilters";
 import { useCustomerAuth } from "@/components/providers/CustomerAuthProvider";
 import { OnboardingFlow } from "./OnboardingFlow";
+import { SPORTS_CATALOG } from "./data";
 
-const SPORTS = [
-  { name: "Box Cricket", icon: Gamepad2, tone: "from-fuchsia-500 to-violet-600", category: "cricket" },
-  { name: "Football", icon: Volleyball, tone: "from-blue-500 to-cyan-500", category: "football" },
-  { name: "Badminton", icon: Table2, tone: "from-violet-500 to-indigo-600", category: "badminton" },
-  { name: "Pickleball", icon: Table2, tone: "from-pink-500 to-rose-500", category: "pickleball" },
-  { name: "Cricket", icon: Disc2, tone: "from-rose-500 to-orange-500", category: "cricket" },
-  { name: "Tennis", icon: Table2, tone: "from-fuchsia-500 to-pink-500", category: "tennis" },
-  { name: "Table Tennis", icon: Table2, tone: "from-indigo-500 to-violet-500", category: "table-tennis" },
-];
 
-const DEFAULT_TRENDING = [
-  { name: "Arena 21", area: "Udaipole", sport: "Box Cricket", price: "₹1,200", accent: "from-fuchsia-500 to-violet-600", slug: "arena-21" },
-  { name: "Pulse Court", area: "Fatehpura", sport: "Badminton", price: "₹780", accent: "from-blue-500 to-cyan-500", slug: "pulse-court" },
-  { name: "Neon Club", area: "Hiran Magri", sport: "Tennis", price: "₹950", accent: "from-rose-500 to-orange-500", slug: "neon-club" },
-];
 
 // Only rendered once the player opens the challenge sheet, and pulls in
 // jsPDF/html-to-image — code-split out of the initial home page bundle.
@@ -177,6 +162,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#f3f4fb] font-sans text-slate-950">
       {showOnboarding && <OnboardingFlow onComplete={handleOnboardingComplete} />}
       
+      <SiteHeader />
       <Hero
         searchValue={search}
         onSearchChange={setSearch}
@@ -191,34 +177,40 @@ export default function HomePage() {
         )}
 
         {/* Find A Venue - Sports Section */}
-        <section className="-mt-6 px-4 pb-8 sm:-mt-10 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-7xl rounded-[1.5rem] border border-white/70 bg-white/80 p-3.5 shadow-[0_24px_70px_-24px_rgba(15,23,42,0.2)] backdrop-blur-xl sm:rounded-[2rem] sm:p-6">
-            <div className="flex items-center gap-2.5 sm:gap-3">
-              <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-500 text-white shadow-md shadow-fuchsia-500/25 sm:h-11 sm:w-11 sm:rounded-2xl">
-                <MapPin className="h-4.5 w-4.5 sm:h-5 sm:w-5" />
+        <section className="-mt-6 px-4 pb-8 sm:-mt-8 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl rounded-[1.25rem] border border-white/60 bg-white/70 p-4 shadow-xl shadow-slate-200/40 backdrop-blur-xl sm:rounded-[2rem] sm:p-5">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-slate-900 text-white shadow-md sm:h-12 sm:w-12 sm:rounded-2xl">
+                <MapPin className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
               <div>
-                <h2 className="text-lg font-black tracking-[-0.03em] text-slate-950 sm:text-2xl">Find A Venue</h2>
-                <p className="text-xs text-slate-600 sm:text-sm">Discover top venues for every game and vibe.</p>
+                <h2 className="text-lg font-bold tracking-tight text-slate-900 sm:text-2xl">Find A Venue</h2>
+                <p className="text-[11px] font-medium text-slate-500 sm:text-sm">Discover top venues for every game and vibe.</p>
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-4 gap-1.5 sm:mt-6 sm:gap-4 md:grid-cols-4 xl:grid-cols-7">
-              {SPORTS.map((sport) => {
-                const Icon = sport.icon;
+            <div className="mt-5 grid grid-cols-4 gap-3 sm:mt-6 sm:gap-5 md:grid-cols-4 xl:grid-cols-7">
+              {SPORTS_CATALOG.map((s, index) => {
+                // Map the ID to a category for the venues page
+                const category = s.id === "box-cricket" || s.id === "cricket-nets" ? "cricket" : s.id;
+                
                 return (
                   <Link
-                    key={sport.name}
-                    href={`/venues?category=${sport.category}`}
-                    className="group flex flex-col items-center text-center min-w-0 w-full overflow-hidden px-0.5"
+                    key={s.id}
+                    href={`/venues?category=${category}`}
+                    className="group flex flex-col items-center justify-start text-center min-w-0 w-full"
                   >
-                    <div
-                      className={`grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br ${sport.tone} text-white shadow-md transition group-hover:scale-105 sm:h-20 sm:w-20`}
-                    >
-                      <Icon className="h-5 w-5 sm:h-9 sm:w-9" />
+                    <div className="relative flex h-14 w-14 items-center justify-center rounded-[1rem] bg-white border border-slate-100 shadow-[0_2px_10px_rgba(15,23,42,0.04)] transition-all duration-300 group-hover:-translate-y-1 group-hover:border-slate-200 group-hover:shadow-[0_8px_20px_rgba(15,23,42,0.08)] sm:h-20 sm:w-20 sm:rounded-[1.25rem]">
+                      <div className={`absolute inset-0 rounded-[inherit] opacity-20 bg-gradient-to-br ${s.bubble}`} />
+                      <img
+                        src={s.image}
+                        alt={s.alt}
+                        loading={index === 0 ? "eager" : "lazy"}
+                        className="relative z-10 h-7 w-7 object-contain transition-transform duration-300 group-hover:scale-110 sm:h-10 sm:w-10"
+                      />
                     </div>
-                    <span className="mt-1.5 text-[10px] font-bold leading-tight text-slate-800 sm:mt-2.5 sm:text-xs sm:font-semibold text-center line-clamp-2 max-w-full break-words">
-                      {sport.name}
+                    <span className="mt-2 text-[10px] font-semibold text-slate-600 transition-colors group-hover:text-slate-950 sm:mt-3 sm:text-xs text-center line-clamp-1 w-full px-1">
+                      {s.label}
                     </span>
                   </Link>
                 );
@@ -227,98 +219,20 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Quick Actions Shortcuts */}
-        <QuickActionsSection
-          onQuickAction={handleQuickAction}
-          onViewAllQuickActions={() => router.push("/games")}
+        <TrendingVenues
+          venues={venues}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+          onViewVenue={openVenue}
+          onBookVenue={openVenue}
+          onViewAll={() => router.push("/venues")}
         />
 
-        {/* Trending Venues Section */}
-        <section className="px-4 pb-16 pt-6 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-rose-500 shadow-sm">
-                  <span className="text-lg">🔥</span> HOT RIGHT NOW
-                </span>
-                <h2 className="mt-4 text-4xl font-black tracking-[-0.04em] text-[#3b1720] sm:text-5xl">
-                  Trending <span className="text-[#d61f45]">Venues</span>
-                </h2>
-                <div className="mt-3 h-1 w-20 rounded-full bg-gradient-to-r from-[#ff5f7d] to-[#d61f45]" />
-              </div>
+        <TopPlayersRanking />
 
-              <p className="max-w-md text-base leading-7 text-slate-600">
-                Popular spots loved by players like you. Book fast before slots fill up.
-              </p>
-
-              <Link href="/venues" className="inline-flex items-center gap-2 text-lg font-semibold text-slate-900">
-                View All <span className="text-[#d61f45]">Venues</span>
-                <ArrowRight className="h-5 w-5 text-[#d61f45]" />
-              </Link>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-3">
-              {(venues.length > 0 ? venues.slice(0, 3) : DEFAULT_TRENDING).map((venue, idx) => {
-                const isReal = "id" in venue;
-                const name = isReal ? (venue as Venue).name : venue.name;
-                const area = isReal ? (venue as Venue).area : (venue as any).area;
-                const sport = isReal ? (venue as Venue).sport : (venue as any).sport;
-                const price = isReal ? `₹${(venue as Venue).pricePerHour}` : (venue as any).price;
-                const accent =
-                  idx === 0
-                    ? "from-fuchsia-500 to-violet-600"
-                    : idx === 1
-                    ? "from-blue-500 to-cyan-500"
-                    : "from-rose-500 to-orange-500";
-                const targetUrl = isReal ? `/venues/${(venue as Venue).slug || (venue as Venue).id}` : "/venues";
-
-                return (
-                  <article
-                    key={name}
-                    className="overflow-hidden rounded-[1.75rem] border border-white bg-white shadow-[0_18px_50px_-24px_rgba(15,23,42,0.25)] transition hover:-translate-y-1 hover:shadow-xl"
-                  >
-                    <div className={`h-44 bg-gradient-to-br ${accent} p-5 text-white`}>
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/80">{sport}</p>
-                          <h3 className="mt-2 text-2xl font-black">{name}</h3>
-                        </div>
-                        <div className="rounded-full border border-white/20 bg-white/10 p-2">
-                          <Sparkles className="h-4 w-4" />
-                        </div>
-                      </div>
-                      <div className="mt-10 flex items-center gap-2 text-sm text-white/90">
-                        <MapPin className="h-4 w-4" />
-                        {area}
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between p-5">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Starting from</p>
-                        <p className="mt-1 text-2xl font-black text-slate-950">
-                          {price}
-                          <span className="text-sm font-medium text-slate-500"> / hour</span>
-                        </p>
-                      </div>
-                      <Link
-                        href={targetUrl}
-                        className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-                      >
-                        Book Now
-                        <ArrowRight className="h-4 w-4" />
-                      </Link>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        <AdBanner />
-        <LastMinuteDealsSection />
-
-        <FindYourGames onSelectSport={() => router.push("/venues")} />
+        <EventsAndOffers
+          onViewAllEvents={() => router.push("/tournaments")}
+        />
 
         <CommunityMatches
           onJoin={() => showToast("Joining Badminton Doubles match…")}
@@ -327,12 +241,6 @@ export default function HomePage() {
           onViewAll={() => router.push("/community")}
           onLaunchChallenge={() => setChallengeOpen(true)}
         />
-
-        <EventsAndOffers
-          onViewAllEvents={() => router.push("/tournaments")}
-        />
-
-        <TopPlayersRanking />
 
         <FoodAndBeverages />
 

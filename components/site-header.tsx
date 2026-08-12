@@ -54,15 +54,15 @@ export function SiteHeader() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-slate-100 bg-white/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-6">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2 sm:gap-4 sm:px-6">
         <BrandLogo
           className="shrink-0"
-          logoBoxClassName="h-11 w-11 rounded-xl sm:h-12 sm:w-12"
-          imageClassName="p-1.5"
+          logoBoxClassName="h-9 w-9 sm:h-10 sm:w-10 rounded-xl"
+          imageClassName="p-1"
           priority
         />
 
-        <nav className="hidden flex-1 items-center justify-center gap-6 lg:flex">
+        <nav className="hidden flex-1 items-center justify-center gap-5 lg:flex">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -80,7 +80,7 @@ export function SiteHeader() {
           <CustomerNotificationBell />
           <Link
             href="/vendor/register"
-            className="hidden rounded-full border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-semibold text-brand-700 transition hover:border-brand-300 hover:bg-brand-100 lg:inline-flex"
+            className="hidden rounded-full bg-brand-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-brand-700 lg:inline-flex shadow-sm"
           >
             List Your Games
           </Link>
@@ -88,14 +88,14 @@ export function SiteHeader() {
             href="/admin/login"
             aria-label="Admin Panel"
             title="Admin Panel"
-            className="hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition hover:border-brand-300 hover:text-brand-600 lg:flex"
+            className="hidden h-8 w-8 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition hover:border-brand-300 hover:text-brand-600 lg:flex"
           >
-            <ShieldCheck size={18} />
+            <ShieldCheck size={16} />
           </Link>
 
           {status === "loading" ? (
             <div className="flex items-center gap-2">
-              <div className="h-9 w-9 sm:h-10 sm:w-10 animate-pulse rounded-full bg-slate-200" />
+              <div className="h-8 w-8 animate-pulse rounded-full bg-slate-200" />
             </div>
           ) : status === "authenticated" ? (
             <div className="flex items-center gap-2">
@@ -103,7 +103,7 @@ export function SiteHeader() {
                 href="/profile"
                 aria-label="My Profile"
                 title="My Profile"
-                className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center overflow-hidden rounded-full bg-brand-100 text-sm font-bold text-brand-700 transition hover:bg-brand-200 border border-brand-200 shadow-2xs"
+                className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-brand-100 text-xs font-bold text-brand-700 transition hover:bg-brand-200 border border-brand-200 shadow-sm"
               >
                 {customer?.avatarUrl && !imgError ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -125,7 +125,7 @@ export function SiteHeader() {
               <button
                 type="button"
                 onClick={() => setAuthView("login")}
-                className="hidden rounded-full bg-gradient-to-r from-brand-500 to-accent-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand-500/30 transition hover:scale-[1.03] sm:inline-flex"
+                className="hidden rounded-full bg-brand-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-brand-700 sm:inline-flex"
               >
                 Login / Sign Up
               </button>
@@ -134,7 +134,7 @@ export function SiteHeader() {
                 onClick={() => setAuthView("login")}
                 aria-label="Profile / Login"
                 title="Profile / Login"
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-2xs transition active:scale-95 sm:hidden"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition active:scale-95 sm:hidden"
               >
                 <User className="h-4 w-4 text-slate-700" />
               </button>

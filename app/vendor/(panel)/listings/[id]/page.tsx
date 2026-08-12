@@ -383,7 +383,7 @@ function MediaTab({
   }
 
   const hasUploadedVideo = videoUrl.match(/\.(mp4|mov|webm)/i) || videoUrl.includes("cloudinary");
-  const allImages = [listing.posterImage, listing.bannerImage, listing.universalImage, ...listing.images].filter(Boolean) as ListingImage[];
+  const allImages = [listing.posterImage, listing.bannerImage, ...(listing.universalImages ?? []), ...listing.images].filter(Boolean) as ListingImage[];
 
   return (
     <div className="space-y-5">

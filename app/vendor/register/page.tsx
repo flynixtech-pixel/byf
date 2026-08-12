@@ -95,51 +95,51 @@ export default function VendorRegisterPage() {
 
   return (
     <main className="min-h-screen bg-[#f6f3ea] text-[#10241a]">
-      <header className="flex items-center justify-between px-6 py-4 sm:px-12">
+      <header className="sticky top-0 z-50 flex items-center justify-between bg-[#f6f3ea]/90 px-6 py-3 backdrop-blur-md sm:px-8">
         <div className="flex items-center gap-2 font-[600] text-lg" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo.jpg"
             alt="Book Your Vibes Logo"
-            className="h-9 w-9 rounded-lg border border-[#e4ded0] object-contain p-0.5 bg-white shrink-0"
+            className="h-8 w-8 rounded-lg border border-[#e4ded0] object-contain p-0.5 bg-white shrink-0"
             loading="lazy"
             decoding="async"
           />
           Book Your Vibes
         </div>
-        <nav className="hidden items-center gap-8 text-sm font-semibold sm:flex">
-          <a href="#categories">Venues</a>
-          <a href="#how-it-works">How it Works</a>
-          <a href="#faq">FAQ</a>
+        <nav className="hidden items-center gap-8 text-sm font-medium sm:flex">
+          <a href="#categories" className="hover:text-[#3f7d3f] transition-colors">Venues</a>
+          <a href="#how-it-works" className="hover:text-[#3f7d3f] transition-colors">How it Works</a>
+          <a href="#faq" className="hover:text-[#3f7d3f] transition-colors">FAQ</a>
         </nav>
         <Link
           href="/vendor/login"
-          className="rounded-full border border-[#0c1912] px-5 py-2 text-sm font-bold hover:bg-[#0c1912] hover:text-[#a6ff3c]"
+          className="rounded-full border border-[#0c1912] px-4 py-1.5 text-sm font-bold transition hover:bg-[#0c1912] hover:text-[#a6ff3c]"
         >
           Login Account
         </Link>
       </header>
 
-      <section className="mx-6 overflow-hidden rounded-3xl bg-[#0c1912] px-6 py-16 text-center text-[#f6f3ea] sm:mx-12 sm:px-12">
-        <span className="inline-block rounded-full bg-white/10 px-4 py-1 text-xs font-bold uppercase tracking-widest text-[#a6ff3c]">
+      <section className="mx-4 mt-2 overflow-hidden rounded-[2rem] bg-[#0c1912] px-4 py-10 text-center text-[#f6f3ea] sm:mx-8 sm:px-8 shadow-xl">
+        <span className="inline-block rounded-full bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#a6ff3c]">
           Trusted by venue owners across India
         </span>
-        <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-[600] leading-tight sm:text-5xl" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
+        <h1 className="mx-auto mt-4 max-w-2xl text-3xl font-[600] leading-tight sm:text-4xl" style={{ fontFamily: "var(--font-space-grotesk), sans-serif" }}>
           Become a Game-Day Partner with <span className="text-[#a6ff3c]">Book Your Vibes</span>
         </h1>
-        <p className="mx-auto mt-4 max-w-xl text-[#c9d6cd]">
+        <p className="mx-auto mt-3 max-w-xl text-sm text-[#c9d6cd] sm:text-base">
           List your turf, court, or arena and reach players looking for their next game across India.
         </p>
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/vendor/login"
-            className="rounded-full border border-white/30 px-6 py-3 text-sm font-bold text-[#f6f3ea]"
+            className="rounded-full border border-white/30 px-5 py-2.5 text-sm font-bold text-[#f6f3ea] transition hover:bg-white/10"
           >
             Login Account
           </Link>
           <button
             onClick={() => setModalOpen(true)}
-            className="rounded-full bg-[#a6ff3c] px-6 py-3 text-sm font-bold text-[#0c1912] hover:opacity-90"
+            className="rounded-full bg-[#a6ff3c] px-5 py-2.5 text-sm font-bold text-[#0c1912] transition hover:scale-105"
           >
             Register as Partner
           </button>
@@ -147,19 +147,19 @@ export default function VendorRegisterPage() {
 
         <p className="mt-4 text-xs text-[#c9d6cd]">
           Already a partner?{" "}
-          <Link href="/vendor/login" className="font-bold text-[#a6ff3c] underline">
+          <Link href="/vendor/login" className="font-bold text-[#a6ff3c] hover:underline">
             Log in here
           </Link>
           .
         </p>
-        <div className="mx-auto mt-10 grid max-w-2xl grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="mx-auto mt-8 grid max-w-2xl grid-cols-2 gap-3 sm:grid-cols-4">
           {[
             { icon: Goal, label: "Turfs" },
             { icon: Gamepad2, label: "Gaming Zones" },
             { icon: Dumbbell, label: "Box Cricket" },
             { icon: Feather, label: "Court Sports" },
           ].map((t) => (
-            <div key={t.label} className="flex items-center justify-center gap-2 rounded-xl bg-white/5 py-4 text-sm font-semibold">
+            <div key={t.label} className="flex items-center justify-center gap-2 rounded-xl bg-white/5 py-3 text-xs font-semibold sm:text-sm">
               <t.icon className="h-4 w-4" /> {t.label}
             </div>
           ))}

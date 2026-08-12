@@ -1768,41 +1768,7 @@ function ReviewStep(props: {
               </div>
             </div>
 
-            {listing.priceTiers.length > 0 && (
-              <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Packages</p>
-                    <p className="text-sm font-extrabold text-slate-900">Choose the booking format</p>
-                  </div>
-                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                    Owner-defined
-                  </span>
-                </div>
-                <div className="mt-3 grid gap-2">
-                  {listing.priceTiers.map((tier) => {
-                    const active = selectedPriceTierId === tier.id;
-                    return (
-                      <button
-                        key={tier.id}
-                        type="button"
-                        onClick={() => setSelectedPriceTierId(tier.id)}
-                        className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-left transition ${active ? "border-brand-500 bg-brand-50 shadow-sm" : "border-slate-100 bg-slate-50/60 hover:border-slate-200"
-                          }`}
-                      >
-                        <div>
-                          <p className="text-sm font-bold text-slate-900">{tier.label}</p>
-                          <p className="text-[11px] font-medium text-slate-500">
-                            Book in the same owner-configured format
-                          </p>
-                        </div>
-                        <p className="text-sm font-black text-slate-900">₹{tier.amount.toLocaleString("en-IN")}</p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+
 
             {/* Date & Time section */}
             <div className="rounded-2xl border border-slate-100 bg-white p-4">
