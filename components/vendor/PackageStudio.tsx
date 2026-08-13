@@ -25,6 +25,11 @@ import {
   Court,
 } from "@/lib/types";
 import { ClockSlotsWidget } from "./ClockSlotsWidget";
+import { AiNameSuggestBot } from "./AiNameSuggestBot";
+import { AiAddOnSuggestBot } from "./AiAddOnSuggestBot";
+import { AiLaunchAutoFillCard } from "./AiLaunchAutoFillCard";
+import { AiPackageAutoFillCard } from "./AiPackageAutoFillCard";
+import { GeneratedLaunchDetails, VendorPackageAiResponse } from "@/lib/api/vendor";
 import { SPORT_CATEGORIES, SportCategory, venueOptionsFor, VenueSetting } from "@/lib/taxonomy";
 import { usePexelsImage } from "@/lib/pexels";
 import { trackEvent, trackPriceChange } from "@/lib/analytics";
@@ -170,6 +175,7 @@ function emptyListing(type: ListingType): Listing {
 type StepProps = {
   draft: Listing;
   update: <K extends keyof Listing>(key: K, value: Listing[K]) => void;
+  updateMany?: (patch: Partial<Listing>) => void;
 };
 
 function uploadImage(audience: Audience, file: File) {
@@ -1473,8 +1479,30 @@ function CustomSportModal({
   );
 }
 
-function DetailsStep({ draft, update, audience }: StepProps & { audience: Audience }) {
+function DetailsStep({ draft, update, updateMany, audience }: StepProps & { audience: Audience }) {
   const gameVenue: VenueSetting = draft.gameVenue ?? "both";
+
+  function handleApplyPackage(data: VendorPackageAiResponse) {
+    if (updateMany) {
+      updateMany({
+        title: data.packageName || draft.title,
+        description: data.description || draft.description,
+        price: data.price > 0 ? data.price : draft.price,
+        inclusions: data.inclusions.length > 0 ? data.inclusions : draft.inclusions,
+        exclusions: data.exclusions.length > 0 ? data.exclusions : draft.exclusions,
+        highlights: data.highlights.length > 0 ? data.highlights : draft.highlights,
+        faqs: data.faqs.length > 0 ? data.faqs : draft.faqs,
+      });
+    } else {
+      if (data.packageName) update("title", data.packageName);
+      if (data.description) update("description", data.description);
+      if (data.price > 0) update("price", data.price);
+      if (data.inclusions.length > 0) update("inclusions", data.inclusions);
+      if (data.exclusions.length > 0) update("exclusions", data.exclusions);
+      if (data.highlights.length > 0) update("highlights", data.highlights);
+      if (data.faqs.length > 0) update("faqs", data.faqs);
+    }
+  }
   const categoryOptions = draft.type === "Game" ? venueOptionsFor(gameVenue) : SPORT_CATEGORIES;
 
   const [customSports, setCustomSports] = useState<VendorCustomSport[]>([]);
@@ -1543,6 +1571,13 @@ function DetailsStep({ draft, update, audience }: StepProps & { audience: Audien
         </div>
       )}
 
+      <AiPackageAutoFillCard
+        packageName={draft.title}
+        category={draft.categories[0]}
+        type={draft.type}
+        onApplyPackage={handleApplyPackage}
+      />
+
       <div>
         <div className="flex items-center gap-1.5">
           <p className="text-[11px] font-semibold tracking-wider text-ink-faint uppercase leading-none">Basic info</p>
@@ -1564,19 +1599,27 @@ function DetailsStep({ draft, update, audience }: StepProps & { audience: Audien
       </div>
 
       <div>
-        <div className="flex items-center gap-1.5 mb-1.5">
-          <label className="block text-[11px] font-semibold tracking-wider text-ink-faint uppercase leading-none">
-            Listing name *
-          </label>
-          <button
-            type="button"
-            onClick={() => toggleInfo("title")}
-            className={`rounded-full p-0.5 transition cursor-pointer ${openInfos["title"] ? "bg-vibe-violet/20 text-vibe-violet" : "text-ink-faint hover:bg-cream-200 hover:text-ink"
-              }`}
-            title="Show info"
-          >
-            <Info size={11} />
-          </button>
+        <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-center gap-1.5">
+            <label className="block text-[11px] font-semibold tracking-wider text-ink-faint uppercase leading-none">
+              {draft.type === "Event" ? "Event name *" : "Listing name *"}
+            </label>
+            <button
+              type="button"
+              onClick={() => toggleInfo("title")}
+              className={`rounded-full p-0.5 transition cursor-pointer ${openInfos["title"] ? "bg-vibe-violet/20 text-vibe-violet" : "text-ink-faint hover:bg-cream-200 hover:text-ink"
+                }`}
+              title="Show info"
+            >
+              <Info size={11} />
+            </button>
+          </div>
+          <AiNameSuggestBot
+            type={draft.type}
+            category={draft.categories[0]}
+            venue={draft.address}
+            onSelectName={(name) => update("title", name)}
+          />
         </div>
         {openInfos["title"] && (
           <p className="mb-2 text-xs text-ink-faint bg-cream-200/40 p-2 rounded-lg leading-relaxed animate-in slide-in-from-top-1 duration-150">
@@ -1586,7 +1629,7 @@ function DetailsStep({ draft, update, audience }: StepProps & { audience: Audien
         <input
           value={draft.title}
           onChange={(e) => update("title", e.target.value)}
-          placeholder="e.g. BABA Turf & Sports Arena"
+          placeholder={draft.type === "Event" ? "e.g. Sunday Trek Meetup" : "e.g. BABA Turf & Sports Arena"}
           className={inputClass}
         />
       </div>
@@ -4069,6 +4112,16 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
                 <Info size={11} />
               </button>
             </div>
+            <AiAddOnSuggestBot
+              type={draft.type}
+              category={draft.categories[0]}
+              eventTitle={draft.title}
+              venue={draft.address}
+              onAddAddOn={(item) => {
+                const next = [...addOns, { id: `ao-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`, label: item.label, price: item.price }];
+                update("addOns", next);
+              }}
+            />
           </div>
           {showAddOnsInfo && (
             <p className="text-xs text-ink-faint mb-3 bg-cream-200/40 p-2.5 rounded-lg leading-relaxed animate-in slide-in-from-top-1 duration-150">
@@ -4340,8 +4393,21 @@ function AcademyStep({
 /*  STEP 6 — LAUNCH                                                    */
 /* ------------------------------------------------------------------ */
 
-function LaunchStep({ draft, update }: StepProps) {
+function LaunchStep({ draft, update, updateMany }: StepProps) {
   const specs = draft.technicalSpecs ?? [];
+
+  function handleApplyLaunchDetails(data: GeneratedLaunchDetails) {
+    if (updateMany) {
+      updateMany({
+        description: data.description || draft.description,
+        inclusions: data.inclusions.length > 0 ? data.inclusions : draft.inclusions,
+        exclusions: data.exclusions.length > 0 ? data.exclusions : draft.exclusions,
+        highlights: data.highlights.length > 0 ? data.highlights : draft.highlights,
+        tags: data.tags.length > 0 ? data.tags : draft.tags,
+        faqs: data.faqs.length > 0 ? data.faqs : draft.faqs,
+      });
+    }
+  }
 
   function addSpec() {
     update("technicalSpecs", [...specs, { label: "", value: "", icon: "crop", color: "purple" }]);
@@ -4378,6 +4444,14 @@ function LaunchStep({ draft, update }: StepProps) {
 
   return (
     <div className="space-y-6">
+      <AiLaunchAutoFillCard
+        type={draft.type}
+        eventTitle={draft.title}
+        category={draft.categories[0]}
+        venue={draft.address}
+        onApplyLaunchDetails={handleApplyLaunchDetails}
+      />
+
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="mb-1 text-[11px] font-semibold tracking-wider text-ink-faint uppercase">Visibility &amp; publishing</p>
@@ -4668,6 +4742,10 @@ export function PackageStudio({
     setDraft((d) => ({ ...d, [key]: value }));
   }
 
+  function updateMany(patch: Partial<Listing>) {
+    setDraft((d) => ({ ...d, ...patch }));
+  }
+
   function goTo(s: number) {
     setStep(s);
     setMaxStep((m) => Math.max(m, s));
@@ -4828,10 +4906,10 @@ export function PackageStudio({
             />
           )}
           {step === 2 && <BookingStep draft={draft} update={update} />}
-          {step === 3 && <DetailsStep draft={draft} update={update} audience={audience} />}
+          {step === 3 && <DetailsStep draft={draft} update={update} updateMany={updateMany} audience={audience} />}
           {step === 4 && <LocationStep draft={draft} update={update} />}
           {step === 5 && <PricingStep draft={draft} update={update} audience={audience} />}
-          {step === 6 && <LaunchStep draft={draft} update={update} />}
+          {step === 6 && <LaunchStep draft={draft} update={update} updateMany={updateMany} />}
           {step === ACADEMY_STEP.id && showAcademyStep && (
             <AcademyStep academy={academy} setAcademy={setAcademy} listingCategories={draft.categories} />
           )}

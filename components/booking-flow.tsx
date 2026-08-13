@@ -2765,14 +2765,14 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
   }
 
   const innerCard = (
-    <div className="w-full max-w-md mx-auto rounded-[2rem] bg-white p-4 sm:p-6 text-center shadow-2xl border border-slate-100/80 animate-in zoom-in-95 duration-200">
-      <div className="mx-auto flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-        <Check className="h-6 w-6 sm:h-7 sm:w-7" strokeWidth={3} />
+    <div className="w-full max-w-md mx-auto rounded-[1.75rem] sm:rounded-[2rem] bg-white p-3.5 sm:p-4 text-center shadow-2xl border border-slate-100/80 animate-in zoom-in-95 duration-200">
+      <div className="mx-auto flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+        <Check className="h-5 w-5 sm:h-5.5 sm:w-5.5" strokeWidth={3} />
       </div>
-      <h2 className="mt-2.5 sm:mt-3 text-lg sm:text-xl font-extrabold text-slate-900">Booking Confirmed!</h2>
-      <p className="mt-0.5 text-xs sm:text-sm text-slate-500">Your slot at {listing.title} is locked in.</p>
+      <h2 className="mt-1.5 sm:mt-2 text-base sm:text-lg font-extrabold text-slate-900">Booking Confirmed!</h2>
+      <p className="mt-0.5 text-[11px] sm:text-xs text-slate-500">Your slot at {listing.title} is locked in.</p>
 
-      <div className="mt-3.5 sm:mt-4 rounded-2xl border border-slate-100 bg-slate-50/80 p-3 sm:p-4 text-left text-xs sm:text-sm">
+      <div className="mt-2 sm:mt-2.5 rounded-xl border border-slate-100 bg-slate-50/80 p-2.5 sm:p-3 text-left text-xs sm:text-xs">
         <Row label="Order ID" value={<span className="font-mono font-bold break-all text-slate-900">{booking.orderId}</span>} />
         <Row label="Venue" value={`${listing.title} · ${listing.categories.map(categoryLabel).join(", ") || listing.type}`} />
         <Row label="Date & Time" value={new Date(booking.dateTime).toLocaleString("en-GB")} />
@@ -2783,17 +2783,17 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
           />
         )}
         {booking.lastMinuteBoost && (
-          <div className="mt-2 rounded-xl border border-orange-200 bg-orange-50/80 p-2.5">
+          <div className="mt-1.5 rounded-lg border border-orange-200 bg-orange-50/80 p-2">
             <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wide text-orange-600">
-              <Zap className="h-3.5 w-3.5 fill-orange-500 text-orange-500" /> Last Minute Deal
+              <Zap className="h-3 w-3 fill-orange-500 text-orange-500" /> Last Minute Deal
             </div>
-            <div className="mt-1 flex items-center justify-between text-[11px]">
+            <div className="mt-0.5 flex items-center justify-between text-[10px]">
               <span className="text-slate-500">Original Price</span>
               <span className="font-bold text-slate-400 line-through">
                 ₹{booking.lastMinuteBoost.originalAmount.toLocaleString("en-IN")}
               </span>
             </div>
-            <div className="mt-0.5 flex items-center justify-between text-[11px]">
+            <div className="mt-0.5 flex items-center justify-between text-[10px]">
               <span className="text-slate-500">You Saved</span>
               <span className="font-black text-emerald-600">
                 ₹{booking.lastMinuteBoost.discountAmount.toLocaleString("en-IN")} ({booking.lastMinuteBoost.discountPct}%)
@@ -2803,42 +2803,42 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
         )}
         {isGenuinePartial ? (
           <>
-            <div className="mt-2 flex items-center justify-between border-t border-slate-200 pt-2">
+            <div className="mt-1.5 flex items-center justify-between border-t border-slate-200 pt-1.5">
               <span className="font-bold text-slate-900">Total Price</span>
               <span className="font-extrabold text-slate-800">₹{booking.totalAmount.toLocaleString("en-IN")}</span>
             </div>
-            <div className="mt-1 flex items-center justify-between">
+            <div className="mt-0.5 flex items-center justify-between">
               <span className="font-bold text-slate-900">Paid Now</span>
               <span className="font-extrabold text-emerald-600">₹{paidAmount.toLocaleString("en-IN")}</span>
             </div>
-            <div className="mt-1 flex items-center justify-between">
+            <div className="mt-0.5 flex items-center justify-between">
               <span className="font-bold text-slate-900">Remaining (pay at venue)</span>
               <span className="font-black text-rose-600">₹{remaining.toLocaleString("en-IN")}</span>
             </div>
           </>
         ) : (
-          <div className="mt-2 flex items-center justify-between border-t border-slate-200 pt-2">
+          <div className="mt-1.5 flex items-center justify-between border-t border-slate-200 pt-1.5">
             <span className="font-bold text-slate-900">{booking.paymentStatus === "paid" ? "Paid" : "Payment"}</span>
             <span className="font-extrabold text-emerald-600">₹{booking.totalAmount.toLocaleString("en-IN")}</span>
           </div>
         )}
       </div>
       {isGenuinePartial ? (
-        <div className="mt-3 flex items-center gap-2 rounded-xl border-l-4 border-amber-400 bg-amber-50 px-3 py-2 text-left text-[11px] text-amber-800">
+        <div className="mt-2 sm:mt-2.5 flex items-center gap-2 rounded-xl border-l-4 border-amber-400 bg-amber-50 px-2.5 py-1.5 text-left text-[11px] text-amber-800">
           <span>
-            <span className="font-black">Partial Payment Confirmed</span> — <span className="font-black">₹{remaining.toLocaleString("en-IN")} balance</span> is payable at the venue upon check-in.
+            <span className="font-black">Partial Payment Confirmed</span> — <span className="font-black">₹{remaining.toLocaleString("en-IN")} balance</span> is payable at venue.
           </span>
         </div>
       ) : (
-        <div className="mt-3 flex items-center gap-2 rounded-xl border-l-4 border-emerald-400 bg-emerald-50 px-3 py-2 text-left text-[11px] text-emerald-800">
+        <div className="mt-2 sm:mt-2.5 flex items-center gap-2 rounded-xl border-l-4 border-emerald-400 bg-emerald-50 px-2.5 py-1.5 text-left text-[11px] text-emerald-800">
           <span>
             <span className="font-black">Fully Paid Online</span> — zero balance due at venue.
           </span>
         </div>
       )}
 
-      <div className="mt-3 flex items-center gap-2 rounded-xl border-l-4 border-brand-400 bg-brand-50 px-3 py-2 text-left text-[11px] text-slate-600">
-        <ShieldCheck className="h-4 w-4 shrink-0 text-brand-500" />
+      <div className="mt-2 sm:mt-2.5 flex items-center gap-2 rounded-xl border-l-4 border-brand-400 bg-brand-50 px-2.5 py-1.5 text-left text-[11px] text-slate-600">
+        <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-brand-500" />
         <span>
           Show Order ID at venue — owner scans it to check you in as <span className="font-bold">{booking.orderId}</span>.
         </span>
@@ -2846,11 +2846,11 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
 
       <BookingQrCode booking={booking} />
 
-      <div className="mt-4 grid grid-cols-2 gap-2">
+      <div className="mt-2.5 sm:mt-3 grid grid-cols-2 gap-2">
         <button
           type="button"
           onClick={shareNow}
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-2.5 text-xs font-bold text-slate-600 transition hover:border-brand-300 hover:text-brand-600 cursor-pointer"
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-2 text-xs font-bold text-slate-600 transition hover:border-brand-300 hover:text-brand-600 cursor-pointer"
         >
           <Share2 className="h-3.5 w-3.5" /> Share Now
         </button>
@@ -2858,7 +2858,7 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
           type="button"
           onClick={downloadTicket}
           disabled={downloading}
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-2.5 text-xs font-bold text-slate-600 transition hover:border-brand-300 hover:text-brand-600 disabled:opacity-60 cursor-pointer"
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 py-2 text-xs font-bold text-slate-600 transition hover:border-brand-300 hover:text-brand-600 disabled:opacity-60 cursor-pointer"
         >
           <Download className="h-3.5 w-3.5" /> {downloading ? "Saving..." : "Download"}
         </button>
@@ -2868,7 +2868,7 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
         <button
           type="button"
           onClick={onClose}
-          className="mt-3 w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-3.5 text-sm font-bold text-white shadow-md shadow-brand-500/30 transition hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+          className="mt-2.5 sm:mt-3 w-full rounded-xl bg-gradient-to-r from-brand-500 to-brand-600 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-brand-500/30 transition hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
         >
           Done
         </button>
@@ -2878,8 +2878,8 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
 
   if (!embedded) {
     return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-md p-2.5 sm:p-4 overflow-y-auto scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden animate-in fade-in duration-200">
-        <div className="w-full max-w-md my-auto">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-md p-2 sm:p-4 overflow-y-auto scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden animate-in fade-in duration-200">
+        <div className="w-full max-w-md my-auto sm:max-h-[96vh] sm:flex sm:flex-col sm:justify-center">
           {innerCard}
         </div>
       </div>
@@ -2891,9 +2891,9 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
 
 function Row({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between py-0.5">
-      <span className="text-slate-500">{label}</span>
-      <span className="font-semibold text-slate-900">{value}</span>
+    <div className="flex items-start justify-between gap-3 py-0.5 sm:py-1">
+      <span className="shrink-0 text-slate-500 font-medium">{label}</span>
+      <span className="min-w-0 text-right font-semibold text-slate-900 leading-snug break-words">{value}</span>
     </div>
   );
 }

@@ -45,6 +45,95 @@ import type {
 
 const AUD = "vendor" as const;
 
+export interface AiParsedEventData {
+  title: string;
+  category: "Alcoholic Party" | "Non-Alcoholic Party" | "Business" | "Sports" | "Performance";
+  venue: string;
+  price: number;
+  capacity: number;
+  date: string;
+  startTime: string;
+  endTime: string;
+  tagline: string;
+  durationMs?: number;
+  source?: string;
+}
+
+export function parseEventPromptWithAi(prompt: string) {
+  return apiRequest<AiParsedEventData>("/vendor/ai/parse-event-prompt", {
+    audience: AUD,
+    method: "POST",
+    body: { prompt },
+  });
+}
+
+export function suggestEventNamesWithAi(params: { category?: string; venue?: string; keyword?: string; type?: string }) {
+  return apiRequest<string[]>("/vendor/ai/suggest-names", {
+    audience: AUD,
+    method: "POST",
+    body: params,
+  });
+}
+
+export interface SuggestedAddOnItem {
+  label: string;
+  price: number;
+}
+
+export function suggestAddOnsWithAi(params: { category?: string; eventTitle?: string; venue?: string; type?: string }) {
+  return apiRequest<SuggestedAddOnItem[]>("/vendor/ai/suggest-addons", {
+    audience: AUD,
+    method: "POST",
+    body: params,
+  });
+}
+
+export interface GeneratedLaunchDetails {
+  description: string;
+  inclusions: string[];
+  exclusions: string[];
+  highlights: string[];
+  tags: string[];
+  faqs: Array<{ question: string; answer: string }>;
+  source?: string;
+}
+
+export function generateLaunchDetailsWithAi(params: { eventTitle: string; category?: string; venue?: string; type?: string }) {
+  return apiRequest<GeneratedLaunchDetails>("/vendor/ai/generate-launch-details", {
+    audience: AUD,
+    method: "POST",
+    body: params,
+  });
+}
+
+export interface VendorPackageAiResponse {
+  packageName: string;
+  description: string;
+  duration: number;
+  price: number;
+  benefits: string[];
+  inclusions: string[];
+  exclusions: string[];
+  highlights: string[];
+  faqs: Array<{ question: string; answer: string }>;
+  source?: string;
+}
+
+export function generateVendorPackageWithAi(params: {
+  prompt?: string;
+  packageName?: string;
+  category?: string;
+  type?: string;
+  price?: number;
+  duration?: number;
+}) {
+  return apiRequest<VendorPackageAiResponse>("/vendor/ai/vendor-package", {
+    audience: AUD,
+    method: "POST",
+    body: params,
+  });
+}
+
 /* ---- Dashboard ---- */
 
 export function getVendorDashboard() {

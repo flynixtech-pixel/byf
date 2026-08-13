@@ -52,6 +52,16 @@ export default function VendorProfilePage() {
         {loading && <p className="text-sm text-slate-500">Loading vendor profile...</p>}
         {error && <p className="rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-600">{error}</p>}
 
+        {!loading && !vendor && (
+          <div className="rounded-[1.75rem] border border-slate-100 bg-white p-10 text-center text-sm text-slate-500 shadow-sm space-y-3">
+            <Store className="mx-auto h-12 w-12 text-slate-300" />
+            <h3 className="text-base font-extrabold text-slate-800">Vendor Profile Not Found</h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              This vendor listing or profile is no longer available or is undergoing review.
+            </p>
+          </div>
+        )}
+
         {vendor && (
           <>
             {vendor.banner && (

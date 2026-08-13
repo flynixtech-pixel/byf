@@ -6,6 +6,10 @@ import { VendorAuthContext } from "@/components/providers/VendorAuthProvider";
 import { uploadAdminImage, uploadVendorImage } from "@/lib/api/uploads";
 import { ApiError } from "@/lib/api/client";
 import { TimeField } from "./TimeField";
+import { AiNameSuggestBot } from "./AiNameSuggestBot";
+import { AiAddOnSuggestBot } from "./AiAddOnSuggestBot";
+import { AiLaunchAutoFillCard } from "./AiLaunchAutoFillCard";
+import { GeneratedLaunchDetails } from "@/lib/api/vendor";
 import {
   AddOn,
   Coupon,
@@ -845,7 +849,15 @@ function LocationStep({ draft, update, updateMany }: StepProps) {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <FieldLabel>Event Name *</FieldLabel>
+          <div className="flex items-center justify-between mb-1.5">
+            <FieldLabel>Event Name *</FieldLabel>
+            <AiNameSuggestBot
+              type="Event"
+              category={currentSubCat}
+              venue={draft.address}
+              onSelectName={(name) => update("title", name)}
+            />
+          </div>
           <input
             value={draft.title}
             onChange={(e) => update("title", e.target.value)}
@@ -1276,6 +1288,7 @@ function BookingStep({ draft, updateMany, vendorProfile }: StepProps & { vendorP
 /* ------------------------------------------------------------------ */
 
 function PricingStep({ draft, update, updateMany }: StepProps) {
+  const category = draft.categories[0] === "Events" ? (draft.subCategories[0] || "") : (draft.categories[0] || "");
   const [priceTiers, setPriceTiers] = useState<PriceTierRow[]>(() => {
     const list = draft.priceTiers.map((t) => {
       const parsed = parsePriceTierLabel(t.label);
@@ -1459,8 +1472,22 @@ function PricingStep({ draft, update, updateMany }: StepProps) {
 
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="rounded-xl2 border border-surface-border p-5">
-          <p className="text-sm font-semibold text-ink">Add-ons</p>
-          <p className="mb-4 text-xs text-ink-faint">Optional extras with charges</p>
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-ink">Add-ons</p>
+              <p className="text-xs text-ink-faint">Optional extras with charges</p>
+            </div>
+            <AiAddOnSuggestBot
+              type="Event"
+              category={category}
+              eventTitle={draft.title}
+              venue={draft.address}
+              onAddAddOn={(item) => {
+                const next = [...addOns, { id: `ao-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`, label: item.label, price: item.price }];
+                update("addOns", next);
+              }}
+            />
+          </div>
           <div className="space-y-3">
             {addOns.map((a, i) => (
               <div key={a.id} className="flex gap-2">
@@ -1549,7 +1576,20 @@ function PricingStep({ draft, update, updateMany }: StepProps) {
 /*  STEP 5 — LAUNCH (DESCRIPTION, HIGHLIGHTS, FAQS, ITINERARY)        */
 /* ------------------------------------------------------------------ */
 
-function LaunchStep({ draft, update }: StepProps) {
+function LaunchStep({ draft, update, updateMany }: StepProps) {
+  const category = draft.categories[0] === "Events" ? (draft.subCategories[0] || "") : (draft.categories[0] || "");
+
+  function handleApplyLaunchDetails(data: GeneratedLaunchDetails) {
+    updateMany({
+      description: data.description || draft.description,
+      inclusions: data.inclusions.length > 0 ? data.inclusions : draft.inclusions,
+      exclusions: data.exclusions.length > 0 ? data.exclusions : draft.exclusions,
+      highlights: data.highlights.length > 0 ? data.highlights : draft.highlights,
+      tags: data.tags.length > 0 ? data.tags : draft.tags,
+      faqs: data.faqs.length > 0 ? data.faqs : draft.faqs,
+    });
+  }
+
   function addDay() {
     update("itinerary", [...draft.itinerary, { day: draft.itinerary.length + 1, title: "", description: "" }]);
   }
@@ -1575,6 +1615,14 @@ function LaunchStep({ draft, update }: StepProps) {
 
   return (
     <div className="space-y-6">
+      <AiLaunchAutoFillCard
+        type="Event"
+        eventTitle={draft.title}
+        category={category}
+        venue={draft.address}
+        onApplyLaunchDetails={handleApplyLaunchDetails}
+      />
+
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="mb-1 text-[11px] font-semibold tracking-wider text-ink-faint uppercase font-sans">Visibility &amp; publishing</p>

@@ -77,5 +77,11 @@ export function mockListingToApiInput(listing: MockListing): AdminListingInput {
   if (!rest.categories || rest.categories.length === 0) {
     delete (rest as Partial<AdminListingInput>).categories;
   }
+  if (!rest.city || !rest.city.trim()) {
+    rest.city = "Udaipur";
+  }
+  if (!rest.state || !rest.state.trim()) {
+    rest.state = "Rajasthan";
+  }
   return rest as AdminListingInput;
 }
