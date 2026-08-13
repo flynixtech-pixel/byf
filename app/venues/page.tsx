@@ -5,15 +5,11 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ChevronDown, ChevronRight, MapPin, Navigation, RotateCcw } from "lucide-react";
 import { SiteHeader } from "../../components/site-header";
-import { MobileTopBar } from "@/components/mobile/ui";
-import { VenuePosterCard } from "@/components/venue-poster-card";
+import { VenuePosterCard, VenuePosterCardSkeleton } from "@/components/venue-poster-card";
 import { browseVenues, getVendorProfile, type VendorPublicProfile } from "@/lib/api/venues";
 import { Listing } from "@/lib/api/types";
-import { categoryLabel } from "@/lib/taxonomy";
 import { trackVenueSearch } from "@/lib/analytics";
 
-/** One card on the browsing grid — either a single venue, or a business with
- * several venues (tap it to see all of them, à la a vendor's own storefront). */
 interface VenueCard {
   id: string;
   href: string;
@@ -57,6 +53,7 @@ function VenuesPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const category = searchParams.get("category") ?? "";
+  const searchQuery = searchParams.get("search") ?? "";
   const [venues, setVenues] = useState<Listing[]>([]);
   const [vendorProfiles, setVendorProfiles] = useState<Record<string, VendorPublicProfile>>({});
   const [loading, setLoading] = useState(true);
@@ -64,11 +61,16 @@ function VenuesPageInner() {
 
   useEffect(() => {
     setLoading(true);
-    // Venues page shows only Turf & Game listings — Events have their own /events page
-    browseVenues({ limit: 24, category: category || undefined, type: category ? undefined : "Turf" })
+    // Venues page shows Turf & Game listings — Events have their own /events page
+    browseVenues({
+      limit: 24,
+      category: category || undefined,
+      search: searchQuery || undefined,
+      type: category || searchQuery ? undefined : "Turf",
+    })
       .then(async (result) => {
         setVenues(result.items);
-        trackVenueSearch(category || "All", category || undefined, undefined, result.items.length);
+        trackVenueSearch(category || searchQuery || "All", category || undefined, undefined, result.items.length);
         // One business can list several turfs — fetch each distinct vendor's public
         // profile (business name + poster) so they can be grouped into one card.
         const vendorIds = Array.from(
@@ -87,7 +89,7 @@ function VenuesPageInner() {
         console.error("Failed to load venues:", err);
       })
       .finally(() => setLoading(false));
-  }, [category]);
+  }, [category, searchQuery]);
 
   /** Group listings by vendor — a single-listing vendor opens straight to booking,
    * a multi-listing vendor opens its business profile (which lists all its venues). */
@@ -143,7 +145,14 @@ function VenuesPageInner() {
     return result;
   }, [venues, vendorProfiles]);
 
-  const cardElements = cards.map((card) => <VenuePosterCard key={card.id} {...card} />);
+  const cardElements = cards.map((card, idx) => (
+    <VenuePosterCard key={card.id} priority={idx < 4} {...card} />
+  ));
+
+  const skeletonElements = useMemo(
+    () => Array.from({ length: 10 }).map((_, i) => <VenuePosterCardSkeleton key={i} />),
+    []
+  );
 
   return (
     <div className="min-h-screen bg-slate-50/60">
@@ -223,11 +232,11 @@ function VenuesPageInner() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {cardElements}
+              {loading ? skeletonElements : cardElements}
               {!loading && cards.length === 0 && (
                 <div className="col-span-full rounded-2xl border border-slate-100 bg-white p-6 text-center text-sm text-slate-500 shadow-2xs space-y-3">
                   <p className="font-semibold text-slate-600">No venues available for this sport yet.</p>
-                  {category && (
+                  {(category || searchQuery) && (
                     <button
                       type="button"
                       onClick={() => router.push("/venues")}
@@ -266,7 +275,7 @@ function VenuesPageInner() {
         </section>
 
         <section className="mt-6 grid gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {cardElements}
+          {loading ? skeletonElements : cardElements}
           {!loading && cards.length === 0 && (
             <p className="col-span-full rounded-[1.75rem] border border-slate-100 bg-white p-10 text-center text-sm text-slate-500">
               No venues available yet. Check back soon.

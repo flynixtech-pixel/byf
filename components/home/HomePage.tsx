@@ -114,6 +114,14 @@ export default function HomePage() {
     [router]
   );
 
+  const handleSearchSubmit = useCallback(() => {
+    if (search.trim()) {
+      router.push(`/venues?search=${encodeURIComponent(search.trim())}`);
+    } else {
+      router.push("/venues");
+    }
+  }, [search, router]);
+
   const filteredVenuesNote = useMemo(() => {
     if (!search && filters.activeFilterCount === 0) return null;
     return filters.filteredVenues.length;
@@ -125,8 +133,10 @@ export default function HomePage() {
       <Hero
         searchValue={search}
         onSearchChange={setSearch}
+        onSearchSubmit={handleSearchSubmit}
         onOpenFilters={() => setFiltersOpen(true)}
         activeFilterCount={filters.activeFilterCount}
+        venues={venues}
       />
 
         {filteredVenuesNote !== null && (
@@ -136,39 +146,47 @@ export default function HomePage() {
         )}
 
         {/* Find A Venue - Sports Section */}
-        <section className="-mt-6 px-4 pb-8 sm:-mt-8 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-7xl rounded-[1.25rem] border border-white/60 bg-white/70 p-4 shadow-xl shadow-slate-200/40 backdrop-blur-xl sm:rounded-[2rem] sm:p-5">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="grid h-10 w-10 place-items-center rounded-xl bg-slate-900 text-white shadow-md sm:h-12 sm:w-12 sm:rounded-2xl">
-                <MapPin className="h-5 w-5 sm:h-6 sm:w-6" />
+        <section className="relative z-10 mx-auto max-w-7xl px-4 pt-1 pb-2 sm:pt-3 sm:px-6 lg:px-8">
+          <div className="rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-xl shadow-slate-200/50 sm:rounded-[2.2rem] sm:p-6.5">
+            <div className="flex items-center justify-between gap-3 mb-5 sm:mb-6">
+              <div className="flex items-center gap-3 sm:gap-3.5">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#0f172a] text-white shadow-md sm:h-12 sm:w-12">
+                  <MapPin className="h-5.5 w-5.5 sm:h-6 sm:w-6" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold tracking-tight text-slate-950 sm:text-2xl">Find A Venue</h2>
+                  <p className="text-[11px] font-medium text-slate-500 sm:text-sm">Discover top venues for every game and vibe.</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-lg font-bold tracking-tight text-slate-900 sm:text-2xl">Find A Venue</h2>
-                <p className="text-[11px] font-medium text-slate-500 sm:text-sm">Discover top venues for every game and vibe.</p>
-              </div>
+              <Link
+                href="/venues"
+                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:text-brand-700 hover:underline transition"
+              >
+                View All Venues <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
 
-            <div className="mt-5 grid grid-cols-4 gap-3 sm:mt-6 sm:gap-5 md:grid-cols-4 xl:grid-cols-7">
+            <div className="grid grid-cols-4 gap-3 sm:gap-5 md:grid-cols-4 xl:grid-cols-7">
               {SPORTS_CATALOG.map((s, index) => {
                 // Map the ID to a category for the venues page
                 const category = s.id === "box-cricket" || s.id === "cricket-nets" ? "cricket" : s.id;
-                
+
                 return (
                   <Link
                     key={s.id}
                     href={`/venues?category=${category}`}
-                    className="group flex flex-col items-center justify-start text-center min-w-0 w-full"
+                    className="group flex flex-col items-center justify-start text-center min-w-0 w-full cursor-pointer"
                   >
-                    <div className="relative flex h-14 w-14 items-center justify-center rounded-[1rem] bg-white border border-slate-100 shadow-[0_2px_10px_rgba(15,23,42,0.04)] transition-all duration-300 group-hover:-translate-y-1 group-hover:border-slate-200 group-hover:shadow-[0_8px_20px_rgba(15,23,42,0.08)] sm:h-20 sm:w-20 sm:rounded-[1.25rem]">
-                      <div className={`absolute inset-0 rounded-[inherit] opacity-20 bg-gradient-to-br ${s.bubble}`} />
+                    <div className="relative flex h-14 w-14 items-center justify-center rounded-[1.15rem] bg-[#f8fafc] border border-slate-100/90 shadow-2xs transition-all duration-300 group-hover:-translate-y-1 group-hover:bg-white group-hover:shadow-md sm:h-20 sm:w-20 sm:rounded-[1.25rem]">
+                      <div className={`absolute inset-0 rounded-[inherit] opacity-15 bg-gradient-to-br ${s.bubble}`} />
                       <img
                         src={s.image}
                         alt={s.alt}
                         loading={index === 0 ? "eager" : "lazy"}
-                        className="relative z-10 h-7 w-7 object-contain transition-transform duration-300 group-hover:scale-110 sm:h-10 sm:w-10"
+                        className="relative z-10 h-8 w-8 object-contain transition-transform duration-300 group-hover:scale-110 sm:h-10 sm:w-10"
                       />
                     </div>
-                    <span className="mt-2 text-[10px] font-semibold text-slate-600 transition-colors group-hover:text-slate-950 sm:mt-3 sm:text-xs text-center line-clamp-1 w-full px-1">
+                    <span className="mt-2 text-[10.5px] font-bold text-slate-700 transition-colors group-hover:text-slate-950 sm:mt-2.5 sm:text-xs text-center truncate w-full px-1">
                       {s.label}
                     </span>
                   </Link>

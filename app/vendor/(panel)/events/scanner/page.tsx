@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle2, QrCode, RefreshCw, Users } from "lucide-react";
+import { CheckCircle2, Mail, Phone, QrCode, RefreshCw, Users } from "lucide-react";
 import { PageHero } from "@/components/vendor/ui";
 import { QrScannerModal } from "@/components/vendor/bookings/QrScannerModal";
 import { checkInEventBooking, getVendorEventArrivals, type EventArrival } from "@/lib/api/vendor";
@@ -111,6 +111,22 @@ export default function EventScannerPage() {
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-ink">{a.customerName}</p>
                   <p className="truncate text-xs text-ink-faint">{a.listingTitle} · {a.orderId}</p>
+                  {(a.email || a.phone) && (
+                    <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-ink-soft font-medium">
+                      {a.email && (
+                        <span className="inline-flex items-center gap-1">
+                          <Mail size={12} className="text-ink-faint shrink-0" />
+                          <span className="truncate">{a.email}</span>
+                        </span>
+                      )}
+                      {a.phone && (
+                        <span className="inline-flex items-center gap-1">
+                          <Phone size={12} className="text-ink-faint shrink-0" />
+                          <span>{a.phone}</span>
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <span className="shrink-0 text-[11px] text-ink-faint">{timeAgo(a.checkedInAt)}</span>
               </li>

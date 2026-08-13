@@ -105,11 +105,10 @@ export function TrendingVenues({
   if (venues.length === 0) return null;
 
   return (
-    <section id="venues" className="mx-auto mt-12 max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="venues" className="mx-auto mt-4 sm:mt-6 max-w-7xl px-4 sm:px-6 lg:px-8">
       <SectionHeading
         eyebrow="Booked the most this week"
         title="Trending Venues"
-        subtitle="Hand-picked from real booking volume across Udaipur — updated daily."
         icon={Flame}
         actionLabel="View All Venues"
         onAction={onViewAll}

@@ -758,6 +758,8 @@ export function getVendorEventBookings(
 export interface EventArrival {
   orderId: string;
   customerName: string;
+  email?: string;
+  phone?: string;
   listingTitle: string;
   totalAmount?: number;
   checkedInAt: string;

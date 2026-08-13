@@ -20,6 +20,7 @@ export const VenuePosterCard = memo(function VenuePosterCard({
   badge,
   isFavorite = false,
   onToggleFavorite,
+  priority = false,
 }: {
   href: string;
   image?: string;
@@ -30,6 +31,7 @@ export const VenuePosterCard = memo(function VenuePosterCard({
   badge?: string;
   isFavorite?: boolean;
   onToggleFavorite?: (e: React.MouseEvent) => void;
+  priority?: boolean;
 }) {
   return (
     <Link
@@ -41,6 +43,7 @@ export const VenuePosterCard = memo(function VenuePosterCard({
           src={image}
           alt={title}
           fill
+          priority={priority}
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
           className="object-cover transition duration-300 group-hover:scale-105"
         />
@@ -100,3 +103,17 @@ export const VenuePosterCard = memo(function VenuePosterCard({
     </Link>
   );
 });
+
+export function VenuePosterCardSkeleton() {
+  return (
+    <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-slate-800 animate-pulse shadow-sm">
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-slate-800" />
+      <div className="absolute left-2.5 top-2.5 h-5 w-16 rounded-full bg-slate-700/80" />
+      <div className="absolute right-2.5 top-2.5 h-7 w-7 rounded-full bg-slate-700/80" />
+      <div className="absolute inset-x-0 bottom-0 p-3.5 space-y-2">
+        <div className="h-4 w-3/4 rounded bg-slate-700/80" />
+        <div className="h-3 w-1/2 rounded bg-slate-700/60" />
+      </div>
+    </div>
+  );
+}

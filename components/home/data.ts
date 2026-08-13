@@ -267,7 +267,7 @@ export const QUICK_ACTION_TASKS = [
   { id: "coaches", label: "Coaches", icon: GraduationCap },
 ];
 
-export const HERO_IMAGES = ["/hero1.png", "/hero2.png", "/hero3.png", "/hero1.png", "/hero2.png"];
+export const HERO_IMAGES = ["/hero1.png", "/hero2.png", "/hero3.png"];
 export const HERO_SLIDE_DURATION_MS = 3500;
 
 export const FOOTER_COLUMNS: { title: string; items: FooterLink[] }[] = [

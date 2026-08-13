@@ -75,8 +75,10 @@ export function setAccessToken(audience: Audience, token: string | null) {
   if (typeof window !== "undefined") {
     if (token) {
       localStorage.setItem(`byv_${audience}_token`, token);
+      localStorage.setItem(`byv_${audience}_has_session`, "true");
     } else {
       localStorage.removeItem(`byv_${audience}_token`);
+      localStorage.removeItem(`byv_${audience}_has_session`);
     }
   }
   tokenListeners.forEach((listener) => listener(audience, token));
@@ -215,6 +217,17 @@ export async function restoreSession(audience: Audience): Promise<string | null>
   // This prevents unnecessary /refresh calls that can clear active sessions due to cross-site cookie blocking.
   const existingToken = getAccessToken(audience);
   if (existingToken) return existingToken;
+
+  // Only attempt a network refresh if there is an indicator that a session was previously established.
+  const hasSessionHint =
+    typeof window !== "undefined" &&
+    (localStorage.getItem(`byv_${audience}_has_session`) === "true" ||
+      document.cookie.includes(`byv_${audience}_has_session=1`));
+
+  if (!hasSessionHint) {
+    return null;
+  }
+
   return refreshAccessToken(audience);
 }
 
