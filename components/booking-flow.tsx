@@ -14,11 +14,12 @@
 /* ------------------------------------------------------------------ */
 
 import { useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
-import { CalendarDays, Check, ChevronRight, ChevronLeft, Clock, Download, MapPin, Maximize2, Minimize2, Minus, Share2, ShieldCheck, Users, X, AlertTriangle, Plus, ArrowLeft, ArrowRight, Image as ImageIcon, Layers, Zap } from "lucide-react";
+import { CalendarDays, Check, CheckCircle2, ChevronRight, ChevronLeft, Clock, Download, MapPin, Maximize2, Minimize2, Minus, Share2, ShieldCheck, Users, X, AlertTriangle, Plus, ArrowLeft, ArrowRight, Image as ImageIcon, Layers, Zap } from "lucide-react";
 import { useCustomerAuth } from "@/components/providers/CustomerAuthProvider";
 import { LoginModal } from "@/components/home/modals/LoginModal";
 import { SignupModal } from "@/components/home/modals/SignupModal";
 import { cancelMyBooking, confirmMyBookingPayment, createMyBooking } from "@/lib/api/customerBookings";
+import { requestNotificationPermission, scheduleGameReminder, triggerDemoReminder } from "@/lib/notifications";
 import { getVenueAvailability, type BookedRange } from "@/lib/api/venues";
 import { ApiError } from "@/lib/api/client";
 import { categoryLabel, matchesCourtSport } from "@/lib/taxonomy";
@@ -432,6 +433,7 @@ export default function BookingFlow({
   const [payment, setPayment] = useState<PaymentMethod>(PAYMENT_METHODS[0]);
   const [paymentOption, setPaymentOption] = useState<"partial" | "full">("full");
   const [playProtect, setPlayProtect] = useState(false);
+  const [gameReminders, setGameReminders] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [booking, setBooking] = useState<Booking | null>(null);
@@ -1113,8 +1115,19 @@ export default function BookingFlow({
         phone: needsPhone ? phone : undefined,
         addOnIds: selectedAddOnIds.length > 0 ? selectedAddOnIds : undefined,
         playProtect,
+        gameReminders,
         durationMinutes,
       });
+
+      if (gameReminders) {
+        scheduleGameReminder({
+          orderId: created.orderId,
+          title: listing.title,
+          sport: sport || selectedSport,
+          dateTime: created.dateTime ? new Date(created.dateTime).toISOString() : dateTime,
+          customerName: customer?.name || created.customerName,
+        });
+      }
 
       trackEvent("booking_started", {
         listingId: listing._id,
@@ -1148,6 +1161,15 @@ export default function BookingFlow({
       });
 
       setBooking(confirmed);
+      if (gameReminders) {
+        scheduleGameReminder({
+          orderId: confirmed.orderId,
+          title: listing.title,
+          sport: sport || selectedSport,
+          dateTime: confirmed.dateTime ? new Date(confirmed.dateTime).toISOString() : (pendingBooking?.dateTime ? new Date(pendingBooking.dateTime).toISOString() : new Date().toISOString()),
+          customerName: customer?.name || confirmed.customerName,
+        });
+      }
       setPaymentGatewayOpen(false);
       setStep("confirmed");
     } catch (err) {
@@ -1177,6 +1199,8 @@ export default function BookingFlow({
           setPayment={setPayment}
           playProtect={playProtect}
           setPlayProtect={setPlayProtect}
+          gameReminders={gameReminders}
+          setGameReminders={setGameReminders}
           canPay={canPay}
           submitting={submitting}
           error={error}
@@ -1390,6 +1414,8 @@ function ReviewStep(props: {
   setPayment: (v: PaymentMethod) => void;
   playProtect: boolean;
   setPlayProtect: (v: boolean) => void;
+  gameReminders: boolean;
+  setGameReminders: (v: boolean) => void;
   canPay: boolean;
   submitting: boolean;
   error: string;
@@ -1455,6 +1481,8 @@ function ReviewStep(props: {
     setPayment,
     playProtect,
     setPlayProtect,
+    gameReminders,
+    setGameReminders,
     canPay,
     submitting,
     error,
@@ -2097,16 +2125,16 @@ function ReviewStep(props: {
                                       onToggleSlotSelection(slot.originalIndex);
                                     }}
                                     className={`relative flex flex-col items-center justify-center rounded-2xl px-2.5 py-2 transition-all duration-200 cursor-pointer border min-h-[54px] col-span-2 sm:col-span-2 ${isSelected
-                                        ? "bg-[#0b9c65] text-white border-[#0b9c65] shadow-md shadow-[#0b9c65]/30 ring-2 ring-[#0b9c65]/30 scale-[1.02]"
-                                        : available
-                                          ? "bg-gradient-to-r from-emerald-50/90 via-teal-50/80 to-white text-slate-900 border-emerald-300 hover:border-[#0b9c65] hover:bg-emerald-100/70 shadow-2xs"
-                                          : "bg-slate-100/80 text-slate-400 border-slate-200/60 cursor-not-allowed opacity-50"
+                                      ? "bg-[#0b9c65] text-white border-[#0b9c65] shadow-md shadow-[#0b9c65]/30 ring-2 ring-[#0b9c65]/30 scale-[1.02]"
+                                      : available
+                                        ? "bg-gradient-to-r from-emerald-50/90 via-teal-50/80 to-white text-slate-900 border-emerald-300 hover:border-[#0b9c65] hover:bg-emerald-100/70 shadow-2xs"
+                                        : "bg-slate-100/80 text-slate-400 border-slate-200/60 cursor-not-allowed opacity-50"
                                       }`}
                                   >
                                     <span
                                       className={`rounded-full px-2.5 py-0.5 text-[8px] font-black uppercase tracking-wider mb-1 ${isSelected
-                                          ? "bg-white text-[#0b9c65]"
-                                          : "bg-emerald-100 text-emerald-900 border border-emerald-300/80 shadow-2xs"
+                                        ? "bg-white text-[#0b9c65]"
+                                        : "bg-emerald-100 text-emerald-900 border border-emerald-300/80 shadow-2xs"
                                         }`}
                                     >
                                       🏷️ CLUB SLOT ({formatDurationText(slot.durationMinutes || 120)})
@@ -2415,27 +2443,39 @@ function ReviewStep(props: {
             </button>
 
             {/* Game Reminders */}
-            <div className="flex items-center justify-between rounded-3xl border border-slate-100 bg-white p-5 lg:p-6">
-              <div>
-                <p className="text-sm font-bold text-slate-800 flex items-center gap-1.5">Game Reminders <span className="text-orange-500 text-sm">🔔</span></p>
-                <p className="text-xs text-slate-500 mt-1">Get an SMS/Push notification 1 hr before your slot.</p>
-              </div>
-              <div className="relative inline-block w-10 h-6">
-                <input type="checkbox" defaultChecked className="peer sr-only" />
-                <div className="w-10 h-6 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
-              </div>
-            </div>
-
-            {/* Play Protect */}
-            <div className="rounded-3xl border border-indigo-100 bg-indigo-50/50 p-5 lg:p-6">
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" checked={playProtect} onChange={(e) => setPlayProtect(e.target.checked)} className="mt-1 h-4 w-4 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-600 accent-indigo-600" />
+            <div className="rounded-3xl border border-slate-100 bg-white p-5 lg:p-6 shadow-xs">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-bold text-indigo-900 flex items-center gap-1.5">Add Play Protect <ShieldCheck className="h-4 w-4 text-indigo-700" /></p>
-                  <p className="text-[11px] text-indigo-700/80 mt-1 font-medium leading-relaxed">Get 100% refund on cancellation &amp; accidental injury cover up to ₹10K.</p>
-                  <p className="text-[11px] font-bold text-indigo-900 mt-1.5">+ ₹19 added to total</p>
+                  <p className="text-sm font-bold text-slate-800 flex items-center gap-1.5">Game Reminders <span className="text-orange-500 text-sm">🔔</span></p>
+                  <p className="text-xs text-slate-500 mt-1">Get an SMS/Push notification 1 hr before your slot.</p>
                 </div>
-              </label>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={gameReminders}
+                    onChange={(e) => {
+                      const enabled = e.target.checked;
+                      setGameReminders(enabled);
+                      if (enabled) {
+                        requestNotificationPermission();
+                      }
+                    }}
+                    className="peer sr-only"
+                  />
+                  <div className="w-10 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
+                </label>
+              </div>
+              {/* {gameReminders && (
+                <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => triggerDemoReminder({ title: listing.title, sport: selectedSport, timeStr: time || "7:00 PM" })}
+                    className="text-[11px] font-bold text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                  >
+                    Test Live Alert 🔔
+                  </button>
+                </div>
+              )} */}
             </div>
 
             {/* Add-ons — filtered specifically to the currently selected game. */}
@@ -2569,6 +2609,18 @@ function ReviewStep(props: {
                   </button>
                 </div>
               )}
+
+              {/* Play Protect */}
+              <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input type="checkbox" checked={playProtect} onChange={(e) => setPlayProtect(e.target.checked)} className="mt-1 h-4 w-4 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-600 accent-indigo-600" />
+                  <div>
+                    <p className="text-sm font-bold text-indigo-900 flex items-center gap-1.5">Add Play Protect <ShieldCheck className="h-4 w-4 text-indigo-700" /></p>
+                    <p className="text-[11px] text-indigo-700/80 mt-1 font-medium leading-relaxed">Get 100% refund on cancellation &amp; accidental injury cover up to ₹10K.</p>
+                    <p className="text-[11px] font-bold text-indigo-900 mt-1.5">+ ₹19 added to total</p>
+                  </div>
+                </label>
+              </div>
 
               {dealSavings && (
                 <div className="rounded-xl border border-orange-200 bg-orange-50/80 p-3 text-xs">

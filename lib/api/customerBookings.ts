@@ -13,6 +13,7 @@ export interface CreateBookingInput {
   payment: PaymentMethod;
   paymentType?: "partial" | "full";
   playProtect?: boolean;
+  gameReminders?: boolean;
   /** Which sport the player is booking (venues can host several). */
   sport?: string;
   /** Court picked on the venue. Omit to let the backend assign the first free one. */

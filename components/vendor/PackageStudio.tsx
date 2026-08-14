@@ -722,6 +722,21 @@ function CategoryPhoto({ cat }: { cat: SportCategory }) {
   const [errored, setErrored] = useState(false);
   const src = cat.image ?? url;
   if (src && !errored) {
+    const isLocalArt = Boolean(cat.image);
+    if (isLocalArt) {
+      return (
+        <div className="h-full w-full flex items-center justify-center p-3.5 sm:p-4 bg-gradient-to-b from-slate-50/90 to-slate-100/90">
+          <img
+            src={src}
+            alt={cat.label}
+            onError={() => setErrored(true)}
+            className="max-h-[60%] max-w-[60%] object-contain drop-shadow-md transition duration-300 group-hover:scale-110"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+      );
+    }
     return (
       <img
         src={src}
@@ -1571,12 +1586,14 @@ function DetailsStep({ draft, update, updateMany, audience }: StepProps & { audi
         </div>
       )}
 
-      <AiPackageAutoFillCard
-        packageName={draft.title}
-        category={draft.categories[0]}
-        type={draft.type}
-        onApplyPackage={handleApplyPackage}
-      />
+      {draft.type !== "Turf" && (
+        <AiPackageAutoFillCard
+          packageName={draft.title}
+          category={draft.categories[0]}
+          type={draft.type}
+          onApplyPackage={handleApplyPackage}
+        />
+      )}
 
       <div>
         <div className="flex items-center gap-1.5">
@@ -1614,12 +1631,14 @@ function DetailsStep({ draft, update, updateMany, audience }: StepProps & { audi
               <Info size={11} />
             </button>
           </div>
-          <AiNameSuggestBot
-            type={draft.type}
-            category={draft.categories[0]}
-            venue={draft.address}
-            onSelectName={(name) => update("title", name)}
-          />
+          {draft.type !== "Turf" && (
+            <AiNameSuggestBot
+              type={draft.type}
+              category={draft.categories[0]}
+              venue={draft.address}
+              onSelectName={(name) => update("title", name)}
+            />
+          )}
         </div>
         {openInfos["title"] && (
           <p className="mb-2 text-xs text-ink-faint bg-cream-200/40 p-2 rounded-lg leading-relaxed animate-in slide-in-from-top-1 duration-150">
@@ -4112,16 +4131,18 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
                 <Info size={11} />
               </button>
             </div>
-            <AiAddOnSuggestBot
-              type={draft.type}
-              category={draft.categories[0]}
-              eventTitle={draft.title}
-              venue={draft.address}
-              onAddAddOn={(item) => {
-                const next = [...addOns, { id: `ao-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`, label: item.label, price: item.price }];
-                update("addOns", next);
-              }}
-            />
+            {draft.type !== "Turf" && (
+              <AiAddOnSuggestBot
+                type={draft.type}
+                category={draft.categories[0]}
+                eventTitle={draft.title}
+                venue={draft.address}
+                onAddAddOn={(item) => {
+                  const next = [...addOns, { id: `ao-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`, label: item.label, price: item.price }];
+                  update("addOns", next);
+                }}
+              />
+            )}
           </div>
           {showAddOnsInfo && (
             <p className="text-xs text-ink-faint mb-3 bg-cream-200/40 p-2.5 rounded-lg leading-relaxed animate-in slide-in-from-top-1 duration-150">
@@ -4444,13 +4465,15 @@ function LaunchStep({ draft, update, updateMany }: StepProps) {
 
   return (
     <div className="space-y-6">
-      <AiLaunchAutoFillCard
-        type={draft.type}
-        eventTitle={draft.title}
-        category={draft.categories[0]}
-        venue={draft.address}
-        onApplyLaunchDetails={handleApplyLaunchDetails}
-      />
+      {draft.type !== "Turf" && (
+        <AiLaunchAutoFillCard
+          type={draft.type}
+          eventTitle={draft.title}
+          category={draft.categories[0]}
+          venue={draft.address}
+          onApplyLaunchDetails={handleApplyLaunchDetails}
+        />
+      )}
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>

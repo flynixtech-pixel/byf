@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { CustomerAuthProvider } from "@/components/providers/CustomerAuthProvider";
 import { GoogleAuthProvider } from "@/components/providers/GoogleAuthProvider";
 import { BottomNav } from "@/components/mobile/BottomNav";
+import { GameReminderNotifier } from "@/components/GameReminderNotifier";
 import Script from "next/script";
 import "./globals.css";
 
@@ -152,6 +153,7 @@ export default function RootLayout({
           <GoogleAuthProvider>
             <CustomerAuthProvider>
               {children}
+              <GameReminderNotifier />
               <BottomNav />
             </CustomerAuthProvider>
           </GoogleAuthProvider>
