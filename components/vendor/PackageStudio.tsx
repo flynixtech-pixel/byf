@@ -3417,6 +3417,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
 
   interface EffectiveSlotInfo {
     price: number;
+    strikePrice?: number;
     blocked: boolean;
     source: "exact" | "sport" | "court" | "default" | "none";
     sourceLabel: string;
@@ -3432,6 +3433,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
       if (exact) {
         return {
           price: exact.price,
+          strikePrice: exact.strikePrice,
           blocked: !!exact.blocked,
           source: "exact",
           sourceLabel: `This Court`,
@@ -3445,6 +3447,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
       if (sportOnly) {
         return {
           price: sportOnly.price,
+          strikePrice: sportOnly.strikePrice,
           blocked: !!sportOnly.blocked,
           source: "sport",
           sourceLabel: `${matchSport} Default`,
@@ -3458,6 +3461,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
       if (courtOnly) {
         return {
           price: courtOnly.price,
+          strikePrice: courtOnly.strikePrice,
           blocked: !!courtOnly.blocked,
           source: "court",
           sourceLabel: `Court Default`,
@@ -3470,6 +3474,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
     if (fallback) {
       return {
         price: fallback.price,
+        strikePrice: fallback.strikePrice,
         blocked: !!fallback.blocked,
         source: "default",
         sourceLabel: "Global Default",
@@ -3478,6 +3483,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
 
     return {
       price: 0,
+      strikePrice: undefined,
       blocked: false,
       source: "none",
       sourceLabel: "Unpriced",
@@ -3505,6 +3511,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
         endTime: range.endTime,
         label: range.label,
         price: effective.price,
+        strikePrice: effective.strikePrice,
         blocked: effective.blocked,
         source: effective.source,
         sourceLabel: effective.sourceLabel,
