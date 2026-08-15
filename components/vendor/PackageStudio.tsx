@@ -2396,6 +2396,13 @@ function generateSlotsInRange(startMin: number, endMin: number, durationMinutes:
   }
   return slots;
 }
+function fmtDur(mins: number) {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}hr${h > 1 ? "s" : ""}`;
+  return `${h}h ${m}m`;
+}
 
 function BookingStep({ draft, update }: StepProps) {
   const [slotPrice, setSlotPrice] = useState(1000);
@@ -2487,15 +2494,6 @@ function BookingStep({ draft, update }: StepProps) {
         : dailySlots // starts with copy of default slots for easier customization
       : [];
 
-  /* helpers */
-  function fmtDur(mins: number) {
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    if (h === 0) return `${m}m`;
-    if (m === 0) return `${h}hr${h > 1 ? "s" : ""}`;
-    return `${h}h ${m}m`;
-  }
-
   /* persist slots into draft — always chronologically sorted, so the slot list, the
      clock dial and the "Opens/Closes" summary can never show three different orderings
      of the same underlying data. */
@@ -2533,63 +2531,7 @@ function BookingStep({ draft, update }: StepProps) {
     return endMin;
   }
 
-  function generateBulkSlots() {
-    if (!isDailyRoutine && !selectedDate) { alert("Please select a date first."); return; }
-    const dur = parseInt(bulkDuration);
-    const generated = generateSlotsInRange(t24m(bulkStartTime), getBulkEndMins(), dur);
-    // Preserve overrides (slots with sport or courtId) and merge properties of matching base slots
-    const overrides = activeSlots.filter((s) => (s.sport && s.sport.trim() !== "") || (s.courtId && s.courtId.trim() !== ""));
-    const baseSlots = activeSlots.filter((s) => !((s.sport && s.sport.trim() !== "") || (s.courtId && s.courtId.trim() !== "")));
-
-    const mergedBase = generated.map((gen) => {
-      const match = baseSlots.find((existing) => existing.startTime === gen.startTime);
-      return match ? { ...gen, ...match } : gen;
-    });
-    save([...mergedBase, ...overrides]);
-  }
-
-  /* Auto-generate slots when generator parameters change to keep UI strictly synchronized.
-   * bulkStartTime/bulkEndTime/bulkDuration are local state seeded with fixed defaults
-   * (05:00–22:00, 60 min) that essentially never match an existing listing's real
-   * schedule. Since this effect also fires on mount, editing an existing package used to
-   * silently regenerate — and overwrite — its actual slot list (and any custom
-   * sport/court pricing that no longer lined up with the regenerated boundaries) the
-   * instant the vendor landed on this step, before they had touched anything. On the
-   * very first run, only proceed if there's nothing configured yet (a brand-new
-   * listing) — that keeps the "auto-fill sensible defaults" convenience for a fresh
-   * package while protecting an existing one. Every run after that only happens because
-   * the vendor deliberately changed one of these three controls. */
-  const didInitialSync = useRef(false);
-  useEffect(() => {
-    const isInitialMount = !didInitialSync.current;
-    didInitialSync.current = true;
-    if (isInitialMount && activeSlots.length > 0) return;
-    if (!rangeValid) return;
-    const dur = parseInt(bulkDuration);
-    const generated = generateSlotsInRange(t24m(bulkStartTime), getBulkEndMins(), dur);
-
-    // Separate overrides and base slots from activeSlots
-    const overrides = activeSlots.filter((s) => (s.sport && s.sport.trim() !== "") || (s.courtId && s.courtId.trim() !== ""));
-    const baseSlots = activeSlots.filter((s) => !((s.sport && s.sport.trim() !== "") || (s.courtId && s.courtId.trim() !== "")));
-
-    // Merge existing base slots properties if any match
-    const mergedBase = generated.map((gen) => {
-      const match = baseSlots.find((existing) => existing.startTime === gen.startTime);
-      return match ? { ...gen, ...match } : gen;
-    });
-
-    const merged = [...mergedBase, ...overrides];
-
-    // Only update if generated slot layout (base slots) has changed to avoid loop
-    const isDifferent =
-      mergedBase.length !== baseSlots.length ||
-      mergedBase.some((s, idx) => s.startTime !== baseSlots[idx]?.startTime || s.endTime !== baseSlots[idx]?.endTime);
-
-    if (isDifferent) {
-      save(merged);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bulkDuration, bulkStartTime, bulkEndTime]);
+  // Slot generation auto-sync has been moved to PricingStep where it can be done per-sport.
 
   const [selectedSlotIndices, setSelectedSlotIndices] = useState<number[]>([]);
 
@@ -2702,8 +2644,8 @@ function BookingStep({ draft, update }: StepProps) {
       // Remove all slots overlapping this 1-hour block
       save(activeSlots.filter((s) => !overlapping.includes(s)));
     } else {
-      // Generate slots for this hour using current duration
-      const newSubSlots = generateSlotsInRange(blockStart, blockEnd, dur);
+      // Generate a simple default slot for this hour (60m)
+      const newSubSlots = generateSlotsInRange(blockStart, blockEnd, 60);
       save([...activeSlots, ...newSubSlots]);
     }
   };
@@ -2909,94 +2851,7 @@ function BookingStep({ draft, update }: StepProps) {
           )}
         </div>
 
-        {/* ── SLOT GENERATOR ── */}
-        {(!selectedDate || (selectedDate && !isHoliday)) && (
-          <div className="rounded-2xl border-2 border-surface-border bg-white p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-              <div>
-                <p className="text-sm font-bold text-slate-800">
-                  {!selectedDate ? "⚙️ Configuration: Global Default Slots" : `📅 Editing: Slots for ${selectedDate}`}
-                </p>
-              </div>
 
-              {selectedDate && (
-                <label className="flex items-center gap-2 cursor-pointer bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 shadow-sm hover:bg-slate-100 transition">
-                  <input
-                    type="checkbox"
-                    checked={false}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        update("slotsList", activeSlots);
-                        update("slotsPerDay", activeSlots.length);
-                        update("dailyRoutine", true);
-                        setSelectedDate("");
-                        alert("🎉 Current slots have been saved as the Global Default layout!");
-                      }
-                    }}
-                    className="w-4 h-4 rounded text-emerald-600 focus:ring-0 accent-emerald-500"
-                  />
-                  <span className="text-xs font-extrabold text-slate-700">Set as Global Default</span>
-                </label>
-              )}
-            </div>
-
-            <p className="text-[11px] font-bold text-ink uppercase tracking-wide mb-3 border-t border-slate-100 pt-3">
-              Slot Generator
-            </p>
-
-            {/* Duration slider */}
-            <div className="mb-5">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-[11px] font-semibold text-ink-faint uppercase tracking-wide">Slot Duration</p>
-                <span className="text-sm font-extrabold text-vibe-violet bg-vibe-violet/10 px-2 py-0.5 rounded-lg">{fmtDur(parseInt(bulkDuration))}</span>
-              </div>
-              <input type="range" min="15" max="180" step="15" value={bulkDuration} onChange={(e) => setBulkDuration(e.target.value)} className="w-full h-2 accent-vibe-violet cursor-pointer" />
-            </div>
-
-            {/* Opens At Hour Cards */}
-            <div className="mb-4">
-              <FieldLabel>Opens At *</FieldLabel>
-              <div className="flex flex-wrap gap-1.5 max-h-[120px] overflow-y-auto border border-slate-100 rounded-lg p-2 bg-slate-50/50">
-                {TIME_OPTIONS.map((t) => {
-                  const isSelected = bulkStartTime === t.value;
-                  return (
-                    <button key={t.value} type="button" onClick={() => setBulkStartTime(t.value)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${isSelected ? "bg-slate-900 text-white" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"}`}>
-                      {t.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Closes At Hour Cards */}
-            <div className="mb-2">
-              <FieldLabel>Closes At *</FieldLabel>
-              <div className="flex flex-wrap gap-1.5 max-h-[120px] overflow-y-auto border border-slate-100 rounded-lg p-2 bg-slate-50/50">
-                {END_TIME_OPTIONS.map((t) => {
-                  const isSelected = bulkEndTime === t.value;
-                  return (
-                    <button key={t.value} type="button" onClick={() => setBulkEndTime(t.value)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${isSelected
-                          ? "bg-slate-900 text-white"
-                          : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
-                        }`}>
-                      {t.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="flex justify-end">
-              <button type="button" onClick={generateBulkSlots}
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-vibe-violet px-6 py-2.5 text-xs font-bold text-white hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:opacity-40">
-                <Plus size={13} /> Generate Slots
-              </button>
-            </div>
-            <p className="text-[10px] text-ink-faint mt-3">💡 You can also click any hour on the clock dial to the right to toggle that slot individually — it always uses the duration set above.</p>
-          </div>
-        )}
 
         {/* ── SLOT LIST TABLE & DYNAMIC GRID ─────────────────── */}
         <div>
@@ -3144,8 +2999,8 @@ function BookingStep({ draft, update }: StepProps) {
 
                 if (partSlots.length === 0) return null;
 
-                const sizeH = cardSize === "S" ? "h-20" : cardSize === "M" ? "h-24" : "h-28";
-                const gridCols = cardSize === "S" ? "grid-cols-4 sm:grid-cols-5" : cardSize === "M" ? "grid-cols-3 sm:grid-cols-4" : "grid-cols-2 sm:grid-cols-3";
+                const sizeClasses = cardSize === "S" ? "min-h-[46px] py-1.5" : cardSize === "M" ? "min-h-[56px] py-2" : "min-h-[64px] py-2.5";
+                const gridCols = cardSize === "S" ? "grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6" : cardSize === "M" ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4" : "grid-cols-2 sm:grid-cols-3";
 
                 return (
                   <div key={part} className="border-b border-slate-100 pb-3 last:border-0">
@@ -3173,19 +3028,19 @@ function BookingStep({ draft, update }: StepProps) {
                         const isChecked = selectedSlotIndices.includes(slot.originalIndex);
                         if (slot.isClubSlot) {
                           return (
-                            <div key={slot.originalIndex} className={`flex flex-col items-center justify-center p-2 rounded-xl border border-purple-300 bg-purple-50/50 relative hover:shadow transition-shadow group ${sizeH}`}>
-                              <span className="rounded-full bg-purple-100 px-2 py-0.5 text-[9px] font-extrabold uppercase text-purple-700 mb-1">⭐ Club Slot</span>
-                              <span className="text-xs font-bold text-purple-950 font-mono">{to12h(slot.startTime)} – {to12h(slot.endTime)}</span>
-                              <span className="text-[9px] font-semibold text-purple-700 mt-0.5">{fmtDur(slot.durationMinutes || 120)} · ₹{slot.price}</span>
-                              <div className="flex items-center gap-1 mt-1 opacity-0 group-hover:opacity-100 transition">
-                                <button type="button" onClick={() => handleSplitClubSlot(slot.originalIndex)} className="text-[9px] font-bold text-purple-700 hover:underline">Split Club</button>
-                                <button type="button" onClick={() => deleteSlot(slot.originalIndex)} className="p-0.5 text-slate-400 hover:text-rose-600"><Trash2 size={11} /></button>
+                            <div key={slot.originalIndex} className={`flex flex-col items-center justify-center px-1 rounded-xl border border-purple-300 bg-purple-50/50 relative hover:shadow transition-shadow group ${sizeClasses}`}>
+                              <span className="rounded-full bg-purple-100 px-1.5 py-0.5 text-[8px] font-extrabold uppercase text-purple-700 mb-0.5 flex items-center gap-0.5">⭐ Club Slot</span>
+                              <span className="text-[11px] font-bold text-purple-950 font-mono tracking-tight">{to12h(slot.startTime)} – {to12h(slot.endTime)}</span>
+                              <span className="text-[8px] font-semibold text-purple-700 mt-0.5 opacity-80">{fmtDur(slot.durationMinutes || 120)} · ₹{slot.price}</span>
+                              <div className="absolute inset-0 bg-white/90 backdrop-blur-[1px] flex items-center justify-center gap-2 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button type="button" onClick={() => handleSplitClubSlot(slot.originalIndex)} className="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-1 rounded-md hover:bg-purple-200 transition">Split</button>
+                                <button type="button" onClick={() => deleteSlot(slot.originalIndex)} className="text-[10px] font-bold text-rose-600 bg-rose-100 px-2 py-1 rounded-md hover:bg-rose-200 transition">Delete</button>
                               </div>
                             </div>
                           );
                         }
                         return (
-                          <div key={slot.originalIndex} className={`flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 bg-white relative hover:shadow transition-shadow group ${sizeH} ${isChecked ? "ring-2 ring-vibe-violet border-vibe-violet" : ""}`}>
+                          <div key={slot.originalIndex} className={`flex flex-col items-center justify-center px-1 rounded-xl border bg-white relative hover:shadow-sm transition-all group overflow-hidden ${sizeClasses} ${isChecked ? "ring-2 ring-vibe-violet border-vibe-violet bg-vibe-violet/5" : "border-slate-200 hover:border-slate-300"}`}>
                             <input
                               type="checkbox"
                               checked={isChecked}
@@ -3193,16 +3048,16 @@ function BookingStep({ draft, update }: StepProps) {
                                 if (e.target.checked) setSelectedSlotIndices((prev) => [...prev, slot.originalIndex]);
                                 else setSelectedSlotIndices((prev) => prev.filter((idx) => idx !== slot.originalIndex));
                               }}
-                              className="absolute top-1.5 left-1.5 w-3.5 h-3.5 rounded border-slate-300 accent-vibe-violet"
+                              className="absolute top-1 left-1 w-3 h-3 rounded border-slate-300 accent-vibe-violet opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                             />
-                            <span className="text-xs font-bold text-slate-700 font-mono mt-2">
+                            <span className={`text-[11px] font-bold font-mono tracking-tight ${isChecked ? 'text-vibe-violet' : 'text-slate-700'}`}>
                               {slot.startTime} - {slot.endTime}
                             </span>
-                            <span className="text-[9px] text-slate-400 uppercase mt-1">{slot.label}</span>
+                            <span className="text-[8px] font-bold text-slate-400 uppercase mt-0.5 opacity-80 tracking-wider">{slot.label}</span>
 
                             <button type="button" onClick={() => deleteSlot(slot.originalIndex)}
-                              className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-vibe-coral transition">
-                              <Trash2 size={12} />
+                              className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 p-0.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded transition-all">
+                              <Trash2 size={10} />
                             </button>
                           </div>
                         );
@@ -3217,7 +3072,7 @@ function BookingStep({ draft, update }: StepProps) {
       </div>
 
       {/* ── RIGHT PANEL: CLOCK ─────────────────────────────── */}
-      <div className="flex flex-col items-center gap-4 lg:border-l lg:border-surface-border lg:pl-6">
+      <div className="flex flex-col items-center gap-4 lg:border-l lg:border-surface-border lg:pl-6 sticky top-24 self-start">
         <div className="w-full">
           <p className="text-[11px] font-bold text-ink uppercase tracking-wider mb-0.5 text-center">24-Hour Dial</p>
           <p className="text-[10px] text-ink-faint text-center mb-3">Click an hour to toggle · Duration controls slot length</p>
@@ -3225,7 +3080,7 @@ function BookingStep({ draft, update }: StepProps) {
         </div>
 
         {activeSlots.length > 0 && (
-          <div className="w-full rounded-2xl bg-slate-900 p-4 text-white">
+          <div className="w-full rounded-2xl bg-slate-900 p-4 text-white shadow-lg ring-1 ring-white/10">
             <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Summary</p>
             <div className="grid grid-cols-2 gap-3">
               <div><p className="text-[10px] text-slate-400">Total Slots</p><p className="text-2xl font-extrabold">{activeSlots.length}</p></div>
@@ -3277,18 +3132,18 @@ function DayPartGroup({ part, children, onSelectAll, onDeselectAll }: { part: st
       }
     >
       <div className="mb-2 flex items-center justify-between">
-        <p className={`flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest ${url ? "text-white" : "text-slate-400"}`}>
+        <p className={`flex items-center gap-1 text-[9px] font-bold uppercase tracking-widest ${url ? "text-white" : "text-slate-500"}`}>
           <Icon size={11} /> {part}
         </p>
         {(onSelectAll || onDeselectAll) && (
           <div className="flex items-center gap-2">
             {onSelectAll && (
-              <button type="button" onClick={onSelectAll} className="rounded-lg bg-white/20 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-sm transition hover:bg-white/30 hover:text-white shadow-sm">
+              <button type="button" onClick={onSelectAll} className={`rounded-lg px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider backdrop-blur-sm transition shadow-sm cursor-pointer ${url ? "bg-white/20 text-white hover:bg-white/30" : "bg-slate-900 text-white hover:bg-slate-800"}`}>
                 Select All
               </button>
             )}
             {onDeselectAll && (
-              <button type="button" onClick={onDeselectAll} className="rounded-lg bg-black/20 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-sm transition hover:bg-black/30 hover:text-white shadow-sm">
+              <button type="button" onClick={onDeselectAll} className={`rounded-lg px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider backdrop-blur-sm transition shadow-sm cursor-pointer ${url ? "bg-black/40 text-white hover:bg-black/60" : "bg-slate-200 text-slate-700 hover:bg-slate-300"}`}>
                 Deselect All
               </button>
             )}
@@ -3416,9 +3271,9 @@ function AddOnRow({
 
 function PricingStep({ draft, update, audience }: StepProps & { audience: Audience }) {
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
-  // Held as a string so the field can actually be cleared. As a number, clearing it
   // coerced ""→0 and the box snapped back to a stuck "0".
   const [priceInput, setPriceInput] = useState<string>("");
+  const [strikePriceInput, setStrikePriceInput] = useState<string>("");
   const [activeSource, setActiveSource] = useState<string>("default");
 
   const [customSports, setCustomSports] = useState<VendorCustomSport[]>([]);
@@ -3428,6 +3283,52 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
   const [showSlotPricingInfo, setShowSlotPricingInfo] = useState(false);
   const [showAddOnsInfo, setShowAddOnsInfo] = useState(false);
   const [showCouponsInfo, setShowCouponsInfo] = useState(false);
+
+  // Slot Generator States
+  const [bulkDuration, setBulkDuration] = useState("60");
+  const [bulkStartTime, setBulkStartTime] = useState("05:00");
+  const [bulkEndTime, setBulkEndTime] = useState("22:00");
+
+  function getBulkEndMins() {
+    let startMin = t24m(bulkStartTime);
+    let endMin = t24m(bulkEndTime);
+    if (endMin <= startMin) endMin += 1440; // wrap to next day
+    return endMin;
+  }
+
+  function handleGenerateSportSlots() {
+    const dur = parseInt(bulkDuration);
+    const newSlots = generateSlotsInRange(t24m(bulkStartTime), getBulkEndMins(), dur);
+    const matchSport = selectedSportFilter === "all" ? undefined : selectedGames.find(g => g.id === selectedSportFilter)?.label;
+    const matchCourt = selectedCourtFilter === "all" ? undefined : selectedCourtFilter;
+
+    let nextSlots = [...slots];
+    const existingScopeSlots = nextSlots.filter(s => s.sport === matchSport && s.courtId === matchCourt);
+    nextSlots = nextSlots.filter(s => !(s.sport === matchSport && s.courtId === matchCourt));
+    
+    const mergedGenerated = newSlots.map((gen) => {
+      const match = existingScopeSlots.find((existing) => existing.startTime === gen.startTime);
+      if (match) {
+        return {
+          ...gen,
+          sport: matchSport,
+          courtId: matchCourt,
+          price: match.price,
+          strikePrice: match.strikePrice,
+          blocked: match.blocked,
+          blockedReason: match.blockedReason
+        };
+      }
+      return {
+        ...gen,
+        sport: matchSport,
+        courtId: matchCourt,
+        price: 0,
+      };
+    });
+
+    saveSlots([...nextSlots, ...mergedGenerated]);
+  }
 
   useEffect(() => {
     if (audience === "vendor") {
@@ -3684,6 +3585,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
     const matchSport = selectedSportFilter === "all" ? undefined : selectedGames.find(g => g.id === selectedSportFilter)?.label;
     const matchCourt = selectedCourtFilter === "all" ? undefined : selectedCourtFilter;
     const priceNum = Number(priceInput) || 0;
+    const strikePriceNum = Number(strikePriceInput) > 0 ? Number(strikePriceInput) : undefined;
 
     let nextSlots = [...slots];
     selectedKeys.forEach((key) => {
@@ -3696,7 +3598,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
           s.courtId === matchCourt
       );
       if (idx > -1) {
-        nextSlots[idx] = { ...nextSlots[idx], price: priceNum };
+        nextSlots[idx] = { ...nextSlots[idx], price: priceNum, strikePrice: strikePriceNum };
       } else {
         const label = uniqueTimeRanges.find(r => r.startTime === start)?.label ?? "Morning";
         nextSlots.push({
@@ -3704,6 +3606,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
           endTime: end,
           label,
           price: priceNum,
+          strikePrice: strikePriceNum,
           blocked: false,
           sport: matchSport,
           courtId: matchCourt,
@@ -3789,29 +3692,33 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
       {/* ── TURF SLOT PRICING SELECTOR ── */}
       {draft.type !== "Event" && (
         <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_18px_50px_-32px_rgba(15,23,42,0.35)]">
-          <div className="flex flex-col gap-5 border-b border-slate-100 bg-gradient-to-br from-slate-950 via-slate-900 to-violet-950 px-5 py-6 text-white sm:flex-row sm:items-center sm:justify-between sm:px-7">
+          <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
             <div>
-              <div className="mb-2 flex items-center gap-2">
-                <span className="rounded-full bg-white/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-violet-200 ring-1 ring-white/10">Single pricing workspace</span>
+              <h2 className="text-sm font-extrabold tracking-tight text-slate-800 flex items-center gap-2">
+                Set your slot prices
                 <button
                   type="button"
                   onClick={() => setShowSlotPricingInfo(!showSlotPricingInfo)}
-                  className="rounded-full p-1 text-slate-300 transition hover:bg-white/10 hover:text-white"
+                  className="rounded-full p-0.5 text-slate-400 transition hover:bg-slate-200 hover:text-slate-600"
                   title="How pricing works"
                   aria-label="How pricing works"
                 >
                   <Info size={13} />
                 </button>
-              </div>
-              <h2 className="text-xl font-extrabold tracking-tight">Set your slot prices</h2>
-              <p className="mt-1 text-xs text-slate-300">Choose the scope, select time slots, then apply one price.</p>
+              </h2>
+              <p className="mt-0.5 text-[11px] font-medium text-slate-500">Choose the scope, select time slots, then apply one price.</p>
             </div>
-            <div className="min-w-[190px] rounded-2xl bg-white/[0.07] p-3.5 ring-1 ring-white/10 backdrop-blur">
-              <div className="flex items-end justify-between gap-4">
-                <div><p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Priced slots</p><p className="mt-0.5 text-lg font-extrabold">{pricedSlots.length}<span className="text-xs font-semibold text-slate-400"> / {uniqueTimeRanges.length}</span></p></div>
-                <span className="text-xs font-extrabold text-violet-200">{pricingProgress}%</span>
+            <div className="flex items-center gap-4">
+              <span className="hidden sm:inline-block text-[9px] font-bold uppercase tracking-widest text-slate-500 bg-white border border-slate-200 rounded-full px-2 py-0.5 shadow-sm">
+                Single Pricing Workspace
+              </span>
+              <div className="text-right">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-0.5">Priced slots</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-extrabold text-slate-700">{pricedSlots.length}<span className="text-[10px] font-semibold text-slate-400"> / {uniqueTimeRanges.length}</span></p>
+                  <span className="text-[10px] font-extrabold text-vibe-violet">{pricingProgress}%</span>
+                </div>
               </div>
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-violet-400 to-fuchsia-400 transition-all" style={{ width: `${pricingProgress}%` }} /></div>
             </div>
           </div>
           <div className="p-5 sm:p-7">
@@ -3860,10 +3767,10 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
                 <button
                   type="button"
                   onClick={() => setSelectedSportFilter("all")}
-                  className={`shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition border cursor-pointer ${
+                  className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold transition border cursor-pointer ${
                     selectedSportFilter === "all"
                       ? "border-vibe-violet bg-vibe-violet text-white shadow-sm"
-                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
                   All Games (Global Default)
@@ -3873,10 +3780,10 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
                     key={g.id}
                     type="button"
                     onClick={() => setSelectedSportFilter(g.id)}
-                    className={`shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition border cursor-pointer ${
+                    className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold transition border cursor-pointer ${
                       selectedSportFilter === g.id
                         ? "border-vibe-violet bg-vibe-violet text-white shadow-sm"
-                        : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                        : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                     }`}
                   >
                     {g.label}
@@ -3894,10 +3801,10 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
                   type="button"
                   onClick={() => setSelectedCourtFilter("all")}
                   disabled={selectedSportFilter === "all" && filteredCourtsForPricing.length === 0}
-                  className={`shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition border cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                  className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold transition border cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
                     selectedCourtFilter === "all"
                       ? "border-vibe-violet bg-vibe-violet text-white shadow-sm"
-                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
                   All Courts
@@ -3907,10 +3814,10 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
                     key={c.id}
                     type="button"
                     onClick={() => setSelectedCourtFilter(c.id)}
-                    className={`shrink-0 rounded-xl px-3.5 py-2 text-xs font-bold transition border cursor-pointer ${
+                    className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold transition border cursor-pointer ${
                       selectedCourtFilter === c.id
                         ? "border-vibe-violet bg-vibe-violet text-white shadow-sm"
-                        : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                        : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                     }`}
                   >
                     {c.name}
@@ -3939,24 +3846,102 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
                 </p>
               )}
             </div>
+
+            {/* ── SLOT GENERATOR IN PRICING STEP ── */}
+            <div className="mt-4 pt-4 border-t border-slate-200">
+              <p className="text-[11px] font-bold text-ink uppercase tracking-wide mb-3">
+                Generate Slots for {selectedSportFilter === "all" && selectedCourtFilter === "all" ? "Global Default" : "this specific selection"}
+              </p>
+
+              {/* Duration Selectors */}
+              <div className="mb-4">
+                <FieldLabel>Slot Duration</FieldLabel>
+                <div className="flex flex-wrap gap-1.5 max-h-[80px] overflow-y-auto border border-slate-100 rounded-lg p-1.5 bg-slate-50/50">
+                  {[15, 30, 45, 60, 90, 120, 180].map((dur) => {
+                    const isSelected = parseInt(bulkDuration) === dur;
+                    return (
+                      <button key={dur} type="button" onClick={() => setBulkDuration(dur.toString())}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${isSelected ? "bg-vibe-violet text-white shadow-sm" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"}`}>
+                        {fmtDur(dur)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 mb-4">
+                {/* Opens At Hour Cards */}
+                <div className="flex-1">
+                  <FieldLabel>Opens At</FieldLabel>
+                  <div className="flex flex-wrap gap-1.5 border border-slate-100 rounded-lg p-2 bg-slate-50/50">
+                    {TIME_OPTIONS.map((t) => {
+                      const isSelected = bulkStartTime === t.value;
+                      return (
+                        <button key={t.value} type="button" onClick={() => setBulkStartTime(t.value)}
+                          className={`px-2 py-1 rounded-md text-[10px] font-bold transition ${isSelected ? "bg-slate-900 text-white" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"}`}>
+                          {t.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Closes At Hour Cards */}
+                <div className="flex-1">
+                  <FieldLabel>Closes At</FieldLabel>
+                  <div className="flex flex-wrap gap-1.5 border border-slate-100 rounded-lg p-2 bg-slate-50/50">
+                    {END_TIME_OPTIONS.map((t) => {
+                      const isSelected = bulkEndTime === t.value;
+                      return (
+                        <button key={t.value} type="button" onClick={() => setBulkEndTime(t.value)}
+                          className={`px-2 py-1 rounded-md text-[10px] font-bold transition ${isSelected ? "bg-slate-900 text-white" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"}`}>
+                          {t.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <button type="button" onClick={handleGenerateSportSlots}
+                  className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-vibe-violet px-6 py-2.5 text-xs font-bold text-white hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:opacity-40">
+                  <Plus size={13} /> Generate Slots
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Pricing Controls Row */}
-          <div className="sticky top-0 z-20 mb-5 flex flex-wrap items-end justify-between gap-4 rounded-2xl border border-violet-200 bg-white/95 p-4 shadow-[0_12px_30px_-20px_rgba(91,33,182,0.65)] backdrop-blur">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="w-48">
-                <FieldLabel>Enter Price (₹) *</FieldLabel>
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-4 rounded-2xl border border-violet-200 bg-white p-4 shadow-sm">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="w-40 sm:w-44">
+                <FieldLabel>Selling Price (₹) *</FieldLabel>
                 <input
                   type="number"
                   value={priceInput}
                   onFocus={(e) => e.target.select()}
                   onChange={(e) => setPriceInput(e.target.value.replace(/^0+(?=\d)/, ""))}
-                  placeholder="e.g. 1000"
-                  className={`${inputClass} text-xs`}
+                  placeholder="e.g. 400"
+                  className={`${inputClass} text-sm font-bold`}
+                />
+              </div>
+              <div className="w-40 sm:w-44">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Original Price (₹)</span>
+                  <span className="text-[9px] text-slate-400 font-semibold">(Optional)</span>
+                </div>
+                <input
+                  type="number"
+                  value={strikePriceInput}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => setStrikePriceInput(e.target.value.replace(/^0+(?=\d)/, ""))}
+                  placeholder="e.g. 500"
+                  className={`${inputClass} text-sm`}
                 />
               </div>
               <button type="button" onClick={handleSetPrice} disabled={selectedKeys.length === 0 || !validPrice}
-                className="rounded-xl bg-gradient-to-r from-violet-700 to-purple-600 px-5 py-2.5 text-xs font-extrabold text-white shadow-lg shadow-violet-200 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0">
+                className="rounded-xl bg-gradient-to-r from-violet-700 to-purple-600 px-6 py-2.5 text-sm font-extrabold text-white shadow-lg shadow-violet-200 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 h-[42px] mt-[26px]">
                 {selectedKeys.length > 0 ? `Apply to ${selectedKeys.length} slot${selectedKeys.length === 1 ? "" : "s"}` : "Select slots below"}
               </button>
             </div>
@@ -3997,21 +3982,28 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
                         setSelectedKeys((prev) => prev.filter((k) => !keys.includes(k)));
                       }}
                     >
-                      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
+                      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-1.5">
                         {partSlots.map((s) => {
                           const key = `${s.startTime}-${s.endTime}`;
                           const isSelected = selectedKeys.includes(key);
                           return (
                             <div key={key} className="group relative">
                               <button type="button" onClick={() => toggleSelect(key)}
-                                className={`flex w-full flex-col items-center justify-center p-2.5 rounded-xl border-2 transition cursor-pointer ${isSelected ? "border-vibe-violet bg-vibe-violet/5 font-extrabold shadow-sm" : "border-slate-200 bg-white hover:border-slate-300"
+                                className={`flex w-full flex-col items-center justify-center p-1.5 min-h-[46px] rounded-lg border transition cursor-pointer overflow-hidden ${isSelected ? "border-vibe-violet bg-vibe-violet/5 shadow-sm ring-1 ring-vibe-violet" : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm"
                                   }`}
                               >
-                                <span className="text-xs font-bold text-slate-700 font-mono">{to12h(s.startTime)} - {to12h(s.endTime)}</span>
-                                <span className={`text-[10px] font-extrabold mt-1 ${s.price > 0 ? "text-vibe-violet" : "text-slate-400"}`}>
-                                  {s.price > 0 ? `₹${s.price}` : "Not Set"}
-                                </span>
-                                <span className="text-[8px] text-slate-400 uppercase mt-0.5">{s.sourceLabel}</span>
+                                <span className={`text-[11px] font-bold font-sans tracking-tight leading-none ${isSelected ? 'text-vibe-violet' : 'text-slate-700'}`}>{to12h(s.startTime)} - {to12h(s.endTime)}</span>
+                                <div className="mt-1 flex flex-col items-center justify-center w-full">
+                                  <div className="flex items-center gap-1">
+                                    {s.strikePrice && s.strikePrice > s.price && (
+                                      <span className="text-[10px] font-medium text-slate-400 line-through">₹{s.strikePrice}</span>
+                                    )}
+                                    <span className={`block text-[12px] font-display font-black leading-none tracking-tight ${s.price > 0 ? "text-vibe-violet" : "text-slate-400"}`}>
+                                      {s.price > 0 ? `₹${s.price}` : "Not Set"}
+                                    </span>
+                                  </div>
+                                  <span className="block text-[7px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-0.5 opacity-80">{s.sourceLabel}</span>
+                                </div>
                               </button>
                               <button
                                 type="button"
@@ -4047,16 +4039,24 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
                 {pricedSlots.map((s) => {
                   const key = `${s.startTime}-${s.endTime}`;
                   return (
-                    <div key={key} className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-bold text-slate-800 shadow-sm animate-in zoom-in-95 duration-100">
-                      <span>{to12h(s.startTime)} - {to12h(s.endTime)}: ₹{s.price}</span>
-                      <span className="text-[8px] text-vibe-violet bg-vibe-violet/5 px-1.5 py-0.5 rounded uppercase tracking-tight">{s.sourceLabel}</span>
+                    <div key={key} className="flex items-center gap-2 rounded-full border border-slate-200 bg-white pl-3 pr-1 py-1.5 shadow-sm animate-in zoom-in-95 duration-100 hover:border-slate-300 transition">
+                      <span className="text-[11px] font-bold text-slate-600 font-sans tracking-tight leading-none pt-0.5">{to12h(s.startTime)} - {to12h(s.endTime)}</span>
+                      <div className="flex items-center gap-1.5 border-l border-slate-100 pl-2">
+                        {s.strikePrice && s.strikePrice > s.price && (
+                          <span className="text-[10px] font-medium text-slate-400 line-through">₹{s.strikePrice}</span>
+                        )}
+                        <span className="text-[12px] font-display font-black text-vibe-violet leading-none tracking-tight">₹{s.price}</span>
+                        {s.sourceLabel && s.sourceLabel !== "Global Default" && (
+                          <span className="text-[7px] text-slate-400 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded-sm uppercase tracking-widest leading-none">{s.sourceLabel}</span>
+                        )}
+                      </div>
                       <button
                         type="button"
                         onClick={() => handleRemovePrice(key)}
-                        className="text-slate-400 hover:text-vibe-coral rounded p-0.5 transition cursor-pointer"
+                        className="text-slate-400 hover:text-white hover:bg-rose-500 rounded-full p-0.5 transition cursor-pointer ml-0.5"
                         title="Remove override"
                       >
-                        <X size={12} />
+                        <X size={10} />
                       </button>
                     </div>
                   );
@@ -4075,16 +4075,16 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
                 {blockedSlots.map((s) => {
                   const key = `${s.startTime}-${s.endTime}`;
                   return (
-                    <div key={key} className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-bold text-slate-600 animate-in zoom-in-95 duration-100">
-                      <span>{to12h(s.startTime)} - {to12h(s.endTime)}</span>
-                      <span className="text-[8px] text-slate-400 bg-slate-200/50 px-1.5 py-0.5 rounded uppercase tracking-tight">Blocked</span>
+                    <div key={key} className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 pl-2.5 pr-1 py-1 shadow-sm animate-in zoom-in-95 duration-100">
+                      <span className="text-[10px] font-bold text-slate-500 font-mono tracking-tight leading-none pt-0.5 opacity-80">{to12h(s.startTime)} - {to12h(s.endTime)}</span>
+                      <span className="text-[7px] text-white bg-slate-400 border border-slate-400 px-1.5 py-0.5 rounded-sm uppercase tracking-widest leading-none">Blocked</span>
                       <button
                         type="button"
                         onClick={() => toggleBlockSlot(key, false)}
-                        className="text-slate-400 hover:text-vibe-violet rounded p-0.5 transition cursor-pointer"
+                        className="text-slate-400 hover:text-white hover:bg-slate-700 rounded-full p-0.5 transition cursor-pointer ml-0.5"
                         title="Unblock slot"
                       >
-                        <X size={12} />
+                        <X size={10} />
                       </button>
                     </div>
                   );
@@ -4899,7 +4899,7 @@ export function PackageStudio({
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-cream-200">
-      <div className="sticky top-0 z-10 flex items-center justify-between bg-gradient-to-r from-vibe-indigo via-vibe-violet to-vibe-violetSoft px-4 py-4 text-white shadow-pop sm:px-8">
+      <div className="sticky top-0 z-30 flex items-center justify-between bg-gradient-to-r from-vibe-indigo via-vibe-violet to-vibe-violetSoft px-4 py-4 text-white shadow-pop sm:px-8">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/70">
             {draft.type === "Event"
