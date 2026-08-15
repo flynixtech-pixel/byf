@@ -15,6 +15,9 @@ import {
 } from "lucide-react";
 import { type Venue, listingToVenue } from "@/lib/venues";
 import { browseVenues } from "@/lib/api/venues";
+import { getFoodOutlets } from "@/lib/api/foodOrders";
+import { browsePublicTournaments } from "@/lib/api/tournaments";
+import type { FoodOutlet, Tournament } from "@/lib/api/types";
 import { SiteHeader } from "../site-header";
 import { Hero } from "./Hero";
 import { FoodAndBeverages } from "./FoodAndBeverages";
@@ -35,7 +38,11 @@ import { useVenueFilters } from "./useVenueFilters";
 import { useCustomerAuth } from "@/components/providers/CustomerAuthProvider";
 import { SPORTS_CATALOG } from "./data";
 
-
+const FALLBACK_VENUES: Venue[] = [
+  { id: "mock-1", slug: "box-cricket", name: "Box Cricket Arena", area: "Udaipur", distanceKm: 0, rating: 4.8, pricePerHour: 800, status: "Available", sport: "Cricket", image: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&q=80" },
+  { id: "mock-2", slug: "premium-sports", name: "Premium Sports Arena", area: "Udaipur", distanceKm: 0, rating: 4.5, pricePerHour: 1500, status: "Available", sport: "Multi-Sport", image: "https://images.unsplash.com/photo-1459865264687-595d652de67e?w=800&q=80" },
+  { id: "mock-3", slug: "dugout-box", name: "Dugout - Box turf", area: "Udaipur", distanceKm: 0, rating: 4.2, pricePerHour: 1000, status: "Available", sport: "Football", image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80" },
+];
 
 // Only rendered once the player opens the challenge sheet, and pulls in
 // jsPDF/html-to-image — code-split out of the initial home page bundle.
@@ -51,6 +58,8 @@ export default function HomePage() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [toast, setToast] = useState<string | null>(null);
   const [venues, setVenues] = useState<Venue[]>([]);
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [foodOutlets, setFoodOutlets] = useState<FoodOutlet[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [challengeOpen, setChallengeOpen] = useState(false);
   const [joinInviteOpen, setJoinInviteOpen] = useState(false);
@@ -65,11 +74,24 @@ export default function HomePage() {
   useEffect(() => {
     browseVenues({ limit: 30, type: "Turf" })
       .then((result) => {
-        setVenues(result.items.map(listingToVenue));
+        if (result.items && result.items.length > 0) {
+          setVenues(result.items.map(listingToVenue));
+        } else {
+          // Fallback if no venues are returned but API succeeded
+          setVenues(FALLBACK_VENUES);
+        }
       })
       .catch(() => {
-        setVenues([]);
+        setVenues(FALLBACK_VENUES);
       });
+
+    browsePublicTournaments({ limit: 1 })
+      .then((res) => setTournaments(res.items))
+      .catch(() => setTournaments([]));
+      
+    getFoodOutlets({ kind: "dining", limit: 10 })
+      .then((res) => setFoodOutlets(res.items))
+      .catch(() => setFoodOutlets([]));
   }, []);
 
   const openVenue = useCallback(
@@ -145,17 +167,27 @@ export default function HomePage() {
           </p>
         )}
 
+        <TrendingVenues
+          venues={venues}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
+          onViewVenue={openVenue}
+          onBookVenue={openVenue}
+          onViewAll={() => router.push("/venues")}
+        />
+
         {/* Find A Venue - Sports Section */}
-        <section className="relative z-10 mx-auto max-w-7xl pt-1 pb-1 sm:pt-3 sm:px-6 lg:px-8">
-          <div className="sm:rounded-[2.2rem] sm:border sm:border-slate-100 sm:bg-white sm:p-6.5 sm:shadow-xl sm:shadow-slate-200/50">
-            <div className="flex items-center justify-between gap-3 mb-3 px-4 sm:px-0 sm:mb-6">
-              <div className="flex items-center gap-2 sm:gap-3.5">
-                <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#0f172a] text-white shadow-sm sm:h-12 sm:w-12 sm:rounded-2xl sm:shadow-md">
-                  <MapPin className="h-4 w-4 sm:h-6 sm:w-6" />
+        <section className="relative z-10 mx-auto max-w-7xl pt-1 pb-1 sm:pt-4 sm:px-6 lg:px-8">
+          <div className="sm:rounded-[2.5rem] sm:border sm:border-slate-100 sm:bg-white sm:p-8 sm:shadow-xl sm:shadow-slate-200/50 relative">
+            
+            <div className="relative z-10 flex items-center justify-between gap-3 mb-4 px-4 sm:px-0 sm:mb-8">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-lg shadow-brand-500/25 sm:h-12 sm:w-12 sm:rounded-2xl">
+                  <MapPin className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
                 <div>
-                  <h2 className="text-base font-bold tracking-tight text-slate-950 sm:text-2xl">Find A Venue</h2>
-                  <p className="text-[10px] font-medium text-slate-500 sm:text-sm">Discover top venues for every game and vibe.</p>
+                  <h2 className="text-lg font-black tracking-tight text-slate-950 sm:text-2xl drop-shadow-sm">Find A Venue</h2>
+                  <p className="text-[11px] font-semibold text-slate-500 sm:text-sm mt-0.5">Discover top venues for every game and vibe.</p>
                 </div>
               </div>
               <Link
@@ -166,7 +198,7 @@ export default function HomePage() {
               </Link>
             </div>
 
-            <div className="flex overflow-x-auto px-4 pb-2 sm:px-0 sm:grid sm:overflow-visible gap-3 sm:gap-5 sm:grid-cols-4 xl:grid-cols-7 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <div className="relative z-10 flex overflow-x-auto px-4 pb-4 pt-2 sm:px-0 sm:grid sm:overflow-visible gap-3 sm:gap-6 sm:grid-cols-4 xl:grid-cols-7 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden snap-x snap-mandatory">
               {SPORTS_CATALOG.map((s, index) => {
                 // Map the ID to a category for the venues page
                 const category = s.id === "box-cricket" || s.id === "cricket-nets" ? "cricket" : s.id;
@@ -175,18 +207,18 @@ export default function HomePage() {
                   <Link
                     key={s.id}
                     href={`/venues?category=${category}`}
-                    className="group flex flex-col items-center justify-start text-center min-w-0 w-20 shrink-0 sm:w-full cursor-pointer"
+                    className="group flex flex-col items-center justify-start text-center min-w-0 w-[72px] shrink-0 sm:w-full cursor-pointer snap-start"
                   >
-                    <div className="relative flex h-14 w-14 items-center justify-center rounded-[1.125rem] bg-[#f8fafc] border border-slate-100/90 shadow-2xs transition-all duration-300 group-hover:-translate-y-1 group-hover:bg-white group-hover:shadow-md sm:h-20 sm:w-20 sm:rounded-[1.25rem]">
-                      <div className={`absolute inset-0 rounded-[inherit] opacity-15 bg-gradient-to-br ${s.bubble}`} />
+                    <div className="relative flex h-16 w-16 sm:h-[110px] sm:w-[110px] items-center justify-center rounded-[1.25rem] sm:rounded-[2rem] bg-slate-50 border border-slate-100 transition-all duration-300 group-hover:-translate-y-2 group-hover:bg-white group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] overflow-hidden">
+                      <div className={`absolute inset-0 opacity-15 bg-gradient-to-br ${s.bubble} transition-opacity duration-300 group-hover:opacity-30`} />
                       <img
                         src={s.image}
                         alt={s.alt}
                         loading={index === 0 ? "eager" : "lazy"}
-                        className="relative z-10 h-7 w-7 object-contain transition-transform duration-300 group-hover:scale-110 sm:h-10 sm:w-10"
+                        className="relative z-10 h-8 w-8 sm:h-[55px] sm:w-[55px] object-contain transition-transform duration-500 group-hover:scale-125 drop-shadow-md"
                       />
                     </div>
-                    <span className="mt-1.5 text-[10px] font-bold text-slate-700 transition-colors group-hover:text-slate-950 sm:mt-2.5 sm:text-xs text-center truncate w-full px-1">
+                    <span className="mt-2 sm:mt-3.5 text-[10px] font-black uppercase tracking-wider text-slate-700 transition-colors group-hover:text-brand-600 sm:text-xs text-center truncate w-full px-1">
                       {s.label}
                     </span>
                   </Link>
@@ -196,20 +228,16 @@ export default function HomePage() {
           </div>
         </section>
 
-        <TrendingVenues
-          venues={venues}
-          favorites={favorites}
-          onToggleFavorite={toggleFavorite}
-          onViewVenue={openVenue}
-          onBookVenue={openVenue}
-          onViewAll={() => router.push("/venues")}
-        />
+        {tournaments.length > 0 && (
+          <EventsAndOffers
+            tournaments={tournaments}
+            onViewAllEvents={() => router.push("/tournaments")}
+          />
+        )}
+
+        {foodOutlets.length > 0 && <FoodAndBeverages foodOutlets={foodOutlets} />}
 
         <TopPlayersRanking />
-
-        <EventsAndOffers
-          onViewAllEvents={() => router.push("/tournaments")}
-        />
 
         <CommunityMatches
           onJoin={() => showToast("Joining Badminton Doubles match…")}
@@ -218,8 +246,6 @@ export default function HomePage() {
           onViewAll={() => router.push("/community")}
           onLaunchChallenge={() => setChallengeOpen(true)}
         />
-
-        <FoodAndBeverages />
 
         <HowItWorks />
 

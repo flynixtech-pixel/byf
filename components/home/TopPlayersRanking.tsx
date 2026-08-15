@@ -276,7 +276,7 @@ export function TopPlayersRanking({
 
   const boardContent = (
     <div className="flex flex-col">
-      <div className={`${isViewAll ? "max-h-[24rem]" : ""} space-y-2 overflow-y-auto overscroll-contain pr-1 [scrollbar-width:thin]`}>
+      <div className="space-y-2">
         {loading ? (
           Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-[68px] animate-pulse rounded-2xl bg-slate-100" />
@@ -366,7 +366,7 @@ export function TopPlayersRanking({
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-7xl px-4 py-6 sm:py-8 mt-4 sm:px-6 lg:px-8">
       <SectionHeading
         eyebrow="BYV Leaderboard"
         title="Top Players Ranking 🏅"

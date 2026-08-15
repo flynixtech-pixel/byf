@@ -17,7 +17,7 @@ export function CommunityMatches({
   onLaunchChallenge: () => void;
 }) {
   return (
-    <section id="community" className="mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="community" className="mx-auto mt-6 sm:mt-8 max-w-7xl px-4 sm:px-6 lg:px-8">
       <SectionHeading
         eyebrow="Open right now"
         title="Community Matches & Challenges"

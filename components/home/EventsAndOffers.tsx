@@ -2,14 +2,20 @@
 
 import { ArrowRight, Calendar, MapPin, Medal, Sparkles, Trophy } from "lucide-react";
 import { SectionHeading } from "./ui";
+import type { Tournament } from "@/lib/api/types";
 
 export function EventsAndOffers({
+  tournaments,
   onViewAllEvents,
 }: {
+  tournaments: Tournament[];
   onViewAllEvents: () => void;
 }) {
+  if (!tournaments || tournaments.length === 0) return null;
+  const t = tournaments[0];
+
   return (
-    <section id="tournaments" className="mx-auto mt-6 sm:mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="tournaments" className="mx-auto mt-6 sm:mt-8 max-w-7xl px-4 sm:px-6 lg:px-8">
       <SectionHeading title="Upcoming Events & Tournaments" subtitle="Participate in local leagues, tournaments and compete for exciting prize pools." />
 
       <div
@@ -34,13 +40,13 @@ export function EventsAndOffers({
                 <Sparkles className="h-3 w-3 fill-slate-950" /> Championship
               </span>
               <span className="rounded-full bg-black/65 backdrop-blur-md px-3 py-1 text-[10px] font-extrabold text-amber-200 border border-amber-400/30">
-                ₹50,000 Prize Pool
+                {t.prizeMoney ? `₹${t.prizeMoney.toLocaleString("en-IN")} Prize Pool` : "Exciting Prizes"}
               </span>
             </div>
 
             <div className="relative z-10 mt-auto">
-              <p className="text-xs font-extrabold uppercase tracking-widest text-amber-300">Annual Tournament</p>
-              <h3 className="text-2xl font-black text-white drop-shadow-md">BYV Premier League 2026</h3>
+              <p className="text-xs font-extrabold uppercase tracking-widest text-amber-300">{t.category} Tournament</p>
+              <h3 className="text-2xl font-black text-white drop-shadow-md">{t.title}</h3>
             </div>
           </div>
 
@@ -50,11 +56,13 @@ export function EventsAndOffers({
               <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600 font-medium">
                 <div className="flex items-center gap-2 font-bold text-slate-800 text-sm">
                   <Calendar className="h-4 w-4 text-amber-500 shrink-0" />
-                  <span>31 May – 6 June 2026</span>
+                  <span>
+                    {new Date(t.startDate).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} – {new Date(t.endDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                  </span>
                 </div>
-                <div className="flex items-center gap-1.5 text-slate-500 font-semibold">
+                <div className="flex items-center gap-1.5 text-slate-500 font-semibold truncate max-w-[50%]">
                   <MapPin className="h-4 w-4 text-slate-400 shrink-0" />
-                  <span>Maharana Pratap Khel Gaon, Udaipur</span>
+                  <span className="truncate">{t.address}, {t.city}</span>
                 </div>
               </div>
 
@@ -63,12 +71,14 @@ export function EventsAndOffers({
                   <Trophy className="h-6 w-6" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-extrabold text-slate-900">Multi-Sport Championship</p>
-                  <p className="text-xs font-medium text-amber-800">Football · Pickleball · Badminton · Lawn Tennis</p>
+                  <p className="text-sm font-extrabold text-slate-900 truncate">{t.title}</p>
+                  <p className="text-xs font-medium text-amber-800 truncate">{t.category} {t.subCategory ? `· ${t.subCategory}` : ""}</p>
                 </div>
                 <div className="shrink-0 text-right pr-2">
                   <span className="block text-[10px] font-bold uppercase text-slate-400">Available Slots</span>
-                  <span className="text-sm font-black text-emerald-600">12 / 16 Teams</span>
+                  <span className="text-sm font-black text-emerald-600">
+                    {t.maxTeams ? `${Math.max(0, t.maxTeams - (t.registeredTeamsCount || 0))} / ${t.maxTeams} Teams` : "Open"}
+                  </span>
                 </div>
               </div>
             </div>
