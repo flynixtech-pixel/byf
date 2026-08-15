@@ -141,6 +141,7 @@ export interface TurfSlot {
   endTime: string;
   label: string;
   price: number;
+  strikePrice?: number;
   blocked?: boolean;
   blockedReason?: string;
   isClubSlot?: boolean;

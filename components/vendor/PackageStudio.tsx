@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useMemo, useEffect } from "react";
-import { Check, ExternalLink, Loader2, Plus, Trash2, Upload, X, Clock3, ChevronLeft, ChevronRight, LayoutGrid, List, Sunrise, Sun, Sunset, Moon, Ban, Crop, ArrowUpDown, Lightbulb, Layers, Grid, LocateFixed, Pencil, Info, Camera, GraduationCap, MoreVertical, CheckCircle2, ImagePlus, Image as ImageIcon } from "lucide-react";
+import { Check, Loader2, Plus, Trash2, Upload, X, Clock3, ChevronLeft, ChevronRight, LayoutGrid, List, Sunrise, Sun, Sunset, Moon, Ban, Crop, ArrowUpDown, Lightbulb, Layers, Grid, LocateFixed, Pencil, Info, Camera, GraduationCap, MoreVertical, CheckCircle2, ImagePlus, Image as ImageIcon } from "lucide-react";
 import { uploadAdminImage, uploadVendorImage } from "@/lib/api/uploads";
 import { ApiError } from "@/lib/api/client";
 import {
@@ -32,7 +32,7 @@ import { AiPackageAutoFillCard } from "./AiPackageAutoFillCard";
 import { GeneratedLaunchDetails, VendorPackageAiResponse } from "@/lib/api/vendor";
 import { SPORT_CATEGORIES, SportCategory, venueOptionsFor, VenueSetting } from "@/lib/taxonomy";
 import { usePexelsImage } from "@/lib/pexels";
-import { trackEvent, trackPriceChange } from "@/lib/analytics";
+import { trackEvent } from "@/lib/analytics";
 import { INDIAN_HOLIDAYS } from "@/lib/holidays";
 
 type Audience = "admin" | "vendor";
@@ -611,7 +611,7 @@ function PackageStep({
           </div>
           <span className="text-sm font-medium text-vibe-violet">{galleryImages.length} / 10 photos</span>
         </div>
-        
+
         <input
           ref={bulkInput}
           type="file"
@@ -949,8 +949,8 @@ function GameCourtsModal({
                         type="button"
                         onClick={() => setActiveTab(i)}
                         className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-bold transition cursor-pointer ${currentTab === i
-                            ? "bg-vibe-violet text-white shadow-md scale-105"
-                            : "border border-surface-border bg-white text-ink-soft hover:bg-cream-200"
+                          ? "bg-vibe-violet text-white shadow-md scale-105"
+                          : "border border-surface-border bg-white text-ink-soft hover:bg-cream-200"
                           }`}
                       >
                         {court.name || `Court ${i + 1}`}
@@ -1101,8 +1101,8 @@ function CourtRow({
           onClick={() => onPatch({ active: !isCourtActive })}
           title={isCourtActive ? "Court is bookable" : "Court is hidden from booking"}
           className={`shrink-0 rounded-lg border px-2.5 py-2 text-[11px] font-bold transition ${isCourtActive
-              ? "border-vibe-violet bg-vibe-violet text-white"
-              : "border-surface-border bg-white text-ink-faint"
+            ? "border-vibe-violet bg-vibe-violet text-white"
+            : "border-surface-border bg-white text-ink-faint"
             }`}
         >
           {isCourtActive ? "Active" : "Off"}
@@ -1134,8 +1134,8 @@ function CourtRow({
                   })
                 }
                 className={`rounded-full border px-2.5 py-1 text-[11px] font-bold transition ${on
-                    ? "border-vibe-violet bg-vibe-violet text-white"
-                    : "border-surface-border bg-white text-ink-faint"
+                  ? "border-vibe-violet bg-vibe-violet text-white"
+                  : "border-surface-border bg-white text-ink-faint"
                   }`}
               >
                 {label}
@@ -1446,8 +1446,8 @@ function CustomSportModal({
                 }}
                 onClick={() => fileInputRef.current?.click()}
                 className={`flex h-36 w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed p-4 text-center transition cursor-pointer ${dragOver
-                    ? "border-vibe-violet bg-vibe-violet/10"
-                    : "border-surface-border bg-cream-200/40 hover:border-vibe-violet/50 hover:bg-cream-200"
+                  ? "border-vibe-violet bg-vibe-violet/10"
+                  : "border-surface-border bg-cream-200/40 hover:border-vibe-violet/50 hover:bg-cream-200"
                   }`}
               >
                 {uploading ? (
@@ -1747,11 +1747,10 @@ function DetailsStep({ draft, update, updateMany, audience }: StepProps & { audi
                       setActiveCourtSport(cat.label);
                     }
                   }}
-                  className={`relative flex items-center gap-2 rounded-full px-3.5 py-2 sm:px-4 sm:py-2.5 text-[11.5px] sm:text-xs font-bold transition-all duration-300 ease-out cursor-pointer border select-none ${
-                    isSelected 
-                      ? "bg-gradient-to-br from-vibe-violet to-purple-700 text-white border-transparent ring-2 ring-vibe-violet/40 ring-offset-2 shadow-lg shadow-vibe-violet/20 hover:-translate-y-0.5" 
-                      : "bg-white/90 backdrop-blur-sm text-slate-600 border-slate-200/80 hover:border-vibe-violet/40 hover:bg-vibe-violet/5 hover:text-vibe-violet hover:shadow-md hover:-translate-y-0.5"
-                  }`}
+                  className={`relative flex items-center gap-2 rounded-full px-3.5 py-2 sm:px-4 sm:py-2.5 text-[11.5px] sm:text-xs font-bold transition-all duration-300 ease-out cursor-pointer border select-none ${isSelected
+                    ? "bg-gradient-to-br from-vibe-violet to-purple-700 text-white border-transparent ring-2 ring-vibe-violet/40 ring-offset-2 shadow-lg shadow-vibe-violet/20 hover:-translate-y-0.5"
+                    : "bg-white/90 backdrop-blur-sm text-slate-600 border-slate-200/80 hover:border-vibe-violet/40 hover:bg-vibe-violet/5 hover:text-vibe-violet hover:shadow-md hover:-translate-y-0.5"
+                    }`}
                 >
                   {cat.isCustom && cat.image ? (
                     <img src={cat.image} alt="" className={`w-[15px] h-[15px] object-contain transition-all duration-300 ${isSelected ? 'brightness-0 invert drop-shadow-sm' : 'opacity-80 group-hover:opacity-100'}`} />
@@ -1762,7 +1761,7 @@ function DetailsStep({ draft, update, updateMany, audience }: StepProps & { audi
                   )}
                   <span className="tracking-wide">{cat.label}</span>
                   {isSelected && (
-                    <span 
+                    <span
                       className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-black/20 hover:bg-black/40 transition cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -2758,16 +2757,16 @@ function BookingStep({ draft, update }: StepProps) {
                     update("dailyRoutine", false);
                   }}
                   className={`flex flex-col justify-between items-start rounded-xl p-2 min-h-[75px] border text-left transition ${isSel
-                      ? "border-slate-900 bg-slate-900 text-white shadow-md font-extrabold"
-                      : isHolidayCell
-                        ? "border-rose-300 bg-rose-50 hover:bg-rose-100"
-                        : hasOvr
-                          ? "border-emerald-200 bg-emerald-50/30 hover:border-emerald-300"
-                          : day.festival
-                            ? "border-rose-100 bg-rose-50/30 hover:border-rose-200 text-rose-900"
-                            : day.isSunday
-                              ? "border-amber-200 bg-amber-50/40 hover:border-amber-300 text-amber-900"
-                              : "border-slate-100 bg-white hover:border-slate-300"
+                    ? "border-slate-900 bg-slate-900 text-white shadow-md font-extrabold"
+                    : isHolidayCell
+                      ? "border-rose-300 bg-rose-50 hover:bg-rose-100"
+                      : hasOvr
+                        ? "border-emerald-200 bg-emerald-50/30 hover:border-emerald-300"
+                        : day.festival
+                          ? "border-rose-100 bg-rose-50/30 hover:border-rose-200 text-rose-900"
+                          : day.isSunday
+                            ? "border-amber-200 bg-amber-50/40 hover:border-amber-300 text-amber-900"
+                            : "border-slate-100 bg-white hover:border-slate-300"
                     }`}
                 >
                   <div className="flex items-center justify-between w-full">
@@ -3305,7 +3304,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
     let nextSlots = [...slots];
     const existingScopeSlots = nextSlots.filter(s => s.sport === matchSport && s.courtId === matchCourt);
     nextSlots = nextSlots.filter(s => !(s.sport === matchSport && s.courtId === matchCourt));
-    
+
     const mergedGenerated = newSlots.map((gen) => {
       const match = existingScopeSlots.find((existing) => existing.startTime === gen.startTime);
       if (match) {
@@ -3417,6 +3416,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
 
   interface EffectiveSlotInfo {
     price: number;
+    strikePrice?: number;
     blocked: boolean;
     source: "exact" | "sport" | "court" | "default" | "none";
     sourceLabel: string;
@@ -3432,6 +3432,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
       if (exact) {
         return {
           price: exact.price,
+          strikePrice: exact.strikePrice,
           blocked: !!exact.blocked,
           source: "exact",
           sourceLabel: `This Court`,
@@ -3445,6 +3446,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
       if (sportOnly) {
         return {
           price: sportOnly.price,
+          strikePrice: sportOnly.strikePrice,
           blocked: !!sportOnly.blocked,
           source: "sport",
           sourceLabel: `${matchSport} Default`,
@@ -3458,6 +3460,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
       if (courtOnly) {
         return {
           price: courtOnly.price,
+          strikePrice: courtOnly.strikePrice,
           blocked: !!courtOnly.blocked,
           source: "court",
           sourceLabel: `Court Default`,
@@ -3470,6 +3473,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
     if (fallback) {
       return {
         price: fallback.price,
+        strikePrice: fallback.strikePrice,
         blocked: !!fallback.blocked,
         source: "default",
         sourceLabel: "Global Default",
@@ -3478,6 +3482,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
 
     return {
       price: 0,
+      strikePrice: undefined,
       blocked: false,
       source: "none",
       sourceLabel: "Unpriced",
@@ -3505,6 +3510,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
         endTime: range.endTime,
         label: range.label,
         price: effective.price,
+        strikePrice: effective.strikePrice,
         blocked: effective.blocked,
         source: effective.source,
         sourceLabel: effective.sourceLabel,
@@ -3722,376 +3728,371 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
             </div>
           </div>
           <div className="p-5 sm:p-7">
-          {showSlotPricingInfo && (
-            <p className="mb-5 rounded-xl border border-violet-100 bg-violet-50 p-3 text-xs leading-relaxed text-violet-900 animate-in slide-in-from-top-1 duration-150">
-              Select one or more slots, enter the amount once, and apply. Use sport or court filters only when you need a custom override.
-            </p>
-          )}
+            {showSlotPricingInfo && (
+              <p className="mb-5 rounded-xl border border-violet-100 bg-violet-50 p-3 text-xs leading-relaxed text-violet-900 animate-in slide-in-from-top-1 duration-150">
+                Select one or more slots, enter the amount once, and apply. Use sport or court filters only when you need a custom override.
+              </p>
+            )}
 
-          {/* Slot source tabs — global default + per-date override lists */}
-          {sources.length > 1 && (
-            <div className="mb-4 flex flex-wrap gap-2">
-              {sources.map((src) => (
-                <button
-                  key={src.id}
-                  type="button"
-                  onClick={() => {
-                    setActiveSource(src.id);
-                    setSelectedKeys([]);
-                  }}
-                  className={`rounded-full px-3.5 py-1.5 text-[11px] font-bold transition cursor-pointer ${
-                    sourceId === src.id
+            {/* Slot source tabs — global default + per-date override lists */}
+            {sources.length > 1 && (
+              <div className="mb-4 flex flex-wrap gap-2">
+                {sources.map((src) => (
+                  <button
+                    key={src.id}
+                    type="button"
+                    onClick={() => {
+                      setActiveSource(src.id);
+                      setSelectedKeys([]);
+                    }}
+                    className={`rounded-full px-3.5 py-1.5 text-[11px] font-bold transition cursor-pointer ${sourceId === src.id
                       ? "bg-slate-900 text-white shadow-sm"
                       : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300"
-                  }`}
-                >
-                  {src.id === "default" ? "⚙️ " : "📅 "}
-                  {src.label}
-                </button>
-              ))}
-            </div>
-          )}
-          {sources.length > 0 && sourceId !== "default" && (
-            <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-[11px] font-semibold text-vibe-amber">
-              You are pricing the custom slots for {sources.find((s) => s.id === sourceId)?.label} only.
-            </p>
-          )}
-
-          {/* Game and Court selectors for pricing overrides */}
-          <div className="mb-5 space-y-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 sm:p-5">
-            <div>
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">
-                1. Select Sport / Game
-              </span>
-              <div className="flex flex-row flex-nowrap gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-                <button
-                  type="button"
-                  onClick={() => setSelectedSportFilter("all")}
-                  className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold transition border cursor-pointer ${
-                    selectedSportFilter === "all"
-                      ? "border-vibe-violet bg-vibe-violet text-white shadow-sm"
-                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
-                  }`}
-                >
-                  All Games (Global Default)
-                </button>
-                {selectedGames.map((g) => (
-                  <button
-                    key={g.id}
-                    type="button"
-                    onClick={() => setSelectedSportFilter(g.id)}
-                    className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold transition border cursor-pointer ${
-                      selectedSportFilter === g.id
-                        ? "border-vibe-violet bg-vibe-violet text-white shadow-sm"
-                        : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
-                    }`}
+                      }`}
                   >
-                    {g.label}
+                    {src.id === "default" ? "⚙️ " : "📅 "}
+                    {src.label}
                   </button>
                 ))}
               </div>
-            </div>
+            )}
+            {sources.length > 0 && sourceId !== "default" && (
+              <p className="mb-4 rounded-lg bg-amber-50 px-3 py-2 text-[11px] font-semibold text-vibe-amber">
+                You are pricing the custom slots for {sources.find((s) => s.id === sourceId)?.label} only.
+              </p>
+            )}
 
-            <div>
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">
-                2. Select Court
-              </span>
-              <div className="flex flex-row flex-nowrap gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-                <button
-                  type="button"
-                  onClick={() => setSelectedCourtFilter("all")}
-                  disabled={selectedSportFilter === "all" && filteredCourtsForPricing.length === 0}
-                  className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold transition border cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
-                    selectedCourtFilter === "all"
+            {/* Game and Court selectors for pricing overrides */}
+            <div className="mb-5 space-y-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 sm:p-5">
+              <div>
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">
+                  1. Select Sport / Game
+                </span>
+                <div className="flex flex-row flex-nowrap gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSportFilter("all")}
+                    className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold transition border cursor-pointer ${selectedSportFilter === "all"
                       ? "border-vibe-violet bg-vibe-violet text-white shadow-sm"
                       : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
-                  }`}
-                >
-                  All Courts
-                </button>
-                {filteredCourtsForPricing.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => setSelectedCourtFilter(c.id)}
-                    className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold transition border cursor-pointer ${
-                      selectedCourtFilter === c.id
+                      }`}
+                  >
+                    All Games (Global Default)
+                  </button>
+                  {selectedGames.map((g) => (
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() => setSelectedSportFilter(g.id)}
+                      className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold transition border cursor-pointer ${selectedSportFilter === g.id
                         ? "border-vibe-violet bg-vibe-violet text-white shadow-sm"
                         : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
-                    }`}
+                        }`}
+                    >
+                      {g.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">
+                  2. Select Court
+                </span>
+                <div className="flex flex-row flex-nowrap gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCourtFilter("all")}
+                    disabled={selectedSportFilter === "all" && filteredCourtsForPricing.length === 0}
+                    className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold transition border cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${selectedCourtFilter === "all"
+                      ? "border-vibe-violet bg-vibe-violet text-white shadow-sm"
+                      : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                      }`}
                   >
-                    {c.name}
+                    All Courts
                   </button>
-                ))}
+                  {filteredCourtsForPricing.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setSelectedCourtFilter(c.id)}
+                      className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold transition border cursor-pointer ${selectedCourtFilter === c.id
+                        ? "border-vibe-violet bg-vibe-violet text-white shadow-sm"
+                        : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                        }`}
+                    >
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Dynamic Selection Tip banner */}
+              <div className="mt-3 pt-3 border-t border-cream-200/40">
+                {selectedSportFilter === "all" && selectedCourtFilter === "all" ? (
+                  <p className="rounded-lg bg-emerald-50 px-3 py-2 text-[11px] font-semibold text-emerald-800 border border-emerald-100/80 leading-relaxed animate-in slide-in-from-top-1 duration-150">
+                    💡 <strong>Global Default:</strong> Setting a price here will apply to <strong>all games and all courts</strong> by default.
+                  </p>
+                ) : selectedSportFilter !== "all" && selectedCourtFilter === "all" ? (
+                  <p className="rounded-lg bg-indigo-50 px-3 py-2 text-[11px] font-semibold text-indigo-850 border border-indigo-150/80 leading-relaxed animate-in slide-in-from-top-1 duration-150">
+                    💡 <strong>Game Default:</strong> Setting a price here will apply to <strong>all courts</strong> hosting <strong>{selectedGames.find(g => g.id === selectedSportFilter)?.label}</strong> (unless overridden).
+                  </p>
+                ) : selectedSportFilter === "all" && selectedCourtFilter !== "all" ? (
+                  <p className="rounded-lg bg-amber-50 px-3 py-2 text-[11px] font-semibold text-amber-850 border border-amber-150/80 leading-relaxed animate-in slide-in-from-top-1 duration-150">
+                    💡 <strong>Court Default:</strong> Setting a price here will apply to <strong>all games</strong> played on <strong>{filteredCourtsForPricing.find(c => c.id === selectedCourtFilter)?.name ?? selectedCourtFilter}</strong>.
+                  </p>
+                ) : (
+                  <p className="rounded-lg bg-purple-50 px-3 py-2 text-[11px] font-semibold text-purple-850 border border-purple-150/80 leading-relaxed animate-in slide-in-from-top-1 duration-150">
+                    💡 <strong>Custom Override:</strong> Setting a price here will apply <strong>only</strong> to the game <strong>{selectedGames.find(g => g.id === selectedSportFilter)?.label}</strong> on <strong>{filteredCourtsForPricing.find(c => c.id === selectedCourtFilter)?.name ?? selectedCourtFilter}</strong>.
+                  </p>
+                )}
+              </div>
+
+              {/* ── SLOT GENERATOR IN PRICING STEP ── */}
+              <div className="mt-4 pt-4 border-t border-slate-200">
+                <p className="text-[11px] font-bold text-ink uppercase tracking-wide mb-3">
+                  Generate Slots for {selectedSportFilter === "all" && selectedCourtFilter === "all" ? "Global Default" : "this specific selection"}
+                </p>
+
+                {/* Duration Selectors */}
+                <div className="mb-4">
+                  <FieldLabel>Slot Duration</FieldLabel>
+                  <div className="flex flex-wrap gap-1.5 max-h-[80px] overflow-y-auto border border-slate-100 rounded-lg p-1.5 bg-slate-50/50">
+                    {[15, 30, 45, 60, 90, 120, 180].map((dur) => {
+                      const isSelected = parseInt(bulkDuration) === dur;
+                      return (
+                        <button key={dur} type="button" onClick={() => setBulkDuration(dur.toString())}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${isSelected ? "bg-vibe-violet text-white shadow-sm" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"}`}>
+                          {fmtDur(dur)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 mb-4">
+                  {/* Opens At Hour Cards */}
+                  <div className="flex-1">
+                    <FieldLabel>Opens At</FieldLabel>
+                    <div className="flex flex-wrap gap-1.5 border border-slate-100 rounded-lg p-2 bg-slate-50/50">
+                      {TIME_OPTIONS.map((t) => {
+                        const isSelected = bulkStartTime === t.value;
+                        return (
+                          <button key={t.value} type="button" onClick={() => setBulkStartTime(t.value)}
+                            className={`px-2 py-1 rounded-md text-[10px] font-bold transition ${isSelected ? "bg-slate-900 text-white" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"}`}>
+                            {t.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Closes At Hour Cards */}
+                  <div className="flex-1">
+                    <FieldLabel>Closes At</FieldLabel>
+                    <div className="flex flex-wrap gap-1.5 border border-slate-100 rounded-lg p-2 bg-slate-50/50">
+                      {END_TIME_OPTIONS.map((t) => {
+                        const isSelected = bulkEndTime === t.value;
+                        return (
+                          <button key={t.value} type="button" onClick={() => setBulkEndTime(t.value)}
+                            className={`px-2 py-1 rounded-md text-[10px] font-bold transition ${isSelected ? "bg-slate-900 text-white" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"}`}>
+                            {t.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
+                  <button type="button" onClick={handleGenerateSportSlots}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-vibe-violet px-6 py-2.5 text-xs font-bold text-white hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:opacity-40">
+                    <Plus size={13} /> Generate Slots
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Dynamic Selection Tip banner */}
-            <div className="mt-3 pt-3 border-t border-cream-200/40">
-              {selectedSportFilter === "all" && selectedCourtFilter === "all" ? (
-                <p className="rounded-lg bg-emerald-50 px-3 py-2 text-[11px] font-semibold text-emerald-800 border border-emerald-100/80 leading-relaxed animate-in slide-in-from-top-1 duration-150">
-                  💡 <strong>Global Default:</strong> Setting a price here will apply to <strong>all games and all courts</strong> by default.
-                </p>
-              ) : selectedSportFilter !== "all" && selectedCourtFilter === "all" ? (
-                <p className="rounded-lg bg-indigo-50 px-3 py-2 text-[11px] font-semibold text-indigo-850 border border-indigo-150/80 leading-relaxed animate-in slide-in-from-top-1 duration-150">
-                  💡 <strong>Game Default:</strong> Setting a price here will apply to <strong>all courts</strong> hosting <strong>{selectedGames.find(g => g.id === selectedSportFilter)?.label}</strong> (unless overridden).
-                </p>
-              ) : selectedSportFilter === "all" && selectedCourtFilter !== "all" ? (
-                <p className="rounded-lg bg-amber-50 px-3 py-2 text-[11px] font-semibold text-amber-850 border border-amber-150/80 leading-relaxed animate-in slide-in-from-top-1 duration-150">
-                  💡 <strong>Court Default:</strong> Setting a price here will apply to <strong>all games</strong> played on <strong>{filteredCourtsForPricing.find(c => c.id === selectedCourtFilter)?.name ?? selectedCourtFilter}</strong>.
-                </p>
-              ) : (
-                <p className="rounded-lg bg-purple-50 px-3 py-2 text-[11px] font-semibold text-purple-850 border border-purple-150/80 leading-relaxed animate-in slide-in-from-top-1 duration-150">
-                  💡 <strong>Custom Override:</strong> Setting a price here will apply <strong>only</strong> to the game <strong>{selectedGames.find(g => g.id === selectedSportFilter)?.label}</strong> on <strong>{filteredCourtsForPricing.find(c => c.id === selectedCourtFilter)?.name ?? selectedCourtFilter}</strong>.
-                </p>
+            {/* Pricing Controls Row */}
+            <div className="mb-5 flex flex-wrap items-end justify-between gap-4 rounded-2xl border border-violet-200 bg-white p-4 shadow-sm">
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="w-40 sm:w-44">
+                  <FieldLabel>Selling Price (₹) *</FieldLabel>
+                  <input
+                    type="number"
+                    value={priceInput}
+                    onFocus={(e) => e.target.select()}
+                    onChange={(e) => setPriceInput(e.target.value.replace(/^0+(?=\d)/, ""))}
+                    placeholder="e.g. 400"
+                    className={`${inputClass} text-sm font-bold`}
+                  />
+                </div>
+                <div className="w-40 sm:w-44">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Original Price (₹)</span>
+                    <span className="text-[9px] text-slate-400 font-semibold">(Optional)</span>
+                  </div>
+                  <input
+                    type="number"
+                    value={strikePriceInput}
+                    onFocus={(e) => e.target.select()}
+                    onChange={(e) => setStrikePriceInput(e.target.value.replace(/^0+(?=\d)/, ""))}
+                    placeholder="e.g. 500"
+                    className={`${inputClass} text-sm`}
+                  />
+                </div>
+                <button type="button" onClick={handleSetPrice} disabled={selectedKeys.length === 0 || !validPrice}
+                  className="rounded-xl bg-gradient-to-r from-violet-700 to-purple-600 px-6 py-2.5 text-sm font-extrabold text-white shadow-lg shadow-violet-200 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 h-[42px] mt-[26px]">
+                  {selectedKeys.length > 0 ? `Apply to ${selectedKeys.length} slot${selectedKeys.length === 1 ? "" : "s"}` : "Select slots below"}
+                </button>
+              </div>
+
+              {unpricedSlots.length > 0 && (
+                <div className="flex gap-2">
+                  <button type="button" onClick={selectAll} className="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-600 px-2.5 py-1.5 rounded-lg font-bold uppercase transition cursor-pointer">Select All</button>
+                  <button type="button" onClick={deselectAll} className="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-600 px-2.5 py-1.5 rounded-lg font-bold uppercase transition cursor-pointer">Deselect All</button>
+                </div>
               )}
             </div>
 
-            {/* ── SLOT GENERATOR IN PRICING STEP ── */}
-            <div className="mt-4 pt-4 border-t border-slate-200">
-              <p className="text-[11px] font-bold text-ink uppercase tracking-wide mb-3">
-                Generate Slots for {selectedSportFilter === "all" && selectedCourtFilter === "all" ? "Global Default" : "this specific selection"}
-              </p>
+            {/* Unpriced slots selector cards */}
+            <div className="mb-6">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-3">Select Slots to Price ({unpricedSlots.length})</p>
+              {uniqueTimeRanges.length === 0 ? (
+                <p className="text-xs text-slate-500 font-semibold bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
+                  No slots generated yet. Go back to the Slots step (Step 2) and generate slots first.
+                </p>
+              ) : unpricedSlots.length === 0 ? (
+                <p className="text-xs text-emerald-600 font-bold bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-center">🎉 All slots have been priced!</p>
+              ) : (
+                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
+                  {(["Morning", "Afternoon", "Evening", "Night", "Mid Night"] as const).map((part) => {
+                    const partSlots = unpricedSlots.filter((s) => s.label === part);
+                    if (partSlots.length === 0) return null;
 
-              {/* Duration Selectors */}
-              <div className="mb-4">
-                <FieldLabel>Slot Duration</FieldLabel>
-                <div className="flex flex-wrap gap-1.5 max-h-[80px] overflow-y-auto border border-slate-100 rounded-lg p-1.5 bg-slate-50/50">
-                  {[15, 30, 45, 60, 90, 120, 180].map((dur) => {
-                    const isSelected = parseInt(bulkDuration) === dur;
                     return (
-                      <button key={dur} type="button" onClick={() => setBulkDuration(dur.toString())}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${isSelected ? "bg-vibe-violet text-white shadow-sm" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"}`}>
-                        {fmtDur(dur)}
-                      </button>
+                      <DayPartGroup
+                        key={part}
+                        part={part}
+                        onSelectAll={() => {
+                          const keys = partSlots.map((s) => `${s.startTime}-${s.endTime}`);
+                          setSelectedKeys((prev) => Array.from(new Set([...prev, ...keys])));
+                        }}
+                        onDeselectAll={() => {
+                          const keys = partSlots.map((s) => `${s.startTime}-${s.endTime}`);
+                          setSelectedKeys((prev) => prev.filter((k) => !keys.includes(k)));
+                        }}
+                      >
+                        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-1.5">
+                          {partSlots.map((s) => {
+                            const key = `${s.startTime}-${s.endTime}`;
+                            const isSelected = selectedKeys.includes(key);
+                            return (
+                              <div key={key} className="group relative">
+                                <button type="button" onClick={() => toggleSelect(key)}
+                                  className={`flex w-full flex-col items-center justify-center p-1.5 min-h-[46px] rounded-lg border transition cursor-pointer overflow-hidden ${isSelected ? "border-vibe-violet bg-vibe-violet/5 shadow-sm ring-1 ring-vibe-violet" : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm"
+                                    }`}
+                                >
+                                  <span className={`text-[11px] font-bold font-sans tracking-tight leading-none ${isSelected ? 'text-vibe-violet' : 'text-slate-700'}`}>{to12h(s.startTime)} - {to12h(s.endTime)}</span>
+                                  <div className="mt-1 flex flex-col items-center justify-center w-full">
+                                    <div className="flex items-center gap-1">
+                                      {s.strikePrice && s.strikePrice > s.price && (
+                                        <span className="text-[10px] font-medium text-slate-400 line-through">₹{s.strikePrice}</span>
+                                      )}
+                                      <span className={`block text-[12px] font-display font-black leading-none tracking-tight ${s.price > 0 ? "text-vibe-violet" : "text-slate-400"}`}>
+                                        {s.price > 0 ? `₹${s.price}` : "Not Set"}
+                                      </span>
+                                    </div>
+                                    <span className="block text-[7px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-0.5 opacity-80">{s.sourceLabel}</span>
+                                  </div>
+                                </button>
+                                <button
+                                  type="button"
+                                  title="Block this slot"
+                                  onClick={(e) => { e.stopPropagation(); toggleBlockSlot(key, true); }}
+                                  className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-slate-700 text-white opacity-0 transition group-hover:flex group-hover:opacity-100 hover:bg-vibe-coral cursor-pointer"
+                                >
+                                  <Ban size={11} />
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </DayPartGroup>
                     );
                   })}
                 </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 mb-4">
-                {/* Opens At Hour Cards */}
-                <div className="flex-1">
-                  <FieldLabel>Opens At</FieldLabel>
-                  <div className="flex flex-wrap gap-1.5 border border-slate-100 rounded-lg p-2 bg-slate-50/50">
-                    {TIME_OPTIONS.map((t) => {
-                      const isSelected = bulkStartTime === t.value;
-                      return (
-                        <button key={t.value} type="button" onClick={() => setBulkStartTime(t.value)}
-                          className={`px-2 py-1 rounded-md text-[10px] font-bold transition ${isSelected ? "bg-slate-900 text-white" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"}`}>
-                          {t.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Closes At Hour Cards */}
-                <div className="flex-1">
-                  <FieldLabel>Closes At</FieldLabel>
-                  <div className="flex flex-wrap gap-1.5 border border-slate-100 rounded-lg p-2 bg-slate-50/50">
-                    {END_TIME_OPTIONS.map((t) => {
-                      const isSelected = bulkEndTime === t.value;
-                      return (
-                        <button key={t.value} type="button" onClick={() => setBulkEndTime(t.value)}
-                          className={`px-2 py-1 rounded-md text-[10px] font-bold transition ${isSelected ? "bg-slate-900 text-white" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"}`}>
-                          {t.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end">
-                <button type="button" onClick={handleGenerateSportSlots}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-vibe-violet px-6 py-2.5 text-xs font-bold text-white hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:opacity-40">
-                  <Plus size={13} /> Generate Slots
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Pricing Controls Row */}
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-4 rounded-2xl border border-violet-200 bg-white p-4 shadow-sm">
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="w-40 sm:w-44">
-                <FieldLabel>Selling Price (₹) *</FieldLabel>
-                <input
-                  type="number"
-                  value={priceInput}
-                  onFocus={(e) => e.target.select()}
-                  onChange={(e) => setPriceInput(e.target.value.replace(/^0+(?=\d)/, ""))}
-                  placeholder="e.g. 400"
-                  className={`${inputClass} text-sm font-bold`}
-                />
-              </div>
-              <div className="w-40 sm:w-44">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Original Price (₹)</span>
-                  <span className="text-[9px] text-slate-400 font-semibold">(Optional)</span>
-                </div>
-                <input
-                  type="number"
-                  value={strikePriceInput}
-                  onFocus={(e) => e.target.select()}
-                  onChange={(e) => setStrikePriceInput(e.target.value.replace(/^0+(?=\d)/, ""))}
-                  placeholder="e.g. 500"
-                  className={`${inputClass} text-sm`}
-                />
-              </div>
-              <button type="button" onClick={handleSetPrice} disabled={selectedKeys.length === 0 || !validPrice}
-                className="rounded-xl bg-gradient-to-r from-violet-700 to-purple-600 px-6 py-2.5 text-sm font-extrabold text-white shadow-lg shadow-violet-200 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0 h-[42px] mt-[26px]">
-                {selectedKeys.length > 0 ? `Apply to ${selectedKeys.length} slot${selectedKeys.length === 1 ? "" : "s"}` : "Select slots below"}
-              </button>
+              )}
             </div>
 
-            {unpricedSlots.length > 0 && (
-              <div className="flex gap-2">
-                <button type="button" onClick={selectAll} className="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-600 px-2.5 py-1.5 rounded-lg font-bold uppercase transition cursor-pointer">Select All</button>
-                <button type="button" onClick={deselectAll} className="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-600 px-2.5 py-1.5 rounded-lg font-bold uppercase transition cursor-pointer">Deselect All</button>
-              </div>
-            )}
-          </div>
-
-          {/* Unpriced slots selector cards */}
-          <div className="mb-6">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-3">Select Slots to Price ({unpricedSlots.length})</p>
-            {uniqueTimeRanges.length === 0 ? (
-              <p className="text-xs text-slate-500 font-semibold bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
-                No slots generated yet. Go back to the Slots step (Step 2) and generate slots first.
+            {/* List of Priced Slots */}
+            <div className="mb-5">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+                {isOverrideMode ? "Custom overrides" : "Priced slots"} ({pricedSlots.length})
               </p>
-            ) : unpricedSlots.length === 0 ? (
-              <p className="text-xs text-emerald-600 font-bold bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-center">🎉 All slots have been priced!</p>
-            ) : (
-              <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
-                {(["Morning", "Afternoon", "Evening", "Night", "Mid Night"] as const).map((part) => {
-                  const partSlots = unpricedSlots.filter((s) => s.label === part);
-                  if (partSlots.length === 0) return null;
-
-                  return (
-                    <DayPartGroup
-                      key={part}
-                      part={part}
-                      onSelectAll={() => {
-                        const keys = partSlots.map((s) => `${s.startTime}-${s.endTime}`);
-                        setSelectedKeys((prev) => Array.from(new Set([...prev, ...keys])));
-                      }}
-                      onDeselectAll={() => {
-                        const keys = partSlots.map((s) => `${s.startTime}-${s.endTime}`);
-                        setSelectedKeys((prev) => prev.filter((k) => !keys.includes(k)));
-                      }}
-                    >
-                      <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-1.5">
-                        {partSlots.map((s) => {
-                          const key = `${s.startTime}-${s.endTime}`;
-                          const isSelected = selectedKeys.includes(key);
-                          return (
-                            <div key={key} className="group relative">
-                              <button type="button" onClick={() => toggleSelect(key)}
-                                className={`flex w-full flex-col items-center justify-center p-1.5 min-h-[46px] rounded-lg border transition cursor-pointer overflow-hidden ${isSelected ? "border-vibe-violet bg-vibe-violet/5 shadow-sm ring-1 ring-vibe-violet" : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm"
-                                  }`}
-                              >
-                                <span className={`text-[11px] font-bold font-sans tracking-tight leading-none ${isSelected ? 'text-vibe-violet' : 'text-slate-700'}`}>{to12h(s.startTime)} - {to12h(s.endTime)}</span>
-                                <div className="mt-1 flex flex-col items-center justify-center w-full">
-                                  <div className="flex items-center gap-1">
-                                    {s.strikePrice && s.strikePrice > s.price && (
-                                      <span className="text-[10px] font-medium text-slate-400 line-through">₹{s.strikePrice}</span>
-                                    )}
-                                    <span className={`block text-[12px] font-display font-black leading-none tracking-tight ${s.price > 0 ? "text-vibe-violet" : "text-slate-400"}`}>
-                                      {s.price > 0 ? `₹${s.price}` : "Not Set"}
-                                    </span>
-                                  </div>
-                                  <span className="block text-[7px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-0.5 opacity-80">{s.sourceLabel}</span>
-                                </div>
-                              </button>
-                              <button
-                                type="button"
-                                title="Block this slot"
-                                onClick={(e) => { e.stopPropagation(); toggleBlockSlot(key, true); }}
-                                className="absolute -right-1.5 -top-1.5 hidden h-5 w-5 items-center justify-center rounded-full bg-slate-700 text-white opacity-0 transition group-hover:flex group-hover:opacity-100 hover:bg-vibe-coral cursor-pointer"
-                              >
-                                <Ban size={11} />
-                              </button>
-                            </div>
-                          );
-                        })}
+              <p className="text-[9px] text-ink-faint mb-2.5">
+                {isOverrideMode ? "These prices apply only to the selected game or court. Removing one restores its inherited price." : "Your global slot prices. These are used unless a game or court override is created."}
+              </p>
+              {pricedSlots.length === 0 ? (
+                <p className="text-xs text-ink-faint italic rounded-xl bg-white p-3 border border-slate-100">{isOverrideMode ? "No custom pricing overrides set yet." : "No slot prices set yet."}</p>
+              ) : (
+                <div className="flex flex-wrap gap-1.5 max-h-[200px] overflow-y-auto pr-1">
+                  {pricedSlots.map((s) => {
+                    const key = `${s.startTime}-${s.endTime}`;
+                    return (
+                      <div key={key} className="flex items-center gap-2 rounded-full border border-slate-200 bg-white pl-3 pr-1 py-1.5 shadow-sm animate-in zoom-in-95 duration-100 hover:border-slate-300 transition">
+                        <span className="text-[11px] font-bold text-slate-600 font-sans tracking-tight leading-none pt-0.5">{to12h(s.startTime)} - {to12h(s.endTime)}</span>
+                        <div className="flex items-center gap-1.5 border-l border-slate-100 pl-2">
+                          {s.strikePrice && s.strikePrice > s.price && (
+                            <span className="text-[10px] font-medium text-slate-400 line-through">₹{s.strikePrice}</span>
+                          )}
+                          <span className="text-[12px] font-display font-black text-vibe-violet leading-none tracking-tight">₹{s.price}</span>
+                          {s.sourceLabel && s.sourceLabel !== "Global Default" && (
+                            <span className="text-[7px] text-slate-400 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded-sm uppercase tracking-widest leading-none">{s.sourceLabel}</span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePrice(key)}
+                          className="text-slate-400 hover:text-white hover:bg-rose-500 rounded-full p-0.5 transition cursor-pointer ml-0.5"
+                          title="Remove override"
+                        >
+                          <X size={10} />
+                        </button>
                       </div>
-                    </DayPartGroup>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
-          {/* List of Priced Slots */}
-          <div className="mb-5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
-              {isOverrideMode ? "Custom overrides" : "Priced slots"} ({pricedSlots.length})
-            </p>
-            <p className="text-[9px] text-ink-faint mb-2.5">
-              {isOverrideMode ? "These prices apply only to the selected game or court. Removing one restores its inherited price." : "Your global slot prices. These are used unless a game or court override is created."}
-            </p>
-            {pricedSlots.length === 0 ? (
-              <p className="text-xs text-ink-faint italic rounded-xl bg-white p-3 border border-slate-100">{isOverrideMode ? "No custom pricing overrides set yet." : "No slot prices set yet."}</p>
-            ) : (
-              <div className="flex flex-wrap gap-1.5 max-h-[200px] overflow-y-auto pr-1">
-                {pricedSlots.map((s) => {
-                  const key = `${s.startTime}-${s.endTime}`;
-                  return (
-                    <div key={key} className="flex items-center gap-2 rounded-full border border-slate-200 bg-white pl-3 pr-1 py-1.5 shadow-sm animate-in zoom-in-95 duration-100 hover:border-slate-300 transition">
-                      <span className="text-[11px] font-bold text-slate-600 font-sans tracking-tight leading-none pt-0.5">{to12h(s.startTime)} - {to12h(s.endTime)}</span>
-                      <div className="flex items-center gap-1.5 border-l border-slate-100 pl-2">
-                        {s.strikePrice && s.strikePrice > s.price && (
-                          <span className="text-[10px] font-medium text-slate-400 line-through">₹{s.strikePrice}</span>
-                        )}
-                        <span className="text-[12px] font-display font-black text-vibe-violet leading-none tracking-tight">₹{s.price}</span>
-                        {s.sourceLabel && s.sourceLabel !== "Global Default" && (
-                          <span className="text-[7px] text-slate-400 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded-sm uppercase tracking-widest leading-none">{s.sourceLabel}</span>
-                        )}
+            {/* Blocked slots */}
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Blocked Slots ({blockedSlots.length})</p>
+              {blockedSlots.length === 0 ? (
+                <p className="text-xs text-ink-faint italic rounded-xl bg-white p-3 border border-slate-100">No slots blocked. Hover a slot above and tap the ban icon to block it.</p>
+              ) : (
+                <div className="flex flex-wrap gap-1.5 max-h-[150px] overflow-y-auto pr-1">
+                  {blockedSlots.map((s) => {
+                    const key = `${s.startTime}-${s.endTime}`;
+                    return (
+                      <div key={key} className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 pl-2.5 pr-1 py-1 shadow-sm animate-in zoom-in-95 duration-100">
+                        <span className="text-[10px] font-bold text-slate-500 font-mono tracking-tight leading-none pt-0.5 opacity-80">{to12h(s.startTime)} - {to12h(s.endTime)}</span>
+                        <span className="text-[7px] text-white bg-slate-400 border border-slate-400 px-1.5 py-0.5 rounded-sm uppercase tracking-widest leading-none">Blocked</span>
+                        <button
+                          type="button"
+                          onClick={() => toggleBlockSlot(key, false)}
+                          className="text-slate-400 hover:text-white hover:bg-slate-700 rounded-full p-0.5 transition cursor-pointer ml-0.5"
+                          title="Unblock slot"
+                        >
+                          <X size={10} />
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleRemovePrice(key)}
-                        className="text-slate-400 hover:text-white hover:bg-rose-500 rounded-full p-0.5 transition cursor-pointer ml-0.5"
-                        title="Remove override"
-                      >
-                        <X size={10} />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Blocked slots */}
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Blocked Slots ({blockedSlots.length})</p>
-            {blockedSlots.length === 0 ? (
-              <p className="text-xs text-ink-faint italic rounded-xl bg-white p-3 border border-slate-100">No slots blocked. Hover a slot above and tap the ban icon to block it.</p>
-            ) : (
-              <div className="flex flex-wrap gap-1.5 max-h-[150px] overflow-y-auto pr-1">
-                {blockedSlots.map((s) => {
-                  const key = `${s.startTime}-${s.endTime}`;
-                  return (
-                    <div key={key} className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 pl-2.5 pr-1 py-1 shadow-sm animate-in zoom-in-95 duration-100">
-                      <span className="text-[10px] font-bold text-slate-500 font-mono tracking-tight leading-none pt-0.5 opacity-80">{to12h(s.startTime)} - {to12h(s.endTime)}</span>
-                      <span className="text-[7px] text-white bg-slate-400 border border-slate-400 px-1.5 py-0.5 rounded-sm uppercase tracking-widest leading-none">Blocked</span>
-                      <button
-                        type="button"
-                        onClick={() => toggleBlockSlot(key, false)}
-                        className="text-slate-400 hover:text-white hover:bg-slate-700 rounded-full p-0.5 transition cursor-pointer ml-0.5"
-                        title="Unblock slot"
-                      >
-                        <X size={10} />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -4242,7 +4243,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
                       <X size={16} />
                     </button>
                   </div>
-                  
+
                   {draft.type !== "Event" && selectedGames.length > 0 && (
                     <div className="mt-3 pt-3 border-t border-cream-200/50">
                       <p className="text-[9px] font-bold uppercase tracking-wider text-slate-500 mb-2">Applicable Games (Leave blank for all)</p>
@@ -4258,9 +4259,8 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
                                 const next = isActive ? current.filter(s => s !== g.label) : [...current, g.label];
                                 updateCoupon(i, { sports: next });
                               }}
-                              className={`rounded-full px-2.5 py-1 text-[10px] font-bold transition cursor-pointer ${
-                                isActive ? "bg-vibe-violet text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                              }`}
+                              className={`rounded-full px-2.5 py-1 text-[10px] font-bold transition cursor-pointer ${isActive ? "bg-vibe-violet text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                }`}
                             >
                               {g.label}
                             </button>
@@ -4923,29 +4923,27 @@ export function PackageStudio({
           {stepsFor(draft.type, showAcademyStep).map((s) => {
             const isCompleted = maxStep > s.id;
             const isValid = isCompleted ? isStepValid(s.id) : false;
-            
+
             return (
               <button
                 key={s.id}
                 onClick={() => goTo(s.id)}
-                className={`flex shrink-0 items-center transition-all duration-300 ${
-                  step === s.id
-                    ? "gap-2 rounded-xl border border-vibe-violet bg-vibe-violet/5 px-3 py-2"
-                    : isCompleted && !isValid
+                className={`flex shrink-0 items-center transition-all duration-300 ${step === s.id
+                  ? "gap-2 rounded-xl border border-vibe-violet bg-vibe-violet/5 px-3 py-2"
+                  : isCompleted && !isValid
                     ? "rounded-full border border-rose-200 bg-rose-50/50 p-2 hover:bg-rose-100/50"
                     : "rounded-full border border-surface-border bg-white p-2 hover:bg-cream-300"
-                }`}
+                  }`}
               >
                 <span
-                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold transition-colors duration-300 ${
-                    step === s.id
-                      ? "bg-vibe-violet text-white"
-                      : isCompleted
-                      ? isValid 
-                        ? "bg-vibe-limeDark text-white" 
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold transition-colors duration-300 ${step === s.id
+                    ? "bg-vibe-violet text-white"
+                    : isCompleted
+                      ? isValid
+                        ? "bg-vibe-limeDark text-white"
                         : "bg-rose-500 text-white"
                       : "bg-cream-300 text-ink-faint"
-                  }`}
+                    }`}
                 >
                   {isCompleted ? (
                     isValid ? <Check size={12} strokeWidth={3} /> : <X size={12} strokeWidth={3} />
@@ -4953,13 +4951,13 @@ export function PackageStudio({
                     s.id
                   )}
                 </span>
-              {step === s.id && (
-                <span className="animate-in fade-in slide-in-from-left-1 overflow-hidden whitespace-nowrap">
-                  <p className="text-xs font-semibold leading-none text-ink">{s.label}</p>
-                  <p className="mt-0.5 text-[10px] text-ink-faint">{s.hint}</p>
-                </span>
-              )}
-            </button>
+                {step === s.id && (
+                  <span className="animate-in fade-in slide-in-from-left-1 overflow-hidden whitespace-nowrap">
+                    <p className="text-xs font-semibold leading-none text-ink">{s.label}</p>
+                    <p className="mt-0.5 text-[10px] text-ink-faint">{s.hint}</p>
+                  </span>
+                )}
+              </button>
             );
           })}
         </div>

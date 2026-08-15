@@ -37,6 +37,7 @@ import { MobileHome } from "./mobile/MobileHome";
 import { useVenueFilters } from "./useVenueFilters";
 import { useCustomerAuth } from "@/components/providers/CustomerAuthProvider";
 import { SPORTS_CATALOG } from "./data";
+import { AnimatedSportIcon } from "../sports/AnimatedSportIcon";
 
 const FALLBACK_VENUES: Venue[] = [
   { id: "mock-1", slug: "box-cricket", name: "Box Cricket Arena", area: "Udaipur", distanceKm: 0, rating: 4.8, pricePerHour: 800, status: "Available", sport: "Cricket", image: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&q=80" },
@@ -209,15 +210,14 @@ export default function HomePage() {
                     href={`/venues?category=${category}`}
                     className="group flex flex-col items-center justify-start text-center min-w-0 w-[72px] shrink-0 sm:w-full cursor-pointer snap-start"
                   >
-                    <div className="relative flex h-16 w-16 sm:h-[110px] sm:w-[110px] items-center justify-center rounded-[1.25rem] sm:rounded-[2rem] bg-slate-50 border border-slate-100 transition-all duration-300 group-hover:-translate-y-2 group-hover:bg-white group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] overflow-hidden">
-                      <div className={`absolute inset-0 opacity-15 bg-gradient-to-br ${s.bubble} transition-opacity duration-300 group-hover:opacity-30`} />
-                      <img
-                        src={s.image}
-                        alt={s.alt}
-                        loading={index === 0 ? "eager" : "lazy"}
-                        className="relative z-10 h-8 w-8 sm:h-[55px] sm:w-[55px] object-contain transition-transform duration-500 group-hover:scale-125 drop-shadow-md"
-                      />
-                    </div>
+                    <AnimatedSportIcon
+                      id={s.id}
+                      label={s.label}
+                      image={s.image}
+                      alt={s.alt}
+                      bubble={s.bubble}
+                      index={index}
+                    />
                     <span className="mt-2 sm:mt-3.5 text-[10px] font-black uppercase tracking-wider text-slate-700 transition-colors group-hover:text-brand-600 sm:text-xs text-center truncate w-full px-1">
                       {s.label}
                     </span>
