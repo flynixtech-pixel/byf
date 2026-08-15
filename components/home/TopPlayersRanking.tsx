@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { MapPin, Trophy, User, ChevronDown, Check } from "lucide-react";
 import { getTopPlayersLeaderboard, type RankedPlayer } from "@/lib/api/leaderboard";
+import { restoreCustomerSession, type CustomerProfile } from "@/lib/api/auth";
 import { SectionHeading } from "./ui";
 
 const ALL_AREAS = "All areas";
@@ -36,10 +37,11 @@ function areaHashtagsFor(player: RankedPlayer): string[] {
 }
 
 /** Gold / silver / bronze for podium, plain slate below it. */
-function rankBadgeStyle(rank: number): { style: string; emoji?: string } {
-  if (rank === 1) return { style: "bg-amber-400 text-amber-950 font-black shadow-2xs", emoji: "🥇" };
-  if (rank === 2) return { style: "bg-slate-300 text-slate-800 font-black shadow-2xs", emoji: "🥈" };
-  if (rank === 3) return { style: "bg-amber-600/20 text-amber-900 font-black border border-amber-500/30", emoji: "🥉" };
+function rankBadgeStyle(rank: number | string): { style: string; emoji?: string; wrapperStyle?: string } {
+  if (rank === 1) return { style: "bg-amber-400 text-amber-950 font-black shadow-2xs", emoji: "🥇", wrapperStyle: "bg-gradient-to-r from-amber-50 to-white border-amber-200 shadow-[0_4px_12px_-4px_rgba(251,191,36,0.3)]" };
+  if (rank === 2) return { style: "bg-slate-300 text-slate-800 font-black shadow-2xs", emoji: "🥈", wrapperStyle: "bg-gradient-to-r from-slate-50 to-white border-slate-200 shadow-sm" };
+  if (rank === 3) return { style: "bg-amber-600/20 text-amber-900 font-black border border-amber-500/30", emoji: "🥉", wrapperStyle: "bg-gradient-to-r from-amber-50/50 to-white border-amber-100/60 shadow-sm" };
+  if (typeof rank === "string") return { style: "bg-slate-100 text-slate-500 font-bold text-[10px]", wrapperStyle: "bg-brand-50 border-brand-200 shadow-sm" };
   return { style: "bg-slate-100 text-slate-600 font-bold" };
 }
 
@@ -49,7 +51,12 @@ function usePlayerRankings(area: string) {
     areas: DEFAULT_AREAS,
     loadedKey: "",
   });
+  const [currentUser, setCurrentUser] = useState<CustomerProfile | null>(null);
   const requestKey = area;
+
+  useEffect(() => {
+    restoreCustomerSession().then(setCurrentUser);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -71,7 +78,7 @@ function usePlayerRankings(area: string) {
     };
   }, [area, requestKey]);
 
-  return { items: data.items, areas: data.areas, loading: data.loadedKey !== requestKey };
+  return { items: data.items, areas: data.areas, loading: data.loadedKey !== requestKey, currentUser };
 }
 
 function CustomAreaDropdown({
@@ -145,19 +152,24 @@ function PlayerRankRow({
   player,
   compact,
   onOpen,
+  isMe,
 }: {
-  player: RankedPlayer;
+  player: RankedPlayer | any;
   compact?: boolean;
-  onOpen: () => void;
+  onOpen?: () => void;
+  isMe?: boolean;
 }) {
-  const tags = useMemo(() => areaHashtagsFor(player), [player]);
+  const tags = useMemo(() => areaHashtagsFor(player as any), [player]);
   const badge = rankBadgeStyle(player.rank);
 
   return (
     <button
       type="button"
       onClick={onOpen}
-      className="group flex w-full items-center gap-3 rounded-2xl border border-slate-100 bg-white p-2.5 text-left transition duration-200 hover:border-brand-300 hover:shadow-md active:scale-[0.99]"
+      disabled={!onOpen}
+      className={`group flex w-full items-center gap-3 rounded-2xl border p-2.5 text-left transition duration-200 ${
+        isMe ? "border-brand-400 bg-brand-50/50 shadow-sm ring-1 ring-brand-100/50" : "border-slate-100 bg-white hover:border-brand-300 hover:shadow-md active:scale-[0.99]"
+      } ${badge.wrapperStyle || ""} ${!onOpen ? "cursor-default" : ""}`}
     >
       <span
         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs ${badge.style}`}
@@ -238,30 +250,77 @@ export function TopPlayersRanking({
 }) {
   const router = useRouter();
   const [area, setArea] = useState(ALL_AREAS);
-  const { items, areas, loading } = usePlayerRankings(area);
+  const [isViewAll, setIsViewAll] = useState(false);
+  const { items, areas, loading, currentUser } = usePlayerRankings(area);
 
   const openPlayerProfile = (player: RankedPlayer) => router.push(`/players/${player.playerId}`);
 
+  const top3 = items.slice(0, 3);
+  const displayItems = isViewAll ? items : top3;
+
+  const userRankData = currentUser ? items.find(p => p.playerId === currentUser.id) : null;
+  const meInTop3 = userRankData && top3.some((p) => p.playerId === userRankData.playerId);
+  const me: RankedPlayer | null = currentUser
+    ? (userRankData || {
+        playerId: currentUser.id,
+        name: currentUser.name,
+        profileImage: currentUser.avatarUrl,
+        city: "",
+        completedBookings: 0,
+        rank: items.length > 0 ? "Unranked" : "-",
+      } as any)
+    : null;
+
+  const showPinnedMe = me && (!isViewAll ? !meInTop3 : !userRankData);
+  const hasMore = items.length > 3;
+
   const boardContent = (
-    <div className="max-h-[20rem] space-y-2 overflow-y-auto overscroll-contain pr-1 [scrollbar-width:thin]">
-      {loading ? (
-        Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-[68px] animate-pulse rounded-2xl bg-slate-100" />
-        ))
-      ) : items.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center">
-          <p className="text-sm font-semibold text-slate-600">No player rankings available yet.</p>
-          <p className="mt-1 text-xs text-slate-400">Complete bookings on BYV to rank on the leaderboard!</p>
-        </div>
-      ) : (
-        items.map((player) => (
+    <div className="flex flex-col">
+      <div className={`${isViewAll ? "max-h-[24rem]" : ""} space-y-2 overflow-y-auto overscroll-contain pr-1 [scrollbar-width:thin]`}>
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-[68px] animate-pulse rounded-2xl bg-slate-100" />
+          ))
+        ) : items.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center">
+            <p className="text-sm font-semibold text-slate-600">No player rankings available yet.</p>
+            <p className="mt-1 text-xs text-slate-400">Complete bookings on BYV to rank on the leaderboard!</p>
+          </div>
+        ) : (
+          displayItems.map((player) => (
+            <PlayerRankRow
+              key={player.playerId}
+              player={player}
+              compact={variant === "mobile"}
+              onOpen={() => openPlayerProfile(player)}
+            />
+          ))
+        )}
+      </div>
+
+      {showPinnedMe && !loading && items.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-slate-100">
+          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400 mb-2 px-1">Your Ranking</p>
           <PlayerRankRow
-            key={player.playerId}
-            player={player}
+            player={me!}
             compact={variant === "mobile"}
-            onOpen={() => openPlayerProfile(player)}
+            isMe={true}
+            onOpen={userRankData ? () => openPlayerProfile(me as RankedPlayer) : undefined}
           />
-        ))
+        </div>
+      )}
+
+      {hasMore && !loading && (
+        <div className="mt-4 flex justify-center">
+          <button
+            type="button"
+            onClick={() => setIsViewAll(!isViewAll)}
+            className="flex items-center gap-1.5 rounded-full bg-slate-50 px-4 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-100 active:scale-95"
+          >
+            {isViewAll ? "Show Top 3 Only" : "View All Players"}
+            <ChevronDown className={`h-4 w-4 transition-transform ${isViewAll ? "rotate-180" : ""}`} />
+          </button>
+        </div>
       )}
     </div>
   );
