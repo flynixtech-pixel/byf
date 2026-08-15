@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Lock } from "lucide-react";
-import { getMpinStatus, setMpin, verifyMpin } from "@/lib/api/vendor";
+import { getMpinStatus, setMpin, verifyMpin, requestMpinChange, confirmMpinChange } from "@/lib/api/vendor";
 
-type PinMode = "loading" | "create" | "create_confirm" | "enter" | "unlocked";
+type PinMode = "loading" | "create" | "create_confirm" | "enter" | "unlocked" | "forgot_requesting" | "forgot_otp" | "forgot_create" | "forgot_create_confirm";
 
 /** Session flag so the MPIN is entered once, not on every dashboard. See VendorAuth logout, which clears it. */
 export const MPIN_SESSION_KEY = "byv_vendor_mpin_ok";
@@ -23,6 +23,7 @@ export function MpinGate({
   );
   const [inputPin, setInputPin] = useState("");
   const [firstPin, setFirstPin] = useState("");
+  const [otpCode, setOtpCode] = useState("");
   const [pinError, setPinError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -37,10 +38,11 @@ export function MpinGate({
   }, []);
 
   function handleDigit(d: string) {
-    if (inputPin.length < 4) {
+    const targetLength = pinMode === "forgot_otp" ? 6 : 4;
+    if (inputPin.length < targetLength) {
       const newPin = inputPin + d;
       setInputPin(newPin);
-      if (newPin.length === 4) void processPin(newPin);
+      if (newPin.length === targetLength) void processPin(newPin);
     }
   }
 
@@ -52,6 +54,24 @@ export function MpinGate({
   function unlock() {
     if (typeof window !== "undefined") sessionStorage.setItem(MPIN_SESSION_KEY, "1");
     setPinMode("unlocked");
+  }
+
+  async function handleForgotPin() {
+    if (submitting) return;
+    setSubmitting(true);
+    setPinError("");
+    setPinMode("forgot_requesting");
+    try {
+      await requestMpinChange();
+      setPinMode("forgot_otp");
+      setInputPin("");
+    } catch (error) {
+      const e = error as { describe?: () => string; message?: string };
+      setPinError(typeof e?.describe === "function" ? e.describe() : e?.message || "Failed to request OTP.");
+      setPinMode("enter");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   async function processPin(pin: string) {
@@ -75,12 +95,31 @@ export function MpinGate({
       } else if (pinMode === "enter") {
         await verifyMpin(pin);
         unlock();
+      } else if (pinMode === "forgot_otp") {
+        setOtpCode(pin);
+        setInputPin("");
+        setPinMode("forgot_create");
+      } else if (pinMode === "forgot_create") {
+        setFirstPin(pin);
+        setInputPin("");
+        setPinMode("forgot_create_confirm");
+      } else if (pinMode === "forgot_create_confirm") {
+        if (pin !== firstPin) {
+          setPinError("PINs do not match. Try again.");
+          setInputPin("");
+          setPinMode("forgot_create");
+        } else {
+          await confirmMpinChange(otpCode, pin);
+          unlock();
+        }
       }
     } catch (error) {
       const e = error as { describe?: () => string; message?: string };
       const msg = typeof e?.describe === "function" ? e.describe() : e?.message || "Something went wrong. Try again.";
       setPinError(pinMode === "enter" ? "Incorrect MPIN" : msg);
       setInputPin("");
+      // On OTP fail, allow re-entry of OTP. If confirm fails, they retry the new PIN.
+      if (pinMode === "forgot_create_confirm") setPinMode("forgot_create");
     } finally {
       setSubmitting(false);
     }
@@ -98,18 +137,32 @@ export function MpinGate({
         <Lock size={28} className="text-vibe-lime" />
       </div>
       <h1 className="text-2xl font-extrabold mb-2">{title}</h1>
-      <p className="text-white/70 text-sm text-center max-w-xs mb-10">
-        {pinMode === "create"
+      <p className="text-white/70 text-sm text-center max-w-xs mb-6">
+        {pinMode === "create" || pinMode === "forgot_create"
           ? "Create a 4-digit PIN to secure your business analytics and reports."
-          : pinMode === "create_confirm"
+          : pinMode === "create_confirm" || pinMode === "forgot_create_confirm"
           ? "Confirm your 4-digit PIN."
+          : pinMode === "forgot_otp"
+          ? "Enter the 6-digit OTP sent to your email."
+          : pinMode === "forgot_requesting"
+          ? "Sending OTP to your email..."
           : "Enter your 4-digit PIN to securely access business analytics and reports."}
       </p>
+
+      {pinMode === "enter" && (
+        <button
+          onClick={handleForgotPin}
+          disabled={submitting}
+          className="text-vibe-lime text-sm mb-6 hover:underline"
+        >
+          Forgot PIN?
+        </button>
+      )}
 
       {pinError && <p className="text-rose-300 text-sm mb-4">{pinError}</p>}
 
       <div className="flex gap-4 mb-12">
-        {[0, 1, 2, 3].map((i) => (
+        {Array.from({ length: pinMode === "forgot_otp" ? 6 : 4 }).map((_, i) => (
           <div
             key={i}
             className={`w-3.5 h-3.5 rounded-full border-2 transition-colors ${

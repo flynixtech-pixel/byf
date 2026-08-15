@@ -17,6 +17,7 @@ import {
   MapPin,
   CalendarDays,
   ChevronDown,
+  ChevronRight,
   ListChecks,
   HelpCircle,
   Share2,
@@ -320,7 +321,7 @@ export default function VenueDetailPage() {
         />
       </div>
 
-      <main className="mx-auto hidden max-w-[1360px] px-4 py-6 sm:block sm:px-6 sm:py-8">
+      <main className="mx-auto hidden max-w-[1360px] px-3 py-4 sm:block sm:px-4 sm:py-5">
         <div className="mb-4 flex items-center justify-between">
           <Link
             href="/venues"
@@ -349,14 +350,14 @@ export default function VenueDetailPage() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[2fr_1fr] lg:gap-8">
+        <div className="grid gap-6 lg:grid-cols-[1.8fr_1fr] lg:gap-8">
           {/* LEFT — details */}
           <div className="min-w-0">
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}
               className="mb-6 group"
             >
-              <div className="relative h-[400px] lg:h-[480px] w-full overflow-hidden rounded-3xl bg-slate-900 shadow-sm cursor-pointer">
+              <div className="relative h-[360px] lg:h-[380px] w-full overflow-hidden rounded-3xl bg-slate-900 shadow-sm cursor-pointer">
                 <AnimatePresence initial={false}>
                   <motion.img
                     key={currentImageIndex}
@@ -470,8 +471,8 @@ export default function VenueDetailPage() {
                   </h1>
                 </div>
                 {venue.reviewCount && venue.reviewCount > 0 ? (
-                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 text-sm font-bold text-amber-700">
-                    <Star className="h-4 w-4 fill-amber-500 text-amber-500" /> {venue.rating?.toFixed(1)} <span className="text-amber-700/80 font-semibold">({venue.reviewCount})</span>
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#0b9c65]/20 bg-[#0b9c65]/10 px-2.5 py-1 text-sm font-bold text-[#0b9c65]">
+                    {venue.rating?.toFixed(1)} <Star className="h-3 w-3 fill-[#0b9c65] text-[#0b9c65]" /> <span className="text-[#0b9c65]/80 font-semibold">({venue.reviewCount})</span>
                   </span>
                 ) : (
                   <span className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-500">
@@ -479,7 +480,7 @@ export default function VenueDetailPage() {
                   </span>
                 )}
               </div>
-              <p className="mt-1.5 text-xs font-bold uppercase tracking-widest text-brand-700">
+              <p className="mt-1.5 text-xs font-bold uppercase tracking-widest text-[#7f1d1d]">
                 {categoryText} • {venue.city}
               </p>
 
@@ -488,10 +489,10 @@ export default function VenueDetailPage() {
               </p>
               <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">Starting price</p>
 
-              <div className="mt-4 space-y-2 border-y border-slate-100 py-4 text-sm text-slate-600">
+              <div className="mt-4 border-y border-slate-100 py-4 text-sm text-slate-600">
                 {isEvent && venue.availableFrom && (
-                  <p className="flex items-center gap-2 font-semibold text-slate-800">
-                    <CalendarDays className="h-4 w-4 text-brand-500" />
+                  <p className="flex items-center gap-2 font-semibold text-slate-800 mb-2">
+                    <CalendarDays className="h-4 w-4 text-[#7f1d1d]" />
                     {new Date(venue.availableFrom).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
                     {(venue.reportingStartTime || venue.reportingEndTime) && (
                       <span className="text-slate-500">
@@ -501,7 +502,7 @@ export default function VenueDetailPage() {
                   </p>
                 )}
                 <p className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 text-brand-500 shrink-0 mt-0.5" />
+                  <MapPin className="h-4 w-4 text-[#7f1d1d] shrink-0 mt-0.5" />
                   <span>
                     <span className="block font-semibold text-slate-800">{venue.address || `${venue.city}, Rajasthan`}</span>
                     <span className="block text-xs text-slate-400">{venue.city} District</span>
@@ -509,8 +510,23 @@ export default function VenueDetailPage() {
                 </p>
               </div>
 
+              <div className="mt-4 flex items-center justify-between gap-2 border-b border-slate-100 pb-4">
+                 <div className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 p-2.5 text-center flex-1">
+                   <Zap className="h-4 w-4 text-[#7f1d1d]" strokeWidth={2} />
+                   <span className="text-[9px] font-bold text-slate-700 leading-tight">Instant<br/>Confirmation</span>
+                 </div>
+                 <div className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 p-2.5 text-center flex-1">
+                   <ListChecks className="h-4 w-4 text-[#7f1d1d]" strokeWidth={2} />
+                   <span className="text-[9px] font-bold text-slate-700 leading-tight">Real-time<br/>Availability</span>
+                 </div>
+                 <div className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 p-2.5 text-center flex-1">
+                   <UserRoundCog className="h-4 w-4 text-[#7f1d1d]" strokeWidth={2} />
+                   <span className="text-[9px] font-bold text-slate-700 leading-tight">Trusted<br/>Venue</span>
+                 </div>
+              </div>
+
               <motion.button
-                whileHover={{ y: -2, boxShadow: "0 10px 25px -5px rgba(220, 38, 38, 0.4)" }}
+                whileHover={{ y: -2, boxShadow: "0 10px 25px -5px rgba(127, 29, 29, 0.4)" }}
                 type="button"
                 onClick={() => {
                   const sports = venueSports(venue);
@@ -521,53 +537,16 @@ export default function VenueDetailPage() {
                     setBooking(true);
                   }
                 }}
-                className="group mt-6 flex w-full items-center justify-between rounded-xl bg-brand-800 px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-brand-900 shadow-md shadow-brand-900/20 cursor-pointer"
+                className="group mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#7f1d1d] px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-[#450a0a] shadow-md cursor-pointer"
               >
                 <span>Book Now</span>
-                <ChevronDown className="h-4 w-4 -rotate-90 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </motion.button>
             </div>
-
-            {venue.vendorId && (
-              <Link
-                href={`/venues/vendor/${venue.vendorId}`}
-                className="mt-4 flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-4 transition hover:border-slate-200 shadow-sm hover:shadow"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
-                    <Store className="h-5 w-5" />
-                  </span>
-                  <div>
-                    <span className="block text-sm font-bold text-slate-900">View vendor profile</span>
-                    <span className="block text-xs font-medium text-slate-500">See all turfs &amp; games from this vendor</span>
-                  </div>
-                </div>
-                <ChevronDown className="h-5 w-5 -rotate-90 text-slate-400" />
-              </Link>
-            )}
-
-            {/* Coaching belongs to a venue, not to an Event — same rule as the Academy tab. */}
-            {venue.type !== "Event" && (
-              <Link
-                href="/coaches"
-                className="mt-3 flex items-center justify-between rounded-2xl border border-slate-100 bg-white p-4 transition hover:border-slate-200 shadow-sm hover:shadow"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
-                    <UserRoundCog className="h-5 w-5" />
-                  </span>
-                  <div>
-                    <span className="block text-sm font-bold text-slate-900">Want a coach here?</span>
-                    <span className="block text-xs font-medium text-slate-500">Browse coaches and book a session</span>
-                  </div>
-                </div>
-                <ChevronDown className="h-5 w-5 -rotate-90 text-slate-400" />
-              </Link>
-            )}
           </motion.div>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-2">
           {/* Same info the mobile view shows — specs, weather, sports, amenities, players, reviews. */}
           {!isEvent && (
             <VenueInfoSections
@@ -637,9 +616,11 @@ export default function VenueDetailPage() {
 
 
         </div>
+      </main>
 
-        {/* Bottom Feature Footer Bar */}
-        <div className="mt-8 rounded-3xl bg-gradient-to-r from-[#7f1d1d] via-[#991b1b] to-[#7f1d1d] p-6 text-white shadow-xl shadow-red-950/20">
+      {/* Bottom Feature Footer Bar */}
+      <div className="hidden sm:block w-full bg-gradient-to-r from-[#7f1d1d] via-[#991b1b] to-[#7f1d1d] py-4 shadow-[0_-4px_20px_rgba(0,0,0,0.15)] mt-6">
+        <div className="mx-auto max-w-[1360px] px-4">
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-md">
@@ -679,7 +660,7 @@ export default function VenueDetailPage() {
             </div>
           </div>
         </div>
-      </main>
+      </div>
 
       {/* Mobile Sticky Booking Bar */}
       <motion.div
@@ -957,7 +938,7 @@ function VenueInfoSections({
 
   return (
     <>
-      {/* 1. Status Pills Bar */}
+      {/* 1. ROW 1: Quick Status Pills & Amenities */}
       <motion.div
         variants={{
           hidden: { opacity: 0 },
@@ -966,102 +947,81 @@ function VenueInfoSections({
         initial="hidden"
         whileInView="show"
         viewport={{ once: true }}
-        className="mt-4 grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4"
+        className="mt-4 flex flex-col lg:flex-row gap-3 items-stretch"
       >
-        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-2 sm:gap-3 rounded-2xl bg-white px-2.5 py-3 sm:px-4 sm:py-3.5 shadow-sm border border-slate-100 min-w-0">
-          <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
-          <div className="min-w-0 flex-1">
-            <span className="block text-[11px] sm:text-xs font-extrabold text-slate-900 leading-tight">
-              Open Today
-            </span>
-            <span className="block text-[9px] sm:text-[10px] font-medium text-slate-500 truncate mt-0.5">
-              {venue.reportingStartTime ?? "06:00 AM"} – {venue.reportingEndTime ?? "11:00 PM"}
-            </span>
-          </div>
-          <span className="shrink-0 rounded-md bg-emerald-50 px-1 py-0.5 text-[7px] sm:text-[8px] font-black uppercase tracking-wider text-emerald-600 border border-emerald-100">
-            OPEN
-          </span>
-        </motion.div>
-        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-2 sm:gap-3 rounded-2xl bg-white px-2.5 py-3 sm:px-4 sm:py-3.5 shadow-sm border border-slate-100 min-w-0">
-          <LayoutGrid className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
-          <div className="min-w-0 flex-1">
-            <span className="block text-[11px] sm:text-xs font-extrabold text-slate-900 leading-tight">
-              {activeCourts.length > 0 ? `${activeCourts.length} Court` : "1 Court"}
-            </span>
-            <span className="block text-[9px] sm:text-[10px] font-medium text-slate-500 truncate mt-0.5">Available</span>
-          </div>
-        </motion.div>
-        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-2 sm:gap-3 rounded-2xl bg-white px-2.5 py-3 sm:px-4 sm:py-3.5 shadow-sm border border-slate-100 min-w-0">
-          <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
-          <div className="min-w-0 flex-1">
-            <span className="block text-[11px] sm:text-xs font-extrabold text-slate-900 leading-tight">Instant Booking</span>
-            <span className="block text-[9px] sm:text-[10px] font-medium text-slate-500 truncate mt-0.5">Quick &amp; easy</span>
-          </div>
-        </motion.div>
-        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-2 sm:gap-3 rounded-2xl bg-white px-2.5 py-3 sm:px-4 sm:py-3.5 shadow-sm border border-slate-100 min-w-0">
-          <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
-          <div className="min-w-0 flex-1">
-            <span className="block text-[11px] sm:text-xs font-extrabold text-slate-900 leading-tight">Confirmed</span>
-            <span className="block text-[9px] sm:text-[10px] font-medium text-slate-500 truncate mt-0.5">Real-time availability</span>
-          </div>
-        </motion.div>
-      </motion.div>
-
-      {/* 2. Location Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.5 }}
-        className="mt-5 rounded-3xl border border-slate-100 bg-white p-5 shadow-sm"
-      >
-        <div className="flex items-center justify-between gap-3 mb-3">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-brand-600 shrink-0" />
-              <h2 className="text-sm font-extrabold text-slate-900">Location</h2>
+        {/* Quick Status Pills */}
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4 flex-1">
+          <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-2 sm:gap-3 rounded-2xl bg-white px-2.5 py-3 sm:px-3 sm:py-3 shadow-sm border border-slate-100 min-w-0">
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
+            <div className="min-w-0 flex-1">
+              <span className="block text-[11px] sm:text-xs font-extrabold text-slate-900 leading-tight">
+                Open Today
+              </span>
+              <span className="block text-[9px] sm:text-[10px] font-medium text-slate-500 truncate mt-0.5">
+                {venue.reportingStartTime ?? "06:00 AM"} – {venue.reportingEndTime ?? "11:00 PM"}
+              </span>
             </div>
-            {(venue.address || venue.city) && (
-              <p className="mt-0.5 text-xs text-slate-500 truncate">{venue.address || venue.city}</p>
-            )}
+            <span className="shrink-0 rounded-md bg-emerald-50 px-1 py-0.5 text-[7px] sm:text-[8px] font-black uppercase tracking-wider text-emerald-600 border border-emerald-100">
+              OPEN
+            </span>
+          </motion.div>
+          <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-2 sm:gap-3 rounded-2xl bg-white px-2.5 py-3 sm:px-4 sm:py-3.5 shadow-sm border border-slate-100 min-w-0">
+            <LayoutGrid className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
+            <div className="min-w-0 flex-1">
+              <span className="block text-[11px] sm:text-xs font-extrabold text-slate-900 leading-tight">
+                {activeCourts.length > 0 ? `${activeCourts.length} Court` : "1 Court"}
+              </span>
+              <span className="block text-[9px] sm:text-[10px] font-medium text-slate-500 truncate mt-0.5">Available</span>
+            </div>
+          </motion.div>
+          <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-2 sm:gap-3 rounded-2xl bg-white px-2.5 py-3 sm:px-4 sm:py-3.5 shadow-sm border border-slate-100 min-w-0">
+            <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
+            <div className="min-w-0 flex-1">
+              <span className="block text-[11px] sm:text-xs font-extrabold text-slate-900 leading-tight">Instant Booking</span>
+              <span className="block text-[9px] sm:text-[10px] font-medium text-slate-500 truncate mt-0.5">Quick &amp; easy</span>
+            </div>
+          </motion.div>
+          <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-2 sm:gap-3 rounded-2xl bg-white px-2.5 py-3 sm:px-4 sm:py-3.5 shadow-sm border border-slate-100 min-w-0">
+            <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
+            <div className="min-w-0 flex-1">
+              <span className="block text-[11px] sm:text-xs font-extrabold text-slate-900 leading-tight">Confirmed</span>
+              <span className="block text-[9px] sm:text-[10px] font-medium text-slate-500 truncate mt-0.5">Real-time availability</span>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Amenities Bar */}
+        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="rounded-2xl bg-white p-3 shadow-sm flex items-center gap-4 overflow-x-auto border border-slate-50 lg:flex-[1.5]">
+          <div className="flex items-center gap-2 text-xs font-extrabold text-slate-900 shrink-0">
+            <UserRoundCog className="h-4 w-4 text-brand-600" /> Amenities
           </div>
-          <a
-            href={`https://maps.google.com/?q=${encodeURIComponent(venue.address || venue.city)}`}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-slate-800 transition shrink-0"
-          >
-            Get Directions &rarr;
-          </a>
-        </div>
-        <div className="relative h-44 w-full overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
-          <motion.iframe
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            title="Venue Map"
-            src={`https://maps.google.com/maps?q=${encodeURIComponent(venue.address || venue.city)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
-            className="absolute inset-0 h-full w-full border-0"
-            loading="lazy"
-          />
-        </div>
+          <div className="h-4 w-px bg-slate-200 shrink-0" />
+          <div className="flex items-center gap-6 text-xs font-bold text-slate-700 shrink-0">
+            {amenities.slice(0, 5).map(({ label, Icon }) => (
+              <motion.span whileHover={{ scale: 1.05 }} key={label} className="flex flex-col items-center gap-1.5 cursor-pointer">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand-50 text-brand-600 border border-brand-100/50">
+                  <Icon className="h-4 w-4" />
+                </span>
+                <span className="text-[9px] font-bold text-center leading-tight whitespace-pre-wrap">{label.replace(" ", "\n")}</span>
+              </motion.span>
+            ))}
+          </div>
+        </motion.div>
       </motion.div>
 
-      {/* 3. Highlights & Packages 2-Column Grid */}
+      {/* 2. ROW 2: Highlights, Packages, Specs, Weather & Location */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.5 }}
-        className="mt-5 grid gap-5 md:grid-cols-2 items-start"
+        className="mt-3 grid gap-3 grid-cols-1 lg:grid-cols-4 items-start"
       >
-        {/* Highlights Card */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
+        {/* Col 1: Highlights */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm h-full">
           <h2 className="text-sm font-extrabold text-slate-900">Highlights</h2>
-          <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="mt-4 flex flex-col gap-3">
             {highlights.slice(0, 4).map((h) => {
-              // Map specific highlight keywords to icons for the new design
               let Icon = CheckCircle2;
               const ht = h.toLowerCase();
               if (ht.includes("net") || ht.includes("campus") || ht.includes("location")) Icon = MapPin;
@@ -1071,12 +1031,12 @@ function VenueInfoSections({
 
               return (
                 <div key={h} className="flex items-start gap-3">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
-                    <Icon className="h-4 w-4" strokeWidth={2} />
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
+                    <Icon className="h-3.5 w-3.5" strokeWidth={2} />
                   </span>
-                  <div className="flex flex-col pt-1.5">
-                    <span className="text-xs font-extrabold text-slate-900 leading-tight">{h.split('—')[0]?.trim() || h}</span>
-                    {h.includes('—') && <span className="text-[10px] text-slate-500 mt-0.5 leading-tight">{h.split('—')[1]?.trim()}</span>}
+                  <div className="flex flex-col pt-1">
+                    <span className="text-[11px] font-extrabold text-slate-900 leading-tight">{h.split('—')[0]?.trim() || h}</span>
+                    {h.includes('—') && <span className="text-[9px] text-slate-500 mt-0.5 leading-tight">{h.split('—')[1]?.trim()}</span>}
                   </div>
                 </div>
               );
@@ -1084,12 +1044,12 @@ function VenueInfoSections({
           </div>
         </div>
 
-        {/* Packages Card */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-1.5">
+        {/* Col 2: Packages */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm h-full">
+          <div className="flex flex-col gap-1.5">
             <h2 className="text-sm font-extrabold text-slate-900">Packages</h2>
-            <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[9px] sm:text-[10px] font-bold text-amber-700 border border-amber-200/60">
-              Same owner-configured booking format
+            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[8px] font-bold text-amber-700 border border-amber-200 w-max">
+              Same owner-configured format
             </span>
           </div>
           <div className="mt-4 flex flex-col border border-slate-100 divide-y divide-slate-100 rounded-xl overflow-hidden">
@@ -1101,74 +1061,37 @@ function VenueInfoSections({
               <motion.div
                 whileHover="hover"
                 key={tier.id || tier.label}
-                className="group flex items-center justify-between p-3.5 bg-white transition hover:bg-red-50/50 cursor-pointer"
+                className="group flex flex-col p-3.5 bg-white transition hover:bg-slate-50 cursor-pointer"
               >
-                <div>
-                  <p className="text-xs font-extrabold text-slate-900">{tier.label}</p>
-                  <p className="text-[10px] font-medium text-slate-500">{tier.time || "06:00 AM - 11:00 PM"}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <motion.p
-                    variants={{ hover: { scale: 1.04 } }}
-                    className="text-sm font-black text-slate-900 origin-right"
-                  >
+                <div className="flex justify-between items-center mb-1">
+                  <p className="text-[11px] font-extrabold text-slate-900">{tier.label}</p>
+                  <motion.p variants={{ hover: { scale: 1.04 } }} className="text-sm font-black text-[#0b9c65]">
                     ₹{tier.amount.toLocaleString("en-IN")}
                   </motion.p>
-                  <motion.div variants={{ hover: { x: 4 } }}>
-                    <ChevronDown className="h-4 w-4 -rotate-90 text-brand-600 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </motion.div>
                 </div>
+                <p className="text-[9px] font-medium text-slate-500">{tier.time || "06:00 AM - 11:00 PM"}</p>
               </motion.div>
             ))}
           </div>
+          <button className="w-full mt-3 text-xs font-bold text-brand-600 hover:text-brand-700 transition flex items-center justify-center gap-1">
+            View all packages <ChevronRight className="h-3.5 w-3.5" />
+          </button>
         </div>
-      </motion.div>
 
-      {/* 4. Amenities Bar */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.5 }}
-        className="mt-5 rounded-3xl bg-white p-5 shadow-sm flex items-center gap-6 overflow-x-auto border border-slate-50"
-      >
-        <div className="flex items-center gap-2 text-xs font-extrabold text-slate-900 shrink-0">
-          <UserRoundCog className="h-4 w-4 text-brand-600" /> Amenities
-        </div>
-        <div className="h-4 w-px bg-slate-200 shrink-0" />
-        <div className="flex items-center gap-8 text-xs font-bold text-slate-700 shrink-0">
-          {amenities.slice(0, 5).map(({ label, Icon }) => (
-            <motion.span whileHover={{ scale: 1.08, rotate: -3 }} key={label} className="flex items-center gap-2 cursor-pointer">
-              <Icon className="h-4 w-4 text-brand-600" /> {label}
-            </motion.span>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* 5. Specs + Weather 2-Column Grid */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.5 }}
-        className="mt-5 grid gap-5 md:grid-cols-2 items-start"
-      >
-        {/* Specs */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
+        {/* Col 3: Technical Specs */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm h-full">
           <h2 className="text-sm font-extrabold text-slate-900">Technical Specifications</h2>
-          <p className="mt-0.5 text-[10px] text-slate-400">What makes this venue play-ready.</p>
-          <div className="mt-4 space-y-3">
+          <div className="mt-4 grid grid-cols-2 gap-x-2 gap-y-4">
             {((venue.technicalSpecs && venue.technicalSpecs.length > 0) ? venue.technicalSpecs : DEFAULT_TECHNICAL_SPECS).map((spec) => {
               const IconComponent = getSpecIcon(spec.icon);
-              const theme = getSpecColorTheme(spec.color || "purple");
               return (
-                <div key={spec.label} className="flex items-start gap-3">
-                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border ${theme.badge}`}>
-                    <IconComponent className="h-4 w-4 stroke-[2]" />
+                <div key={spec.label} className="flex flex-col gap-1.5">
+                  <span className={`flex h-6 w-6 items-center justify-center rounded-lg border border-slate-100 bg-slate-50 text-slate-600`}>
+                    <IconComponent className="h-3 w-3 stroke-[2]" />
                   </span>
                   <div>
-                    <h4 className="text-xs font-bold text-slate-900 leading-tight">{spec.label}</h4>
-                    <p className="mt-0.5 text-[10px] text-slate-500 leading-snug">{spec.value}</p>
+                    <h4 className="text-[10px] font-bold text-slate-900 leading-tight">{spec.label}</h4>
+                    <p className="mt-0.5 text-[9px] text-slate-500 leading-snug line-clamp-2">{spec.value}</p>
                   </div>
                 </div>
               );
@@ -1176,117 +1099,125 @@ function VenueInfoSections({
           </div>
         </div>
 
-        {/* Weather - Hardcoded Red Weather UI to match the Target Design exactly */}
-        <div className="rounded-3xl border border-red-900 bg-gradient-to-br from-red-900 via-[#7f1d1d] to-[#450a0a] p-6 text-white shadow-lg flex flex-col justify-between">
-          <div>
-            <h2 className="text-sm font-extrabold text-white/90">Local Weather</h2>
-            <div className="mt-4 flex items-center justify-between">
+        {/* Col 4: Weather & Location Stacked */}
+        <div className="flex flex-col gap-3 h-full">
+          <div className="rounded-3xl border border-red-900 bg-gradient-to-br from-[#7f1d1d] to-[#450a0a] p-5 text-white shadow-lg flex flex-col justify-between flex-1">
+            <h2 className="text-[11px] font-extrabold text-white/90">Local Weather</h2>
+            <div className="mt-2 flex items-center justify-between">
               <div>
-                <motion.p
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6 }}
-                  className="text-4xl font-black"
-                >
+                <motion.p initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-3xl font-black">
                   24°
                 </motion.p>
-                <p className="text-xs font-semibold text-white/80 mt-1">Cloudy</p>
+                <p className="text-[10px] font-semibold text-white/80 mt-0.5">Cloudy</p>
               </div>
-              <motion.div
-                animate={{ y: [0, -6, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <Cloud className="h-10 w-10 text-white/90" strokeWidth={1.5} />
+              <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
+                <Cloud className="h-8 w-8 text-white/90" strokeWidth={1.5} />
               </motion.div>
             </div>
+            <div className="mt-4 flex items-center justify-between border-t border-white/20 pt-3 text-center">
+              <div>
+                <p className="text-[8px] font-bold text-white/80">WED</p>
+                <CloudRain className="mx-auto h-3 w-3 my-1 text-white" strokeWidth={1.5} />
+                <p className="text-[10px] font-extrabold text-white">28°</p>
+              </div>
+              <div>
+                <p className="text-[8px] font-bold text-white/80">THU</p>
+                <Cloud className="mx-auto h-3 w-3 my-1 text-white" strokeWidth={1.5} />
+                <p className="text-[10px] font-extrabold text-white">28°</p>
+              </div>
+              <div>
+                <p className="text-[8px] font-bold text-white/80">FRI</p>
+                <Cloud className="mx-auto h-3 w-3 my-1 text-white" strokeWidth={1.5} />
+                <p className="text-[10px] font-extrabold text-white">29°</p>
+              </div>
+            </div>
           </div>
-          <div className="mt-6 flex items-center justify-between border-t border-white/20 pt-4 text-center">
-            <div>
-              <p className="text-[10px] font-bold text-white/80">WED</p>
-              <CloudRain className="mx-auto h-4 w-4 my-1.5 text-white" strokeWidth={1.5} />
-              <p className="text-xs font-extrabold text-white">28°</p>
+
+          <div className="rounded-3xl border border-slate-100 bg-white shadow-sm flex flex-col flex-1 overflow-hidden">
+            <div className="p-4 pb-2 min-w-0">
+              <h2 className="text-sm font-extrabold text-slate-900 leading-tight">Location</h2>
+              {(venue.address || venue.city) && (
+                <p className="mt-0.5 text-[10px] text-slate-500 truncate">{venue.address || venue.city}</p>
+              )}
             </div>
-            <div>
-              <p className="text-[10px] font-bold text-white/80">THU</p>
-              <Cloud className="mx-auto h-4 w-4 my-1.5 text-white" strokeWidth={1.5} />
-              <p className="text-xs font-extrabold text-white">28°</p>
+            <div className="relative flex-1 min-h-[100px] w-full bg-slate-100">
+              <iframe
+                title="Venue Map"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(venue.address || venue.city)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                className="absolute inset-0 h-full w-full border-0"
+                loading="lazy"
+              />
             </div>
-            <div>
-              <p className="text-[10px] font-bold text-white/80">FRI</p>
-              <Cloud className="mx-auto h-4 w-4 my-1.5 text-white" strokeWidth={1.5} />
-              <p className="text-xs font-extrabold text-white">29°</p>
-            </div>
+            <a
+              href={`https://maps.google.com/?q=${encodeURIComponent(venue.address || venue.city)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center justify-center gap-1.5 bg-slate-50 p-2 text-[10px] font-bold text-brand-600 hover:text-brand-700 transition"
+            >
+              View on Google Maps <ArrowLeft className="h-3 w-3 rotate-135" />
+            </a>
           </div>
         </div>
       </motion.div>
 
-      {/* 5. Reviews + Write Form + Summary 3-Column Grid */}
+      {/* 3. ROW 3: Reviews + Write Form + Summary */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.5 }}
-        className="mt-5 grid gap-5 lg:grid-cols-3 items-stretch"
+        className="mt-3 grid gap-3 grid-cols-1 lg:grid-cols-3 items-stretch pb-24 lg:pb-32"
       >
         {/* Reviews & Community */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm flex flex-col">
+        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm flex flex-col h-full">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-extrabold text-slate-900">Reviews &amp; Community</h2>
-            {reviewProps.reviews.length > 0 && (
-              <button className="text-xs font-bold text-brand-600 hover:text-brand-700 transition">View all reviews →</button>
-            )}
           </div>
-
-          <div className="flex items-start gap-5">
-            <div className="shrink-0">
+          <div className="flex items-start gap-4">
+            <div className="shrink-0 flex flex-col items-center">
               <p className="text-3xl font-black text-slate-900 leading-none">{venue.rating?.toFixed(1) || "4.8"}</p>
-              <motion.div
-                variants={{ show: { transition: { staggerChildren: 0.08 } } }}
-                initial="hidden" whileInView="show" viewport={{ once: true }}
-                className="flex items-center gap-0.5 mt-1.5 mb-1"
-              >
+              <div className="flex items-center gap-0.5 mt-1.5 mb-1">
                 {[1, 2, 3, 4, 5].map((s) => (
-                  <motion.div key={s} variants={{ hidden: { opacity: 0, scale: 0.5 }, show: { opacity: 1, scale: 1 } }}>
-                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                  </motion.div>
+                  <Star key={s} className="h-2.5 w-2.5 fill-amber-400 text-amber-400" />
                 ))}
-              </motion.div>
-              <div className="flex text-[10px] font-semibold text-slate-500">
+              </div>
+              <div className="text-[9px] font-semibold text-slate-500">
                 {reviewProps.reviews.length || venue.reviewCount || 0} Reviews
               </div>
+              {reviewProps.reviews.length > 0 && (
+                <button className="mt-3 w-full rounded-xl bg-[#7f1d1d] hover:bg-[#450a0a] text-white py-1.5 px-3 text-[10px] font-bold transition">
+                  View all reviews
+                </button>
+              )}
             </div>
 
             <div className="flex-1">
               {reviewProps.reviews.length > 0 ? (
-                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+                <div className="space-y-4 max-h-[220px] overflow-y-auto pr-2">
                   {reviewProps.reviews.slice(0, 3).map((r, i) => (
                     <div key={i}>
                       <div className="flex items-center gap-2">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-100 text-[10px] font-bold text-brand-700 uppercase">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-100 text-[8px] font-bold text-brand-700 uppercase">
                           {r.customerName.charAt(0) || "U"}
                         </span>
                         <div>
-                          <p className="text-xs font-bold text-slate-900 leading-none">{r.customerName}</p>
+                          <p className="text-[11px] font-bold text-slate-900 leading-none">{r.customerName}</p>
                           <div className="flex items-center gap-0.5 mt-0.5">
                             {[1, 2, 3, 4, 5].map((s) => (
-                              <Star key={s} className={`h-2.5 w-2.5 ${s <= (r.rating || 5) ? "fill-amber-400 text-amber-400" : "text-slate-200"}`} />
+                              <Star key={s} className={`h-2 w-2 ${s <= (r.rating || 5) ? "fill-amber-400 text-amber-400" : "text-slate-200"}`} />
                             ))}
                           </div>
                         </div>
                       </div>
-                      <p className="mt-2 text-xs text-slate-600 leading-relaxed">{r.comment}</p>
+                      <p className="mt-1.5 text-[10px] text-slate-600 leading-relaxed">{r.comment}</p>
                     </div>
                   ))}
-                  {reviewProps.reviews.length > 3 && (
-                    <p className="text-xs font-bold text-brand-600 text-center cursor-pointer">View {reviewProps.reviews.length - 3} more reviews...</p>
-                  )}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center text-center py-6 text-slate-400">
-                  <Star className="h-8 w-8 text-slate-200 mb-2" />
-                  <p className="text-xs font-semibold">No reviews yet.</p>
-                  <p className="text-[10px]">Be the first to share your experience!</p>
+                  <Star className="h-6 w-6 text-slate-200 mb-2" />
+                  <p className="text-[11px] font-semibold">No reviews yet.</p>
+                  <p className="text-[9px]">Be the first to share your experience!</p>
                 </div>
               )}
             </div>
@@ -1294,14 +1225,14 @@ function VenueInfoSections({
         </div>
 
         {/* Write Review Form */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm flex flex-col justify-between">
+        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm flex flex-col justify-between h-full">
           <div>
             <h3 className="text-sm font-extrabold text-slate-900">Be the first to review this venue</h3>
-            <p className="mt-1 text-xs text-slate-500">Your experience helps other players choose better.</p>
+            <p className="mt-1 text-[10px] text-slate-500">Your experience helps other players choose better.</p>
           </div>
 
-          <form onSubmit={reviewProps.onSubmitReview} className="mt-4 space-y-3" noValidate>
-            <div className="flex items-center gap-2">
+          <form onSubmit={reviewProps.onSubmitReview} className="mt-4 flex flex-col gap-3" noValidate>
+            <div className="flex items-center gap-1.5">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
                   key={star}
@@ -1310,41 +1241,35 @@ function VenueInfoSections({
                   className="p-0 cursor-pointer transition hover:scale-110"
                 >
                   <Star
-                    className={`h-5 w-5 ${star <= reviewProps.reviewRating ? "fill-amber-400 text-amber-400" : "text-slate-200"}`}
+                    className={`h-4 w-4 ${star <= reviewProps.reviewRating ? "fill-amber-400 text-amber-400" : "text-slate-200"}`}
                   />
                 </button>
               ))}
             </div>
-            <div>
-              <input
-                type="text"
-                value={reviewProps.reviewName}
-                onChange={(e) => reviewProps.onNameChange(e.target.value)}
-                placeholder="Your Name (e.g. Aman Sharma)"
-                className={`w-full rounded-xl border ${reviewProps.reviewError?.includes('Name') || reviewProps.reviewError?.includes('all fields') ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'} p-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:bg-white transition-colors`}
-              />
-            </div>
-            <div>
-              <textarea
-                rows={2}
-                value={reviewProps.reviewComment}
-                onChange={(e) => reviewProps.onCommentChange(e.target.value)}
-                placeholder="Tell us about your experience..."
-                className={`w-full rounded-xl border ${reviewProps.reviewError?.includes('comment') || reviewProps.reviewError?.includes('all fields') ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'} p-2 text-xs text-slate-800 outline-none focus:border-brand-500 focus:bg-white resize-none transition-colors`}
-              />
-            </div>
-
+            <input
+              type="text"
+              value={reviewProps.reviewName}
+              onChange={(e) => reviewProps.onNameChange(e.target.value)}
+              placeholder="Your Name (e.g. Aman Sharma)"
+              className={`w-full rounded-xl border ${reviewProps.reviewError?.includes('Name') || reviewProps.reviewError?.includes('all fields') ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'} p-2 text-[11px] text-slate-800 outline-none focus:border-brand-500 focus:bg-white transition-colors`}
+            />
+            <textarea
+              rows={2}
+              value={reviewProps.reviewComment}
+              onChange={(e) => reviewProps.onCommentChange(e.target.value)}
+              placeholder="Tell us about your experience..."
+              className={`w-full rounded-xl border ${reviewProps.reviewError?.includes('comment') || reviewProps.reviewError?.includes('all fields') ? 'border-red-400 bg-red-50' : 'border-slate-200 bg-slate-50'} p-2 text-[11px] text-slate-800 outline-none focus:border-brand-500 focus:bg-white resize-none transition-colors`}
+            />
             {reviewProps.reviewError && (
-              <p className="text-[10px] font-bold text-red-500">{reviewProps.reviewError}</p>
+              <p className="text-[9px] font-bold text-red-500">{reviewProps.reviewError}</p>
             )}
             {reviewProps.reviewSuccess && (
-              <p className="text-[10px] font-bold text-emerald-500">Review submitted successfully! Thank you.</p>
+              <p className="text-[9px] font-bold text-[#0b9c65]">Review submitted successfully! Thank you.</p>
             )}
-
             <button
               type="submit"
               disabled={reviewProps.submittingReview}
-              className="w-full rounded-xl bg-brand-800 hover:bg-brand-900 py-2.5 text-xs font-bold text-white shadow-md transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full mt-auto rounded-xl bg-[#7f1d1d] hover:bg-[#450a0a] py-2.5 text-[11px] font-bold text-white shadow-md transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {reviewProps.submittingReview ? "Submitting..." : "Write a Review"}
             </button>
@@ -1359,6 +1284,7 @@ function VenueInfoSections({
     </>
   );
 }
+
 
 /** Bottom sheet for choosing which sport to book. Shared by both layouts. */
 function SportPickerSheet({

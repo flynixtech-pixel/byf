@@ -7,6 +7,7 @@ import { getVendorProfile, updateVendorProfile } from "@/lib/api/vendor";
 import { ApiError } from "@/lib/api/client";
 import { Vendor } from "@/lib/api/types";
 import { uploadVendorImage } from "@/lib/api/uploads";
+import { ProfileMpinResetModal } from "@/components/vendor/ProfileMpinResetModal";
 
 const CATEGORIES = [
   "Turf Owners",
@@ -54,6 +55,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [showMpinReset, setShowMpinReset] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -293,6 +295,21 @@ export default function ProfilePage() {
         </SectionCard>
       </div>
 
+      <SectionCard title="Security">
+        <div className="flex items-center justify-between mt-2">
+          <div>
+            <p className="text-sm font-semibold text-ink">Dashboard mPIN</p>
+            <p className="text-xs text-ink-faint mt-1">Reset the 4-digit PIN used to access your reports.</p>
+          </div>
+          <button
+            onClick={() => setShowMpinReset(true)}
+            className="rounded-lg border border-surface-border px-4 py-2 text-xs font-semibold text-ink hover:bg-cream-200 transition"
+          >
+            Reset mPIN
+          </button>
+        </div>
+      </SectionCard>
+
       <SectionCard
         title="Master Categories"
         description="Select exactly what your business offers (Max 5)"
@@ -358,6 +375,8 @@ export default function ProfilePage() {
           </div>
         </SectionCard>
       )}
+
+      {showMpinReset && <ProfileMpinResetModal onClose={() => setShowMpinReset(false)} />}
     </div>
   );
 }

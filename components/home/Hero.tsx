@@ -105,14 +105,10 @@ export function Hero({
   return (
     <section id="home" className="relative z-50">
       <div
-        className="relative"
-        style={{
-          background:
-            "linear-gradient(135deg, #15101f 0%, #211731 35%, #2b1f3d 60%, #3a2a1a 100%)",
-        }}
+        className="relative sm:bg-[linear-gradient(135deg,#15101f_0%,#211731_35%,#2b1f3d_60%,#3a2a1a_100%)] bg-transparent"
       >
-        {/* rotating background slideshow */}
-        <div className="absolute inset-0 overflow-hidden" aria-hidden>
+        {/* rotating background slideshow - hidden on mobile */}
+        <div className="absolute inset-0 overflow-hidden hidden sm:block" aria-hidden>
           {HERO_IMAGES.map((src, i) => (
             <div
               key={i}
@@ -141,29 +137,29 @@ export function Hero({
           />
         </div>
 
-        {/* ambient glow accents */}
-        <div className="pointer-events-none absolute -left-32 -top-32 h-[28rem] w-[28rem] rounded-full bg-brand-500/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-40 right-0 h-[28rem] w-[28rem] rounded-full bg-fuchsia-500/15 blur-3xl" />
-        <div className="pointer-events-none absolute right-1/4 top-10 h-56 w-56 rounded-full bg-sky-500/10 blur-3xl" />
+        {/* ambient glow accents - hidden on mobile */}
+        <div className="pointer-events-none absolute -left-32 -top-32 h-[28rem] w-[28rem] rounded-full bg-brand-500/20 blur-3xl hidden sm:block" />
+        <div className="pointer-events-none absolute -bottom-40 right-0 h-[28rem] w-[28rem] rounded-full bg-fuchsia-500/15 blur-3xl hidden sm:block" />
+        <div className="pointer-events-none absolute right-1/4 top-10 h-56 w-56 rounded-full bg-sky-500/10 blur-3xl hidden sm:block" />
 
-        <div className="relative z-10 mx-auto max-w-7xl px-4 pb-2 pt-8 sm:px-6 sm:pt-12 sm:pb-4 lg:pt-14">
-          <div className="max-w-2xl mt-2 sm:mt-4">
+        <div className="relative z-10 mx-auto max-w-7xl px-4 pb-2 pt-2 sm:px-6 sm:pt-12 sm:pb-4 lg:pt-14">
+          <div className="max-w-2xl mt-0 sm:mt-4">
             <h1
-              className="mt-4 text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl"
+              className="hidden sm:block mt-4 text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl"
               style={{ fontFamily: "var(--font-space-grotesk), sans-serif", lineHeight: 1.1 }}
             >
               Play. Book. <span className="text-brand-400">Vibe.</span>
             </h1>
 
-            <p className="mt-4 max-w-xl text-base text-slate-300 sm:text-lg">
+            <p className="hidden sm:block mt-4 max-w-xl text-base text-slate-300 sm:text-lg">
               Book courts and turfs, find players for tonight&rsquo;s match, discover nearby
               restaurants, and never argue about who owes what - all from one app.
             </p>
 
             {/* Search bar & Instant Recommendations */}
-            <div ref={searchContainerRef} className="relative mt-6">
-              <form onSubmit={handleSubmit} className="flex flex-col gap-2 rounded-[1.75rem] bg-white p-2 shadow-2xl shadow-black/30 sm:flex-row sm:items-center sm:rounded-full sm:p-1.5 sm:pl-5">
-                <span aria-hidden className="hidden text-slate-400 sm:block">
+            <div ref={searchContainerRef} className="relative mt-2 sm:mt-6">
+              <form onSubmit={handleSubmit} className="flex flex-row items-center gap-2 rounded-full bg-white p-1.5 pl-3 sm:pl-5 shadow-sm border border-slate-200 sm:shadow-2xl sm:shadow-black/30 sm:border-none">
+                <span aria-hidden className="text-slate-400">
                   <Search className="h-4 w-4" />
                 </span>
                 <input
@@ -174,14 +170,14 @@ export function Hero({
                   }}
                   onFocus={() => setSuggestionsOpen(true)}
                   placeholder="Let's find your vibe"
-                  className="w-full flex-1 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none placeholder:text-slate-400 sm:bg-transparent sm:px-0 sm:py-2"
+                  className="w-full flex-1 bg-transparent px-2 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400 sm:px-0"
                 />
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
                     aria-label="Filters"
                     onClick={onOpenFilters}
-                    className="relative hidden h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 sm:flex"
+                    className="relative flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200"
                   >
                     <Settings className="h-4 w-4" />
                     {activeFilterCount > 0 && (
@@ -190,7 +186,7 @@ export function Hero({
                       </span>
                     )}
                   </button>
-                  <PrimaryButton type="submit" className="w-full !px-6 !py-3 sm:w-auto">Search</PrimaryButton>
+                  <PrimaryButton type="submit" className="hidden sm:inline-flex w-auto !px-6 !py-3">Search</PrimaryButton>
                 </div>
               </form>
 
@@ -206,7 +202,7 @@ export function Hero({
             </div>
 
             {/* trust row */}
-            <div className="mt-4 flex items-center gap-x-5 text-xs font-medium text-slate-300">
+            <div className="hidden sm:flex mt-4 items-center gap-x-5 text-xs font-medium text-slate-300">
               <span className="flex items-center gap-1.5">
                 <span aria-hidden className="flex items-center gap-0.5 text-amber-400">
                   <Star className="h-3.5 w-3.5 fill-current" /> 4.8
@@ -217,7 +213,7 @@ export function Hero({
           </div>
 
           {/* slideshow dots */}
-          <div className="mt-4 pb-1 flex items-center justify-center gap-2 lg:justify-start">
+          <div className="hidden sm:flex mt-4 pb-1 items-center justify-center gap-2 lg:justify-start">
             {HERO_IMAGES.map((src, i) => (
               <button
                 key={i}

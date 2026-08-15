@@ -59,28 +59,37 @@ export function PageHero({
   eyebrow,
   title,
   description,
+  icon,
   right,
 }: {
   eyebrow: string;
   title: string;
   description?: string;
+  icon?: ReactNode;
   right?: ReactNode;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#100725] via-[#220f4c] to-[#3a1a7c] px-5 py-5 sm:px-6 sm:py-6 text-white shadow-lg border border-purple-500/20">
-      <div className="absolute -right-10 -top-16 h-48 w-48 rounded-full bg-fuchsia-500/20 blur-3xl" />
+    <div className="relative overflow-hidden rounded-[1.25rem] bg-gradient-to-r from-[#200f50] via-[#2f1373] to-[#3c1490] px-6 py-4 sm:px-8 sm:py-6 text-white shadow-xl shadow-indigo-900/10 border border-[#442393]">
+      <div className="absolute right-0 top-0 w-1/3 h-full bg-[url('/images/events-banner.png')] opacity-20 bg-cover bg-center mask-image:linear-gradient(to_left,white,transparent)" style={{ WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,1), rgba(0,0,0,0))" }} />
       <div className="absolute left-10 -bottom-10 h-40 w-40 rounded-full bg-indigo-500/20 blur-2xl" />
-      <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] font-bold tracking-widest uppercase shadow-sm backdrop-blur-md text-purple-200">
-            {eyebrow}
-          </span>
-          <h1 className="mt-2 font-display text-xl sm:text-2xl font-bold tracking-tight">{title}</h1>
-          {description && (
-            <p className="mt-1 text-xs text-white/70 max-w-lg leading-relaxed">{description}</p>
+      <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div className="flex items-center gap-5">
+          {icon && (
+             <div className="hidden sm:flex h-16 w-16 items-center justify-center rounded-full bg-white/10 border border-white/20 shadow-inner backdrop-blur-md">
+                {icon}
+             </div>
           )}
+          <div>
+            <span className="inline-flex items-center gap-1.5 px-1 py-0.5 text-[11px] font-bold tracking-widest uppercase text-indigo-200">
+              {eyebrow}
+            </span>
+            <h1 className="mt-1.5 font-display text-2xl sm:text-3xl font-bold tracking-tight text-white">{title}</h1>
+            {description && (
+              <p className="mt-1.5 text-[13px] text-indigo-100/80 max-w-lg leading-relaxed font-medium">{description}</p>
+            )}
+          </div>
         </div>
-        {right && <div className="flex flex-wrap gap-2.5">{right}</div>}
+        {right && <div className="flex flex-wrap items-center gap-3">{right}</div>}
       </div>
     </div>
   );

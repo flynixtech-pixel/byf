@@ -97,10 +97,10 @@ const STAT_CARD_CFG: {
   label: string;
   cls: { box: string; label: string; value: string };
 }[] = [
-  { tone: "available", label: "Available", cls: { box: "border-emerald-200 bg-emerald-50", label: "text-emerald-600", value: "text-emerald-700" } },
-  { tone: "taken", label: "Booked", cls: { box: "border-orange-200 bg-orange-50", label: "text-orange-500", value: "text-orange-700" } },
-  { tone: "blocked", label: "Blocked", cls: { box: "border-slate-200 bg-slate-100", label: "text-slate-500", value: "text-slate-700" } },
-];
+    { tone: "available", label: "Available", cls: { box: "border-emerald-200 bg-emerald-50", label: "text-emerald-600", value: "text-emerald-700" } },
+    { tone: "taken", label: "Booked", cls: { box: "border-orange-200 bg-orange-50", label: "text-orange-500", value: "text-orange-700" } },
+    { tone: "blocked", label: "Blocked", cls: { box: "border-slate-200 bg-slate-100", label: "text-slate-500", value: "text-slate-700" } },
+  ];
 
 function timeStringToHours(timeStr: string): number {
   if (!timeStr) return 0;

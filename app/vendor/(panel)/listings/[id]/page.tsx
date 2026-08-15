@@ -7,7 +7,7 @@ import {
   ArrowLeft, Camera, ClipboardList, FileText, Pencil, Plus,
   LayoutGrid, Clock as ClockIcon, ChevronDown, X,
   Ban, BookOpen, Pause, Clock3, CalendarDays, Phone, User, CalendarCheck, Check,
-  Video, Loader2, Upload, MapPin
+  Video, Loader2, Upload, MapPin, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { Badge } from "@/components/vendor/ui";
 import { Toast } from "@/components/admin/Toast";
@@ -528,27 +528,100 @@ function ImageGallery({
 
   const activeImage = allImages[active] ?? allImages[0];
 
+  const handlePrev = () => setActive((prev) => (prev === 0 ? allImages.length - 1 : prev - 1));
+  const handleNext = () => setActive((prev) => (prev === allImages.length - 1 ? 0 : prev + 1));
+
   return (
-    <div className="rounded-xl2 border border-surface-border bg-white p-4 shadow-panel">
-      <div className="relative h-64 overflow-hidden rounded-xl bg-cream-300 sm:h-80">
+    <div className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] flex flex-col items-center">
+      {/* Premium Small Thumbnails Row on Top */}
+      {allImages.length > 0 && (
+        <div className="mb-5 flex gap-3 overflow-x-auto pb-2 w-full max-w-full scrollbar-none items-center justify-start sm:justify-center">
+          {allImages.map((img, i) => (
+            <button
+              key={img.id}
+              onClick={() => setActive(i)}
+              className={`relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-[14px] border-2 transition-all duration-300 ${
+                i === active ? "border-indigo-600 shadow-md ring-[3px] ring-indigo-50 scale-105 z-10" : "border-transparent opacity-60 hover:opacity-100 hover:scale-95"
+              }`}
+            >
+              <img src={img.url} alt={img.label} className="h-full w-full object-cover" loading="lazy" decoding="async" />
+            </button>
+          ))}
+          <button
+            onClick={() => addInput.current?.click()}
+            className="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 flex-col items-center justify-center rounded-[14px] border border-dashed border-slate-300 bg-slate-50 text-slate-400 hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-600 transition-colors shadow-sm hover:shadow-md"
+            title="Add Photo"
+          >
+            <Plus size={24} />
+          </button>
+        </div>
+      )}
+
+      {/* Main Large Image Slider */}
+      <div className="relative w-full h-64 overflow-hidden rounded-[1.25rem] bg-slate-50 sm:h-[400px] shadow-inner group border border-slate-100">
         {activeImage ? (
-          <img src={activeImage.url} alt={activeImage.label} className="h-full w-full object-cover"
-            loading="lazy"
-            decoding="async"
-          />
+          <>
+            <img src={activeImage.url} alt={activeImage.label} className="h-full w-full object-cover transition-opacity duration-500" loading="lazy" decoding="async" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#110826]/80 via-transparent to-transparent pointer-events-none" />
+            
+            {/* Left/Right Controls */}
+            {allImages.length > 1 && (
+              <>
+                <button
+                  onClick={handlePrev}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white border border-white/30 hover:bg-white/40 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 shadow-lg"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <button
+                  onClick={handleNext}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white border border-white/30 hover:bg-white/40 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 shadow-lg"
+                >
+                  <ChevronRight size={24} />
+                </button>
+              </>
+            )}
+
+            {/* Bottom Info: Label and Indicator */}
+            <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between">
+               <span className="bg-white/20 backdrop-blur-md text-white text-[12px] font-bold px-3 py-1.5 rounded-lg border border-white/20 shadow-sm inline-flex">
+                  {activeImage.label || "Gallery Photo"}
+               </span>
+               {allImages.length > 1 && (
+                 <div className="flex gap-1.5 bg-black/40 backdrop-blur-md px-3 py-2 rounded-full border border-white/10">
+                   {allImages.map((_, i) => (
+                     <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i === active ? "w-4 bg-white" : "w-1.5 bg-white/40"}`} />
+                   ))}
+                 </div>
+               )}
+            </div>
+          </>
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-1.5 px-6 text-center text-ink-faint">
-            <Camera size={28} />
-            <p className="text-sm font-semibold text-ink-soft">No photos yet</p>
-            <p className="text-xs">Add a poster and banner — players see these on your venue page.</p>
+          <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
+            <div className="h-16 w-16 rounded-full bg-slate-200 flex items-center justify-center shadow-inner">
+               <Camera size={28} className="text-slate-400" />
+            </div>
+            <p className="text-lg font-black text-slate-700">No photos yet</p>
+            <p className="text-xs font-medium text-slate-500 max-w-xs">Upload your first photo to make your listing look premium and attractive.</p>
+            <button
+              onClick={() => addInput.current?.click()}
+              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 hover:scale-105 transition-all"
+            >
+              <Camera size={16} /> Upload First Photo
+            </button>
           </div>
         )}
-        <button
-          onClick={() => addInput.current?.click()}
-          className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-lg bg-black/60 px-3 py-2 text-xs font-semibold text-white hover:bg-black/75"
-        >
-          <Camera size={14} /> Add photo
-        </button>
+        
+        {/* Top Right Add Photo Button */}
+        {activeImage && (
+           <button
+             onClick={() => addInput.current?.click()}
+             className="absolute top-5 right-5 inline-flex items-center gap-1.5 rounded-xl bg-black/40 backdrop-blur-md px-4 py-2 text-[11px] font-bold text-white hover:bg-black/60 border border-white/10 transition-all opacity-0 group-hover:opacity-100 shadow-lg hover:scale-105"
+           >
+             <Plus size={14} /> Add Photo
+           </button>
+        )}
+
         <input
           ref={addInput}
           type="file"
@@ -561,47 +634,6 @@ function ImageGallery({
           }}
         />
       </div>
-
-      {allImages.length > 1 && (
-        <div className="mt-4 flex gap-3 overflow-x-auto">
-          {allImages.map((img, i) => (
-            <button
-              key={img.id}
-              onClick={() => setActive(i)}
-              className={`relative h-16 w-24 shrink-0 overflow-hidden rounded-lg border-2 ${
-                i === active ? "border-vibe-violet" : "border-transparent"
-              }`}
-            >
-              <img src={img.url} alt={img.label} className="h-full w-full object-cover"
-            loading="lazy"
-            decoding="async"
-          />
-              <span className="absolute inset-x-0 bottom-0 bg-black/50 py-0.5 text-center text-[9px] font-semibold text-white">
-                {img.label}
-              </span>
-            </button>
-          ))}
-          {/* Append another photo (banner, gallery shots…) instead of only replacing */}
-          <button
-            onClick={() => addInput.current?.click()}
-            className="flex h-16 w-24 shrink-0 flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-surface-border text-ink-faint transition hover:border-vibe-violet hover:text-vibe-violet"
-          >
-            <Plus size={16} />
-            <span className="text-[9px] font-semibold">Add photo</span>
-          </button>
-          <input
-            ref={addInput}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) onReplace(allImages.length, file);
-              e.target.value = "";
-            }}
-          />
-        </div>
-      )}
     </div>
   );
 }

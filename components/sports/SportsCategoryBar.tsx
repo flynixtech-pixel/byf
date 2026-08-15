@@ -42,27 +42,11 @@ export function SportsCategoryBar({
   useEffect(() => {
     if (externalSelectedId && externalSelectedId !== internalSelectedId) {
       setInternalSelectedId(externalSelectedId);
-      setItemsOrder((prev) => {
-        const idx = prev.findIndex((item) => item.id === externalSelectedId);
-        if (idx <= 0) return prev;
-        const target = prev[idx];
-        const rest = prev.filter((item) => item.id !== externalSelectedId);
-        return [target, ...rest];
-      });
     }
   }, [externalSelectedId]);
 
   const handleCategoryClick = (id: string) => {
     setInternalSelectedId(id);
-
-    // Reorder items so clicked category moves smoothly to first position (index 0)
-    setItemsOrder((prevOrder) => {
-      const idx = prevOrder.findIndex((c) => c.id === id);
-      if (idx <= 0) return prevOrder;
-      const selectedItem = prevOrder[idx];
-      const remainingItems = prevOrder.filter((c) => c.id !== id);
-      return [selectedItem, ...remainingItems];
-    });
 
     // Smooth horizontal scroll to index 0
     if (scrollRef.current) {
@@ -79,7 +63,7 @@ export function SportsCategoryBar({
       ref={scrollRef}
       className={`-mx-4 flex items-center gap-2.5 overflow-x-auto px-4 py-2 scroll-smooth scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0 ${className}`}
     >
-      {itemsOrder.map((cat) => {
+      {categories.map((cat) => {
         const isSelected = cat.id === activeId;
 
         if (variant === "card") {

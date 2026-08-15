@@ -146,27 +146,27 @@ export default function HomePage() {
         )}
 
         {/* Find A Venue - Sports Section */}
-        <section className="relative z-10 mx-auto max-w-7xl px-4 pt-1 pb-2 sm:pt-3 sm:px-6 lg:px-8">
-          <div className="rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-xl shadow-slate-200/50 sm:rounded-[2.2rem] sm:p-6.5">
-            <div className="flex items-center justify-between gap-3 mb-5 sm:mb-6">
-              <div className="flex items-center gap-3 sm:gap-3.5">
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#0f172a] text-white shadow-md sm:h-12 sm:w-12">
-                  <MapPin className="h-5.5 w-5.5 sm:h-6 sm:w-6" />
+        <section className="relative z-10 mx-auto max-w-7xl pt-1 pb-1 sm:pt-3 sm:px-6 lg:px-8">
+          <div className="sm:rounded-[2.2rem] sm:border sm:border-slate-100 sm:bg-white sm:p-6.5 sm:shadow-xl sm:shadow-slate-200/50">
+            <div className="flex items-center justify-between gap-3 mb-3 px-4 sm:px-0 sm:mb-6">
+              <div className="flex items-center gap-2 sm:gap-3.5">
+                <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-[#0f172a] text-white shadow-sm sm:h-12 sm:w-12 sm:rounded-2xl sm:shadow-md">
+                  <MapPin className="h-4 w-4 sm:h-6 sm:w-6" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold tracking-tight text-slate-950 sm:text-2xl">Find A Venue</h2>
-                  <p className="text-[11px] font-medium text-slate-500 sm:text-sm">Discover top venues for every game and vibe.</p>
+                  <h2 className="text-base font-bold tracking-tight text-slate-950 sm:text-2xl">Find A Venue</h2>
+                  <p className="text-[10px] font-medium text-slate-500 sm:text-sm">Discover top venues for every game and vibe.</p>
                 </div>
               </div>
               <Link
                 href="/venues"
-                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:text-brand-700 hover:underline transition"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 hover:text-brand-700 hover:underline transition shrink-0"
               >
-                View All Venues <ArrowRight className="h-3.5 w-3.5" />
+                View All <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
 
-            <div className="grid grid-cols-4 gap-3 sm:gap-5 md:grid-cols-4 xl:grid-cols-7">
+            <div className="flex overflow-x-auto px-4 pb-2 sm:px-0 sm:grid sm:overflow-visible gap-3 sm:gap-5 sm:grid-cols-4 xl:grid-cols-7 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               {SPORTS_CATALOG.map((s, index) => {
                 // Map the ID to a category for the venues page
                 const category = s.id === "box-cricket" || s.id === "cricket-nets" ? "cricket" : s.id;
@@ -175,18 +175,18 @@ export default function HomePage() {
                   <Link
                     key={s.id}
                     href={`/venues?category=${category}`}
-                    className="group flex flex-col items-center justify-start text-center min-w-0 w-full cursor-pointer"
+                    className="group flex flex-col items-center justify-start text-center min-w-0 w-20 shrink-0 sm:w-full cursor-pointer"
                   >
-                    <div className="relative flex h-14 w-14 items-center justify-center rounded-[1.15rem] bg-[#f8fafc] border border-slate-100/90 shadow-2xs transition-all duration-300 group-hover:-translate-y-1 group-hover:bg-white group-hover:shadow-md sm:h-20 sm:w-20 sm:rounded-[1.25rem]">
+                    <div className="relative flex h-14 w-14 items-center justify-center rounded-[1.125rem] bg-[#f8fafc] border border-slate-100/90 shadow-2xs transition-all duration-300 group-hover:-translate-y-1 group-hover:bg-white group-hover:shadow-md sm:h-20 sm:w-20 sm:rounded-[1.25rem]">
                       <div className={`absolute inset-0 rounded-[inherit] opacity-15 bg-gradient-to-br ${s.bubble}`} />
                       <img
                         src={s.image}
                         alt={s.alt}
                         loading={index === 0 ? "eager" : "lazy"}
-                        className="relative z-10 h-8 w-8 object-contain transition-transform duration-300 group-hover:scale-110 sm:h-10 sm:w-10"
+                        className="relative z-10 h-7 w-7 object-contain transition-transform duration-300 group-hover:scale-110 sm:h-10 sm:w-10"
                       />
                     </div>
-                    <span className="mt-2 text-[10.5px] font-bold text-slate-700 transition-colors group-hover:text-slate-950 sm:mt-2.5 sm:text-xs text-center truncate w-full px-1">
+                    <span className="mt-1.5 text-[10px] font-bold text-slate-700 transition-colors group-hover:text-slate-950 sm:mt-2.5 sm:text-xs text-center truncate w-full px-1">
                       {s.label}
                     </span>
                   </Link>

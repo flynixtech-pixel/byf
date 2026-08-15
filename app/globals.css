@@ -2,13 +2,63 @@
 @import "tw-animate-css";
 @import "../components/vendor/theme.css";
 
+@font-face {
+  font-family: 'Axiforma';
+  src: url('/fonts/Axiforma-Thin.ttf') format('truetype');
+  font-weight: 100;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Axiforma';
+  src: url('/fonts/Axiforma-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Axiforma';
+  src: url('/fonts/Axiforma-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Axiforma';
+  src: url('/fonts/Axiforma-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Axiforma';
+  src: url('/fonts/Axiforma-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Axiforma';
+  src: url('/fonts/Axiforma-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Axiforma';
+  src: url('/fonts/Axiforma-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Axiforma';
+  src: url('/fonts/Axiforma-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+}
+
 :root {
   /* Opt out of Android/Chrome's automatic dark-theme inversion — this site is light-mode only. */
   color-scheme: light only;
   --background: #ffffff;
   --foreground: #171717;
-  --font-inter: "Inter", "Segoe UI", "Trebuchet MS", Arial, sans-serif;
-  --font-space-grotesk: "Space Grotesk", "Avenir Next", "Segoe UI", "Trebuchet MS", Arial, sans-serif;
+  --font-axiforma: "Axiforma", "Inter", "Segoe UI", "Trebuchet MS", Arial, sans-serif;
+  --font-inter: var(--font-axiforma);
+  --font-space-grotesk: var(--font-axiforma);
   --font-plex-mono: "IBM Plex Mono", "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
 
   /* ---- Site theme engine — brand/accent scales, overridden per [data-theme] below ---- */

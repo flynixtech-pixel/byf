@@ -2662,17 +2662,8 @@ function BookingStep({ draft, update }: StepProps) {
   }
 
   function deleteSlot(i: number) { save(activeSlots.filter((_, idx) => idx !== i)); }
-  function updateSlotPrice(i: number, price: number) { save(activeSlots.map((s, idx) => idx === i ? { ...s, price } : s)); }
-
   function deleteDayPartGroup(partName: string) {
     save(activeSlots.filter((s) => s.label !== partName));
-  }
-
-  function setDayPartGroupPrice(partName: string) {
-    const input = prompt(`Enter price (₹) for all ${partName} slots:`);
-    if (!input) return;
-    const price = Number(input.replace(/\D/g, "")) || 0;
-    save(activeSlots.map((s) => (s.label === partName ? { ...s, price } : s)));
   }
 
   /* Clock dial click — toggle every slot in the 1-hour block [hour * 60, (hour + 1) * 60) */
@@ -2997,6 +2988,7 @@ function BookingStep({ draft, update }: StepProps) {
               <p className="text-[11px] font-bold text-ink uppercase tracking-wider">
                 {!selectedDate ? `Global Default Slots (${activeSlots.length})` : `Slots for ${selectedDate} (${activeSlots.length})`}
               </p>
+              <p className="mt-0.5 text-[10px] font-medium text-slate-400">Manage availability here · add prices once in the Pricing step</p>
               {selectedDate && (draft.dateOverrides ?? []).some((o) => o.date === selectedDate) && (
                 <button type="button" onClick={() => { update("dateOverrides", (draft.dateOverrides ?? []).filter((o) => o.date !== selectedDate)); setSelectedDate(""); }}
                   className="text-[10px] text-vibe-coral font-bold uppercase hover:underline">Clear Override</button>
@@ -3151,13 +3143,6 @@ function BookingStep({ draft, update }: StepProps) {
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          onClick={() => setDayPartGroupPrice(part)}
-                          className="text-[9px] font-bold text-vibe-violet hover:underline"
-                        >
-                          Set Price
-                        </button>
-                        <button
-                          type="button"
                           onClick={() => deleteDayPartGroup(part)}
                           className="text-[9px] font-bold text-rose-500 hover:underline"
                         >
@@ -3196,9 +3181,7 @@ function BookingStep({ draft, update }: StepProps) {
                             <span className="text-xs font-bold text-slate-700 font-mono mt-2">
                               {slot.startTime} - {slot.endTime}
                             </span>
-                            <span className="text-[9px] text-slate-400 uppercase mt-1">
-                              {slot.label} {slot.price > 0 ? `· ₹${slot.price}` : ""}
-                            </span>
+                            <span className="text-[9px] text-slate-400 uppercase mt-1">{slot.label}</span>
 
                             <button type="button" onClick={() => deleteSlot(slot.originalIndex)}
                               className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-vibe-coral transition">
@@ -3779,28 +3762,45 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
     update("coupons", coupons.filter((_, idx) => idx !== i));
   }
 
+  const validPrice = Number(priceInput) > 0;
+  const pricingProgress = uniqueTimeRanges.length === 0
+    ? 0
+    : Math.round((pricedSlots.length / uniqueTimeRanges.length) * 100);
+
   return (
     <div className="space-y-6">
       {/* ── TURF SLOT PRICING SELECTOR ── */}
       {draft.type !== "Event" && (
-        <div className="rounded-xl border border-surface-border bg-cream-200/25 p-5">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <span className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
-              Slot-by-Slot Pricing
-            </span>
-            <button
-              type="button"
-              onClick={() => setShowSlotPricingInfo(!showSlotPricingInfo)}
-              className={`rounded-full p-0.5 transition cursor-pointer ${showSlotPricingInfo ? "bg-vibe-violet/20 text-vibe-violet" : "text-ink-faint hover:bg-cream-200 hover:text-ink"
-                }`}
-              title="Show info"
-            >
-              <Info size={11} />
-            </button>
+        <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_18px_50px_-32px_rgba(15,23,42,0.35)]">
+          <div className="flex flex-col gap-5 border-b border-slate-100 bg-gradient-to-br from-slate-950 via-slate-900 to-violet-950 px-5 py-6 text-white sm:flex-row sm:items-center sm:justify-between sm:px-7">
+            <div>
+              <div className="mb-2 flex items-center gap-2">
+                <span className="rounded-full bg-white/10 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] text-violet-200 ring-1 ring-white/10">Single pricing workspace</span>
+                <button
+                  type="button"
+                  onClick={() => setShowSlotPricingInfo(!showSlotPricingInfo)}
+                  className="rounded-full p-1 text-slate-300 transition hover:bg-white/10 hover:text-white"
+                  title="How pricing works"
+                  aria-label="How pricing works"
+                >
+                  <Info size={13} />
+                </button>
+              </div>
+              <h2 className="text-xl font-extrabold tracking-tight">Set your slot prices</h2>
+              <p className="mt-1 text-xs text-slate-300">Choose the scope, select time slots, then apply one price.</p>
+            </div>
+            <div className="min-w-[190px] rounded-2xl bg-white/[0.07] p-3.5 ring-1 ring-white/10 backdrop-blur">
+              <div className="flex items-end justify-between gap-4">
+                <div><p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Priced slots</p><p className="mt-0.5 text-lg font-extrabold">{pricedSlots.length}<span className="text-xs font-semibold text-slate-400"> / {uniqueTimeRanges.length}</span></p></div>
+                <span className="text-xs font-extrabold text-violet-200">{pricingProgress}%</span>
+              </div>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-violet-400 to-fuchsia-400 transition-all" style={{ width: `${pricingProgress}%` }} /></div>
+            </div>
           </div>
+          <div className="p-5 sm:p-7">
           {showSlotPricingInfo && (
-            <p className="text-xs text-ink-faint mb-3 bg-cream-200/40 p-2.5 rounded-lg leading-relaxed animate-in slide-in-from-top-1 duration-150">
-              Click to select one or multiple slots below, set their price, and apply. Priced slots will move to the list below.
+            <p className="mb-5 rounded-xl border border-violet-100 bg-violet-50 p-3 text-xs leading-relaxed text-violet-900 animate-in slide-in-from-top-1 duration-150">
+              Select one or more slots, enter the amount once, and apply. Use sport or court filters only when you need a custom override.
             </p>
           )}
 
@@ -3834,7 +3834,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
           )}
 
           {/* Game and Court selectors for pricing overrides */}
-          <div className="mb-4 bg-cream-200/50 p-4 rounded-xl border border-surface-border space-y-4">
+          <div className="mb-5 space-y-4 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 sm:p-5">
             <div>
               <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">
                 1. Select Sport / Game
@@ -3925,7 +3925,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
           </div>
 
           {/* Pricing Controls Row */}
-          <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-100 pb-4 mb-4">
+          <div className="sticky top-0 z-20 mb-5 flex flex-wrap items-end justify-between gap-4 rounded-2xl border border-violet-200 bg-white/95 p-4 shadow-[0_12px_30px_-20px_rgba(91,33,182,0.65)] backdrop-blur">
             <div className="flex flex-wrap items-center gap-3">
               <div className="w-48">
                 <FieldLabel>Enter Price (₹) *</FieldLabel>
@@ -3938,9 +3938,9 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
                   className={`${inputClass} text-xs`}
                 />
               </div>
-              <button type="button" onClick={handleSetPrice} disabled={selectedKeys.length === 0}
-                className="rounded-xl bg-vibe-violet px-5 py-2.5 text-xs font-bold text-white hover:opacity-90 disabled:opacity-50 transition cursor-pointer">
-                Apply Price ({selectedKeys.length} selected)
+              <button type="button" onClick={handleSetPrice} disabled={selectedKeys.length === 0 || !validPrice}
+                className="rounded-xl bg-gradient-to-r from-violet-700 to-purple-600 px-5 py-2.5 text-xs font-extrabold text-white shadow-lg shadow-violet-200 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0">
+                {selectedKeys.length > 0 ? `Apply to ${selectedKeys.length} slot${selectedKeys.length === 1 ? "" : "s"}` : "Select slots below"}
               </button>
             </div>
 
@@ -4018,13 +4018,13 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
           {/* List of Priced Slots */}
           <div className="mb-5">
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
-              Custom Overrides for Selected Sport/Court ({pricedSlots.length})
+              {isOverrideMode ? "Custom overrides" : "Priced slots"} ({pricedSlots.length})
             </p>
             <p className="text-[9px] text-ink-faint mb-2.5">
-              These are specific prices you set just for this game/court. Deleting them will revert the slot to inherit the default price.
+              {isOverrideMode ? "These prices apply only to the selected game or court. Removing one restores its inherited price." : "Your global slot prices. These are used unless a game or court override is created."}
             </p>
             {pricedSlots.length === 0 ? (
-              <p className="text-xs text-ink-faint italic rounded-xl bg-white p-3 border border-slate-100">No custom pricing overrides set yet.</p>
+              <p className="text-xs text-ink-faint italic rounded-xl bg-white p-3 border border-slate-100">{isOverrideMode ? "No custom pricing overrides set yet." : "No slot prices set yet."}</p>
             ) : (
               <div className="flex flex-wrap gap-1.5 max-h-[200px] overflow-y-auto pr-1">
                 {pricedSlots.map((s) => {
@@ -4074,6 +4074,7 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
                 })}
               </div>
             )}
+          </div>
           </div>
         </div>
       )}

@@ -77,6 +77,7 @@ export interface Listing {
   gameVenue?: "indoor" | "outdoor" | "both";
   categories: string[];
   subCategories: string[];
+  customSports?: { id: string; name: string; venueType: string }[];
   /** Max players allowed per selected sport — Turf/Game listings only, one entry per category. */
   sportCapacities?: { category: string; maxPlayers: number }[];
   /** Bookable units in this venue — court 1, court 2... Empty = the venue is a single unit. */

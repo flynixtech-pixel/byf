@@ -474,8 +474,8 @@ function EventPhotosStep({ draft, update, audience }: StepProps & { audience: Au
           onFile={(f) => handleMainUpload("poster", f)}
           onRemove={poster ? () => removeMain("poster") : undefined}
           outputNote="This image will be shown on listing cards and in search results."
-          wrapperClass="lg:w-[320px] shrink-0"
-          aspectClass="h-[220px]"
+          wrapperClass="lg:w-[280px] shrink-0"
+          aspectClass="h-[140px]"
         />
         <PhotoBox
           label="Banner Image"
@@ -489,7 +489,7 @@ function EventPhotosStep({ draft, update, audience }: StepProps & { audience: Au
           onRemove={banner ? () => removeMain("banner") : undefined}
           outputNote="This image will be shown at the top of your listing detail page."
           wrapperClass="flex-1"
-          aspectClass="h-[220px]"
+          aspectClass="h-[140px]"
         />
       </div>
 
@@ -535,7 +535,7 @@ function EventPhotosStep({ draft, update, audience }: StepProps & { audience: Au
               type="button"
               onClick={() => bulkInput.current?.click()}
               disabled={bulkUploading || galleryImages.length >= 10}
-              className="flex h-36 w-36 shrink-0 flex-col items-center justify-center rounded-xl border-2 border-dashed border-vibe-violet/30 bg-vibe-violet/5 hover:bg-vibe-violet/10 transition disabled:opacity-50"
+              className="flex h-24 w-24 shrink-0 flex-col items-center justify-center rounded-xl border-2 border-dashed border-vibe-violet/30 bg-vibe-violet/5 hover:bg-vibe-violet/10 transition disabled:opacity-50"
             >
               {bulkUploading ? (
                 <>
@@ -553,7 +553,7 @@ function EventPhotosStep({ draft, update, audience }: StepProps & { audience: Au
             </button>
 
             {galleryImages.map((img, i) => (
-              <div key={img.id} className="relative h-36 w-32 shrink-0 overflow-hidden rounded-xl border border-surface-border group">
+              <div key={img.id} className="relative h-24 w-28 shrink-0 overflow-hidden rounded-xl border border-surface-border group">
                 <img src={img.url} className="h-full w-full object-cover" alt={img.label} />
                 <div className="absolute left-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-white/80 text-[10px] font-bold text-vibe-violet backdrop-blur-sm">
                   {i + 1}
@@ -567,7 +567,7 @@ function EventPhotosStep({ draft, update, audience }: StepProps & { audience: Au
             ))}
 
             {Array.from({ length: 10 - galleryImages.length }).map((_, i) => (
-              <div key={`empty-${i}`} className="relative flex h-36 w-32 shrink-0 items-center justify-center rounded-xl border border-dashed border-surface-border bg-slate-50/50">
+              <div key={`empty-${i}`} className="relative flex h-24 w-28 shrink-0 items-center justify-center rounded-xl border border-dashed border-surface-border bg-slate-50/50">
                 <div className="absolute left-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-white text-[10px] font-bold text-slate-300">
                   {galleryImages.length + i + 1}
                 </div>

@@ -91,11 +91,11 @@ export function SectionHeading({
   light?: boolean;
 }) {
   return (
-    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="mb-4 sm:mb-8 flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="max-w-2xl">
         {eyebrow && (
           <p
-            className={`mb-2 text-xs font-bold uppercase tracking-[0.2em] ${
+            className={`mb-1.5 sm:mb-2 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] ${
               light ? "text-brand-300" : "text-brand-600"
             }`}
           >
@@ -103,15 +103,15 @@ export function SectionHeading({
           </p>
         )}
         <h2
-          className={`flex items-center gap-2 text-2xl font-extrabold sm:text-3xl ${
+          className={`flex items-center gap-2 text-xl font-extrabold sm:text-3xl ${
             light ? "text-white" : "text-slate-900"
           }`}
         >
           {title}
-          {Icon && <Icon className="h-6 w-6 text-brand-500" aria-hidden />}
+          {Icon && <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-brand-500" aria-hidden />}
         </h2>
         {subtitle && (
-          <p className={`mt-2 text-sm sm:text-base ${light ? "text-slate-300" : "text-slate-500"}`}>
+          <p className={`mt-1.5 sm:mt-2 text-[11px] sm:text-base ${light ? "text-slate-300" : "text-slate-500"}`}>
             {subtitle}
           </p>
         )}
@@ -119,11 +119,11 @@ export function SectionHeading({
       {actionLabel && (
         <button
           onClick={onAction}
-          className={`inline-flex items-center gap-1 whitespace-nowrap text-sm font-semibold transition ${
+          className={`inline-flex items-center gap-1 whitespace-nowrap text-xs sm:text-sm font-semibold transition ${
             light ? "text-brand-300 hover:text-brand-200" : "text-brand-600 hover:text-brand-700"
           }`}
         >
-          {actionLabel} <ArrowRight className="h-4 w-4" />
+          {actionLabel} <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         </button>
       )}
     </div>

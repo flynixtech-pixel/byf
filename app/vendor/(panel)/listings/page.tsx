@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Copy, Eye, Plus, Search, Share2, Trash2 } from "lucide-react";
+import { CalendarDays, Copy, Eye, Filter, Plus, Search, Share2, ShieldCheck, Store, Trash2, Users } from "lucide-react";
 import { PageHero, Badge } from "@/components/vendor/ui";
 import { useVendorAuth } from "@/components/providers/VendorAuthProvider";
 import { Toast } from "@/components/admin/Toast";
@@ -12,7 +12,6 @@ import { apiListingToMock, mockListingToApiInput } from "@/lib/api/listingAdapte
 import { ApiError } from "@/lib/api/client";
 import { categoryLabel } from "@/lib/taxonomy";
 
-const TABS = ["All", "Turf", "Game", "Event"] as const;
 
 const TYPE_TONE: Record<Listing["type"], "info" | "success" | "pending"> = {
   Turf: "info",
@@ -25,7 +24,7 @@ export default function ListingsPage() {
   const canAddEvent = vendor.verticals.includes("events");
   const [allListings, setAllListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<(typeof TABS)[number]>("All");
+
   const [query, setQuery] = useState("");
   const [toast, setToast] = useState<string | null>(null);
 
@@ -76,75 +75,62 @@ export default function ListingsPage() {
 
   const filtered = useMemo(() => {
     return allListings.filter((l) => {
-      const matchesTab = tab === "All" || l.type === tab;
-      const matchesQuery = l.title.toLowerCase().includes(query.toLowerCase());
-      return matchesTab && matchesQuery;
+      return l.title.toLowerCase().includes(query.toLowerCase());
     });
-  }, [allListings, tab, query]);
+  }, [allListings, query]);
 
   return (
     <div className="space-y-6">
       <PageHero
-        eyebrow="Vendor Listings"
+        eyebrow="VENDOR LISTINGS"
         title="Manage your listings"
         description="Add turfs, indoor games, or events — control pricing, availability and visibility from one place."
+        icon={<CalendarDays size={28} className="text-[#d8b4fe]" />}
         right={
-          <>
-            <Link
-              href="/vendor/listings/new?kind=turf"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-white text-indigo-950 font-bold text-xs px-3.5 py-2 shadow-sm hover:scale-105 hover:shadow-md transition-all"
-            >
-              <Plus size={14} /> Add Turf / Game
-            </Link>
-            {canAddEvent && (
+          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="relative w-full sm:w-64">
+                <Search
+                  size={16}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-300"
+                />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search my listings..."
+                  className="w-full rounded-full border border-indigo-400/30 bg-indigo-900/30 pl-9 pr-3 py-2.5 text-[12px] font-semibold text-white placeholder-indigo-300 outline-none backdrop-blur-md transition-colors focus:border-indigo-300 focus:bg-indigo-900/50"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
               <Link
-                href="/vendor/listings/new?kind=event"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-fuchsia-400 text-white font-bold text-xs px-3.5 py-2 shadow-sm shadow-fuchsia-500/25 hover:scale-105 hover:shadow-md transition-all"
+                href="/vendor/listings/new?kind=turf"
+                className="inline-flex h-[38px] items-center justify-center gap-1.5 rounded-full bg-white text-[#281c52] font-bold text-xs px-4 shadow-sm hover:scale-105 transition-all"
               >
-                <Plus size={14} /> Add New Event
+                <Plus size={14} /> Add Turf
               </Link>
-            )}
-          </>
+              {canAddEvent && (
+                <Link
+                  href="/vendor/listings/new?kind=event"
+                  className="inline-flex h-[38px] items-center justify-center gap-1.5 rounded-full bg-fuchsia-400 text-white font-bold text-xs px-4 shadow-sm hover:scale-105 transition-all"
+                >
+                  <Plus size={14} /> Add Event
+                </Link>
+              )}
+            </div>
+          </div>
         }
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <SummaryCard label="My Listings" value={allListings.length} hint="Vendor owned" />
-        <SummaryCard label="Claimable Admin Listings" value={0} hint="Available to claim" />
-        <SummaryCard label="Claimed From Admin" value={0} hint="Claimed listings" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <SummaryCard label="My Listings" value={allListings.length} hint="Vendor owned" icon={<Store size={20} />} color="text-indigo-600 bg-indigo-50" trend="↑ 12%" trendColor="text-green-700 bg-green-100" />
+        <SummaryCard label="Claimable Admin Listings" value={0} hint="Available to claim" icon={<ShieldCheck size={20} />} color="text-slate-600 bg-slate-100" trend="0%" trendColor="text-emerald-700 bg-emerald-100" />
+        <SummaryCard label="Claimed From Admin" value={0} hint="Claimed listings" icon={<Users size={20} />} color="text-slate-600 bg-slate-100" trend="0%" trendColor="text-emerald-700 bg-emerald-100" />
       </div>
 
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
-        <div className="inline-flex rounded-xl border border-surface-border bg-white p-1">
-          {TABS.map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                tab === t
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "text-slate-500 hover:text-slate-900 hover:bg-slate-100"
-              }`}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-        <div className="relative w-full sm:w-72">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint"
-          />
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search my listings..."
-            className="w-full rounded-xl border-2 border-slate-100 bg-white pl-9 pr-3 py-2 text-xs font-medium text-slate-800 outline-none transition-colors focus:border-indigo-400 focus:ring-4 focus:ring-indigo-400/10"
-          />
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.map((listing) => (
           <ListingCard
             key={listing.id}
@@ -177,19 +163,33 @@ function SummaryCard({
   label,
   value,
   hint,
+  icon,
+  color,
+  trend,
+  trendColor,
 }: {
   label: string;
   value: number;
   hint: string;
+  icon: React.ReactNode;
+  color: string;
+  trend: string;
+  trendColor: string;
 }) {
   return (
-    <div className="rounded-[1rem] border border-slate-100 bg-white p-4 shadow-sm hover:shadow-md transition-shadow">
-      <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-        {label}
-      </p>
-      <div className="mt-1 flex items-baseline gap-2">
-        <p className="font-display text-2xl font-black text-slate-900">{value}</p>
-        <p className="text-[10px] font-semibold text-slate-500">{hint}</p>
+    <div className="flex items-center gap-3.5 rounded-[1.25rem] border border-slate-100 bg-white p-3.5 sm:p-4 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-lg transition-shadow">
+      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.85rem] ${color}`}>
+        {icon}
+      </div>
+      <div className="flex-1">
+        <p className="text-[11px] font-bold text-slate-900 leading-tight">{label}</p>
+        <div className="flex items-baseline gap-2 mt-0.5">
+          <p className="font-display text-[20px] font-black text-slate-900 leading-none">{value}</p>
+        </div>
+        <p className="text-[10px] font-medium text-slate-500 mt-0.5">{hint}</p>
+      </div>
+      <div className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${trendColor}`}>
+        {trend}
       </div>
     </div>
   );
@@ -206,10 +206,16 @@ const ListingCard = memo(function ListingCard({
   onDelete: (listing: Listing) => void;
   onShare: (listing: Listing) => void;
 }) {
+  const imageUrl = listing.coverImage || listing.images?.[0]?.url || "/images/events-banner.png";
+
   return (
-    <div className="group rounded-[1rem] border border-slate-100 bg-white overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col hover:-translate-y-1">
-      <div className="h-28 bg-gradient-to-br from-indigo-900 to-purple-900 relative flex items-end p-3">
-        <div className="absolute top-2.5 left-2.5 flex gap-1.5">
+    <div className="group rounded-[1.5rem] border border-slate-100 bg-white overflow-hidden shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_30px_-4px_rgba(0,0,0,0.1)] transition-all duration-300 flex flex-col hover:-translate-y-1">
+      <div 
+        className="h-36 bg-cover bg-center relative flex items-end p-4"
+        style={{ backgroundImage: `url('${imageUrl}')` }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-t from-[#200f50]/80 to-transparent mix-blend-multiply opacity-60" />
+        <div className="absolute top-4 left-4 flex gap-2">
           <Badge tone={TYPE_TONE[listing.type]}>{listing.type}</Badge>
           <Badge tone={listing.status === "Active" ? "success" : "neutral"}>
             {listing.status}
@@ -218,46 +224,53 @@ const ListingCard = memo(function ListingCard({
         <button
           type="button"
           onClick={() => onShare(listing)}
-          className="absolute top-2.5 right-2.5 flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm transition-transform hover:scale-110 hover:bg-white/40"
+          className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-transform hover:scale-110 hover:bg-white/40 shadow-sm"
           title="Share Link"
         >
-          <Share2 size={12} />
+          <Share2 size={14} />
         </button>
       </div>
-      <div className="p-3.5 flex-1 flex flex-col">
-        <h4 className="font-display font-bold text-slate-900 text-[13px] leading-tight">{listing.title}</h4>
-        <div className="flex items-center justify-between mt-1.5">
-          <p className="text-base font-black text-slate-900">
-            ₹{listing.price.toLocaleString("en-IN")}
-            <span className="text-[10px] font-semibold text-slate-500"> /slot</span>
-          </p>
-          <span className="text-[9px] font-semibold tracking-wide text-slate-400 uppercase">Listed {listing.listedOn}</span>
+      <div className="p-5 flex-1 flex flex-col">
+        <h4 className="font-display font-bold text-slate-900 text-[16px] leading-snug mb-3 line-clamp-2">{listing.title}</h4>
+        
+        <div className="flex items-center justify-between mb-4 mt-auto">
+          <div>
+            <p className="text-[18px] font-black text-slate-900">
+              ₹{listing.price.toLocaleString("en-IN")}
+              <span className="text-[11px] font-semibold text-slate-500 ml-1">/slot</span>
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+             <span className="text-[9px] font-bold tracking-widest text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full uppercase">Listed</span>
+             <p className="text-[10px] font-semibold text-slate-500">{listing.listedOn}</p>
+          </div>
         </div>
 
-        <div className="mt-2.5 rounded-lg border border-slate-50 bg-slate-50 px-2.5 py-1.5 text-[10px] text-slate-600">
-          Access: <span className="font-bold text-slate-800">{listing.access}</span>
+        <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 px-3.5 py-3 text-[12px] text-emerald-800 flex items-center gap-2.5 font-bold mb-1">
+           <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+           Access: {listing.access}
         </div>
 
-        <div className="mt-3.5 grid grid-cols-2 gap-2">
+        <div className="flex flex-col sm:flex-row gap-3 mt-4 pt-4 border-t border-slate-100">
           <Link
             href={`/vendor/listings/${listing.id}`}
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-indigo-950 text-white text-[11px] font-bold py-1.5 transition-colors hover:bg-indigo-900"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#281c52] text-white text-[12px] font-bold py-2.5 transition-all hover:bg-indigo-900 hover:shadow-lg hover:shadow-indigo-900/20"
           >
-            <Eye size={12} /> View
+            <Eye size={14} /> View Details
           </Link>
           <button
             onClick={() => onClone(listing)}
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 text-slate-600 text-[11px] font-bold py-1.5 transition-colors hover:bg-slate-50 hover:text-slate-900"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 text-slate-700 text-[12px] font-bold py-2.5 transition-colors hover:bg-slate-50 hover:text-slate-900"
           >
-            <Copy size={12} /> Clone
+            <Copy size={14} /> Clone
+          </button>
+          <button
+            onClick={() => onDelete(listing)}
+            className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-100 text-rose-600 text-[12px] font-bold py-2.5 transition-colors hover:bg-rose-50 hover:text-rose-700"
+          >
+            <Trash2 size={14} /> Delete
           </button>
         </div>
-        <button
-          onClick={() => onDelete(listing)}
-          className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-lg border border-rose-100 text-rose-600 text-[11px] font-bold py-1.5 transition-colors hover:bg-rose-50"
-        >
-          <Trash2 size={12} /> Delete
-        </button>
       </div>
     </div>
   );

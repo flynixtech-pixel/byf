@@ -100,11 +100,13 @@ export default function Sidebar({
   onClose,
   onLogout,
   verticals,
+  desktopClosed,
 }: {
   open: boolean;
   onClose: () => void;
-  onLogout: () => void;
+  onLogout?: () => void;
   verticals: VendorVertical[];
+  desktopClosed?: boolean;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -163,20 +165,18 @@ export default function Sidebar({
       )}
 
       <aside
-        className={`fixed z-50 inset-y-0 left-0 w-64 shrink-0 border-r border-surface-border bg-white flex flex-col transform transition-transform duration-200 lg:fixed lg:top-0 lg:bottom-0 lg:left-0 lg:z-30 lg:translate-x-0 ${
+        className={`fixed z-50 inset-y-0 left-0 w-64 shrink-0 border-r border-surface-border bg-white flex flex-col transform transition-transform duration-300 ease-in-out lg:fixed lg:top-0 lg:bottom-0 lg:left-0 lg:z-30 ${
           open ? "translate-x-0" : "-translate-x-full"
-        }`}
+        } ${desktopClosed ? "lg:-translate-x-full" : "lg:translate-x-0"}`}
       >
         <div className="flex items-center justify-between h-16 px-5 border-b border-surface-border shrink-0">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-vibe-violet to-vibe-limeDark flex items-center justify-center text-white font-display font-semibold">
-              BV
-            </div>
+            <img src="/logo.jpg" alt="BYV Logo" className="h-9 w-auto rounded-lg object-contain shadow-sm" />
             <div>
-              <p className="font-display font-semibold text-ink text-sm leading-none">
+              <p className="font-display font-black text-slate-900 text-[15px] leading-tight tracking-tight">
                 Book Your Vibes
               </p>
-              <p className="text-[11px] text-ink-faint mt-1">Vendor Workspace</p>
+              <p className="text-[10px] text-slate-500 font-semibold tracking-wide">Vendor Workspace</p>
             </div>
           </div>
           <button

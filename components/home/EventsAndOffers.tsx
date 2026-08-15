@@ -9,7 +9,7 @@ export function EventsAndOffers({
   onViewAllEvents: () => void;
 }) {
   return (
-    <section id="tournaments" className="mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="tournaments" className="mx-auto mt-6 sm:mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
       <SectionHeading title="Upcoming Events & Tournaments" subtitle="Participate in local leagues, tournaments and compete for exciting prize pools." />
 
       <div

@@ -135,81 +135,99 @@ export function SiteHeader() {
 
           <button
             className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full border border-slate-200 text-slate-600 lg:hidden shrink-0 cursor-pointer"
-            onClick={() => setMobileOpen((v) => !v)}
-            aria-label="Toggle menu"
+            onClick={() => setMobileOpen(true)}
+            aria-label="Open menu"
           >
-            {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            <Menu className="h-4 w-4" />
           </button>
         </div>
       </div>
-
-      {mobileOpen && (
-        <div className="border-t border-slate-100 bg-white px-4 py-4 shadow-lg lg:hidden">
-          <nav className="flex flex-col gap-3">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className={`text-sm font-semibold ${
-                  isActive(link.href) ? "text-brand-600" : "text-slate-700"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-
-            {status === "loading" ? (
-              <div className="mt-2 grid grid-cols-2 gap-2">
-                <div className="h-[42px] animate-pulse rounded-full bg-slate-100" />
-                <div className="h-[42px] animate-pulse rounded-full bg-slate-100" />
-              </div>
-            ) : status === "authenticated" ? (
-              <div className="mt-2 grid grid-cols-2 gap-2">
-                <Link
-                  href="/profile"
-                  onClick={() => setMobileOpen(false)}
-                  className="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700"
-                >
-                  My Profile
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileOpen(false);
-                    logout();
-                  }}
-                  className="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600"
-                >
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <div className="mt-2 grid grid-cols-2 gap-2">
-                <Link
-                  href="/vendor/register"
-                  onClick={() => setMobileOpen(false)}
-                  className="inline-flex items-center justify-center rounded-full border border-brand-200 bg-brand-50 px-4 py-2.5 text-sm font-semibold text-brand-700"
-                >
-                  List Games
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileOpen(false);
-                    setAuthView("login");
-                  }}
-                  className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-brand-500 to-accent-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md"
-                >
-                  Login / Sign Up
-                </button>
-              </div>
-            )}
-          </nav>
-        </div>
-      )}
-
     </header>
+
+    {/* Side Drawer Overlay */}
+    <div 
+      className={`fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm lg:hidden transition-opacity duration-300 ${mobileOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`} 
+      onClick={() => setMobileOpen(false)}
+      aria-hidden="true"
+    />
+
+    {/* Side Drawer Menu */}
+    <div 
+      className={`fixed inset-y-0 right-0 z-[100] w-72 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out lg:hidden flex flex-col ${mobileOpen ? "translate-x-0" : "translate-x-full"}`}
+    >
+      <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+        <span className="font-extrabold text-slate-900 text-lg tracking-tight">Menu</span>
+        <button onClick={() => setMobileOpen(false)} className="rounded-full p-2 text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer active:scale-95">
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+      
+      <div className="p-6 overflow-y-auto flex-1 flex flex-col">
+        <nav className="flex flex-col gap-4">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setMobileOpen(false)}
+              className={`text-base font-bold pb-3 border-b border-slate-50 transition-colors ${
+                isActive(link.href) ? "text-brand-600" : "text-slate-700 hover:text-brand-600"
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+        
+        <div className="mt-8 pt-6 border-t border-slate-100">
+          {status === "loading" ? (
+            <div className="flex flex-col gap-3">
+              <div className="h-11 animate-pulse rounded-full bg-slate-100" />
+              <div className="h-11 animate-pulse rounded-full bg-slate-100" />
+            </div>
+          ) : status === "authenticated" ? (
+            <div className="flex flex-col gap-3">
+              <Link
+                href="/profile"
+                onClick={() => setMobileOpen(false)}
+                className="inline-flex w-full items-center justify-center rounded-full border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition active:scale-95 hover:bg-slate-50"
+              >
+                My Profile
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileOpen(false);
+                  logout();
+                }}
+                className="inline-flex w-full items-center justify-center rounded-full border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600 transition active:scale-95 hover:bg-slate-100"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileOpen(false);
+                  setAuthView("login");
+                }}
+                className="inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-brand-500 to-accent-500 px-5 py-3 text-sm font-bold text-white shadow-md transition active:scale-95"
+              >
+                Login / Sign Up
+              </button>
+              <Link
+                href="/vendor/register"
+                onClick={() => setMobileOpen(false)}
+                className="inline-flex w-full items-center justify-center rounded-full border border-brand-200 bg-brand-50 px-4 py-3 text-sm font-semibold text-brand-700 transition active:scale-95"
+              >
+                List Your Games
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
 
       {authView === "login" && (
         <LoginModal
