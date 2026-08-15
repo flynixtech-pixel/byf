@@ -195,7 +195,7 @@ function PlayerRankRow({
           <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-500 to-brand-600 text-white font-extrabold text-xs">
             {player.name
               .split(" ")
-              .map((n) => n[0])
+              .map((n: string) => n[0])
               .join("")
               .substring(0, 2)
               .toUpperCase() || <User className="h-4 w-4 text-white" />}
