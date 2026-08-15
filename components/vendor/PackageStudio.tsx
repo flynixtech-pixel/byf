@@ -39,9 +39,9 @@ type Audience = "admin" | "vendor";
 
 const STEPS = [
   { id: 1, label: "Images", hint: "Media uploads" },
-  { id: 2, label: "Slots", hint: "Turf time slots" },
-  { id: 3, label: "Details", hint: "Name & games / categories" },
-  { id: 4, label: "Location", hint: "Venue address & map" },
+  { id: 2, label: "Details", hint: "Name & games / categories" },
+  { id: 3, label: "Location", hint: "Venue address & map" },
+  { id: 4, label: "Slots", hint: "Turf time slots" },
   { id: 5, label: "Pricing", hint: "Set prices per slot" },
   { id: 6, label: "Publish", hint: "Review details & save" },
 ] as const;
@@ -50,9 +50,9 @@ const STEPS = [
  * setup for events, PricingStep renders participant tiers, etc.). */
 const EVENT_STEPS = [
   { id: 1, label: "Event photos", hint: "Poster & banner" },
-  { id: 2, label: "Booking", hint: "Dates & timezone" },
-  { id: 3, label: "Details", hint: "Name & category" },
-  { id: 4, label: "Location", hint: "Venue & map" },
+  { id: 2, label: "Details", hint: "Name & category" },
+  { id: 3, label: "Location", hint: "Venue & map" },
+  { id: 4, label: "Booking", hint: "Dates & timezone" },
   { id: 5, label: "Pricing", hint: "Rates & add-ons" },
   { id: 6, label: "Launch", hint: "Publish your event" },
 ] as const;
@@ -1550,6 +1550,35 @@ function DetailsStep({ draft, update, updateMany, audience }: StepProps & { audi
 
   const allCategories = [...categoryOptions, ...customCategories];
 
+  const sportEmojis: Record<string, string> = {
+    "cricket": "🏏", "box-cricket": "🏏", "tennis-ball-cricket": "🏏", "football": "⚽", "futsal": "⚽",
+    "badminton": "🏸", "tennis": "🎾", "soft-tennis": "🎾", "pickleball": "🏓", "padel": "🎾", "squash": "🎾",
+    "racquetball": "🎾", "basketball": "🏀", "3x3-basketball": "🏀", "volleyball": "🏐", "beach-volleyball": "🏐",
+    "handball": "🤾", "kabaddi": "🤼", "beach-kabaddi": "🤼", "circle-kabaddi": "🤼", "kho-kho": "🏃",
+    "hockey": "🏑", "field-hockey": "🏑", "rugby": "🏉", "american-football": "🏈", "baseball": "⚾",
+    "softball": "🥎", "athletics": "🏃", "cycling": "🚴", "track-cycling": "🚴", "skating": "⛸️",
+    "roller-skating": "🛼", "ice-skating": "⛸️", "ice-hockey": "🏒", "swimming": "🏊", "water-polo": "🤽",
+    "diving": "🤿", "artistic-swimming": "🧜‍♀️", "table-tennis": "🏓", "billiards": "🎱", "snooker": "🎱",
+    "pool": "🎱", "carrom": "🎯", "chess": "♟️", "archery": "🏹", "shooting": "🔫", "boxing": "🥊",
+    "kickboxing": "🥊", "wrestling": "🤼", "judo": "🥋", "karate": "🥋", "taekwondo": "🥋", "wushu": "🥋",
+    "fencing": "🤺", "gymnastics": "🤸", "yoga": "🧘", "yogasana": "🧘", "pilates": "🧘‍♀️", "dance": "💃",
+    "fitness": "🏋️", "gym": "🏋️", "golf": "⛳", "mini-golf": "⛳", "polo": "🏇", "equestrian": "🏇",
+    "horse-riding": "🏇", "rowing": "🚣", "kayaking": "🛶", "canoeing": "🛶", "surfing": "🏄",
+    "sailing": "⛵", "yachting": "🛥️", "triathlon": "🏃", "modern-pentathlon": "🏇", "sepaktakraw": "🏐",
+    "netball": "🏀", "korfball": "🏀", "throwball": "🏐", "roll-ball": "🛼", "shooting-ball": "🏐",
+    "atya-patya": "🏃", "mallakhamb": "🤸", "powerlifting": "🏋️", "weightlifting": "🏋️", "bodybuilding": "💪",
+    "tug-of-war": "🪢", "bridge": "🃏", "bowling": "🎳", "ten-pin-bowling": "🎳", "darts": "🎯",
+    "air-hockey": "🏒", "foosball": "⚽", "paintball": "🔫", "laser-tag": "🔫", "climbing": "🧗",
+    "bouldering": "🧗", "martial-arts": "🥋", "aikido": "🥋", "jiu-jitsu": "🥋", "muay-thai": "🥊",
+    "mma": "🥊", "wushu-sanda": "🥋", "flying-disc": "🥏", "ultimate-frisbee": "🥏", "base-jumping": "🪂",
+    "skateboarding": "🛹", "bmx": "🚴", "motorsport": "🏎️", "karting": "🏎️", "drag-racing": "🏎️",
+    "air-sports": "🪂", "paragliding": "🪂", "hang-gliding": "🪂", "triathlon-swimming": "🏊"
+  };
+
+  function getSportEmoji(sportId: string) {
+    return sportEmojis[sportId] || "🏅";
+  }
+
   async function handleDeleteCustomSport(cat: SportCategory) {
     if (!cat.customId) return;
     if (!confirm(`Are you sure you want to delete "${cat.label}"?`)) return;
@@ -1702,11 +1731,11 @@ function DetailsStep({ draft, update, updateMany, audience }: StepProps & { audi
 
       <div>
         <FieldLabel>Category * (select all that apply)</FieldLabel>
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="flex flex-wrap gap-2.5 mt-4 max-h-[350px] overflow-y-auto p-2 pr-3 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
           {allCategories.map((cat) => {
             const isSelected = draft.categories.includes(cat.id);
             return (
-              <div key={cat.id} className="group relative aspect-[4/3] overflow-hidden rounded-2xl">
+              <div key={cat.id} className="relative group">
                 <button
                   type="button"
                   onClick={() => {
@@ -1718,57 +1747,49 @@ function DetailsStep({ draft, update, updateMany, audience }: StepProps & { audi
                       setActiveCourtSport(cat.label);
                     }
                   }}
-                  className={`relative h-full w-full overflow-hidden rounded-2xl border-2 text-left shadow-sm transition cursor-pointer ${isSelected ? "border-vibe-violet ring-2 ring-vibe-violet/30" : "border-surface-border hover:border-vibe-violet/50"
-                    }`}
+                  className={`relative flex items-center gap-2 rounded-full px-3.5 py-2 sm:px-4 sm:py-2.5 text-[11.5px] sm:text-xs font-bold transition-all duration-300 ease-out cursor-pointer border select-none ${
+                    isSelected 
+                      ? "bg-gradient-to-br from-vibe-violet to-purple-700 text-white border-transparent ring-2 ring-vibe-violet/40 ring-offset-2 shadow-lg shadow-vibe-violet/20 hover:-translate-y-0.5" 
+                      : "bg-white/90 backdrop-blur-sm text-slate-600 border-slate-200/80 hover:border-vibe-violet/40 hover:bg-vibe-violet/5 hover:text-vibe-violet hover:shadow-md hover:-translate-y-0.5"
+                  }`}
                 >
-                  <div className="h-full w-full bg-cream-300">
-                    <CategoryPhoto cat={cat} />
-                  </div>
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
-                  {isSelected && <div className="pointer-events-none absolute inset-0 bg-vibe-violet/25" />}
-                  <span className="absolute inset-x-0 bottom-0 px-1.5 py-1 text-[10px] sm:text-xs md:text-sm font-black text-white drop-shadow-sm leading-tight text-center sm:text-left">
-                    {cat.label}
-                  </span>
-
-                  {/* Hover indicator to open modal */}
-                  <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition duration-200 pointer-events-none z-10">
-                    <span className="rounded-full bg-black/75 px-2 py-1 text-[8px] sm:text-[10px] font-bold text-white backdrop-blur-sm whitespace-nowrap">
-                      {isSelected ? "Configure" : "Select"}
+                  {cat.isCustom && cat.image ? (
+                    <img src={cat.image} alt="" className={`w-[15px] h-[15px] object-contain transition-all duration-300 ${isSelected ? 'brightness-0 invert drop-shadow-sm' : 'opacity-80 group-hover:opacity-100'}`} />
+                  ) : (
+                    <span className="text-[14px] sm:text-[16px] leading-none">
+                      {getSportEmoji(cat.id)}
                     </span>
-                  </div>
-                </button>
-
-                {isSelected && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const next = draft.categories.filter((c) => c !== cat.id);
-                      update("categories", next);
-                      const validLabels = new Set(
-                        next.map((id) => allCategories.find((c) => c.id === id)?.label ?? id)
-                      );
-                      const courts = draft.courts ?? [];
-                      if (courts.length > 0) {
-                        update(
-                          "courts",
-                          courts
-                            .map((court) => ({ ...court, sports: court.sports.filter((s) => validLabels.has(s)) }))
-                            .filter((court, i) => court.sports.length > 0 || courts[i]!.sports.length === 0)
+                  )}
+                  <span className="tracking-wide">{cat.label}</span>
+                  {isSelected && (
+                    <span 
+                      className="ml-1 flex h-4 w-4 items-center justify-center rounded-full bg-black/20 hover:bg-black/40 transition cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const next = draft.categories.filter((c) => c !== cat.id);
+                        update("categories", next);
+                        const validLabels = new Set(
+                          next.map((id) => allCategories.find((c) => c.id === id)?.label ?? id)
                         );
-                      }
-                    }}
-                    className="absolute right-1 top-1 sm:right-1.5 sm:top-1.5 z-20 flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-vibe-violet text-white shadow hover:bg-rose-600 transition cursor-pointer"
-                    title={`Deselect ${cat.label}`}
-                  >
-                    <X size={10} className="hidden group-hover:block sm:w-[12px] sm:h-[12px]" />
-                    <Check size={10} className="block group-hover:hidden sm:w-[12px] sm:h-[12px]" />
-                  </button>
-                )}
+                        const courts = draft.courts ?? [];
+                        if (courts.length > 0) {
+                          update(
+                            "courts",
+                            courts
+                              .map((court) => ({ ...court, sports: court.sports.filter((s) => validLabels.has(s)) }))
+                              .filter((court, i) => court.sports.length > 0 || courts[i]!.sports.length === 0)
+                          );
+                        }
+                      }}
+                    >
+                      <X size={10} className="text-white" />
+                    </span>
+                  )}
+                </button>
 
                 {/* Edit & Delete Action Buttons for Custom Sports only */}
                 {cat.isCustom && (
-                  <div className="absolute left-1 top-1 z-20 flex gap-1">
+                  <div className="absolute -top-2 -right-2 z-20 hidden group-hover:flex gap-1 bg-white p-1 rounded-full shadow-lg border border-slate-100 animate-in fade-in zoom-in duration-200">
                     <button
                       type="button"
                       title="Edit Custom Sport"
@@ -1777,9 +1798,9 @@ function DetailsStep({ draft, update, updateMany, audience }: StepProps & { audi
                         setEditingSport(cat);
                         setModalOpen(true);
                       }}
-                      className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md hover:bg-white hover:text-vibe-violet transition cursor-pointer"
+                      className="flex h-5 w-5 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-vibe-violet transition cursor-pointer"
                     >
-                      <Pencil size={9} className="sm:w-[11px] sm:h-[11px]" />
+                      <Pencil size={10} />
                     </button>
                     <button
                       type="button"
@@ -1788,9 +1809,9 @@ function DetailsStep({ draft, update, updateMany, audience }: StepProps & { audi
                         e.stopPropagation();
                         handleDeleteCustomSport(cat);
                       }}
-                      className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md hover:bg-white hover:text-rose-600 transition cursor-pointer"
+                      className="flex h-5 w-5 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-rose-600 transition cursor-pointer"
                     >
-                      <Trash2 size={9} className="sm:w-[11px] sm:h-[11px]" />
+                      <Trash2 size={10} />
                     </button>
                   </div>
                 )}
@@ -1806,14 +1827,10 @@ function DetailsStep({ draft, update, updateMany, audience }: StepProps & { audi
                 setEditingSport(null);
                 setModalOpen(true);
               }}
-              className="group relative flex aspect-[4/3] flex-col items-center justify-center gap-1.5 overflow-hidden rounded-2xl border-2 border-dashed border-vibe-violet/40 bg-vibe-violet/5 text-center transition hover:border-vibe-violet hover:bg-vibe-violet/10 cursor-pointer"
+              className="relative flex items-center gap-1.5 rounded-full px-3.5 py-2 sm:px-4 sm:py-2.5 text-[11.5px] sm:text-xs font-bold transition-all duration-300 ease-out cursor-pointer border border-dashed border-vibe-violet/50 bg-vibe-violet/5 text-vibe-violet hover:border-vibe-violet hover:bg-vibe-violet/10 hover:shadow-md hover:-translate-y-0.5 select-none"
             >
-              <span className="flex h-7 w-7 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-vibe-violet text-white shadow-md transition group-hover:scale-110">
-                <Plus size={14} className="sm:w-[18px] sm:h-[18px]" />
-              </span>
-              <span className="text-[10px] sm:text-xs font-black text-vibe-violet leading-tight">
-                + Add Sport
-              </span>
+              <Plus size={14} strokeWidth={2.5} />
+              <span className="tracking-wide">Add Sport</span>
             </button>
           )}
         </div>
@@ -4859,6 +4876,27 @@ export function PackageStudio({
     onSave(finalDraft, showAcademyStep ? academy : undefined);
   }
 
+  const isStepValid = (stepId: number) => {
+    switch (stepId) {
+      case 1:
+        return (draft.images?.length ?? 0) > 0;
+      case 2:
+        return draft.categories.length > 0;
+      case 3:
+        return draft.cityMode === "multiple" ? (draft.cities?.length ?? 0) > 0 : draft.city.trim().length > 0;
+      case 4:
+        return draft.type === "Event" ? true : (draft.slotsPerDay ?? 0) > 0;
+      case 5:
+        return computeStartingPrice(draft) > 0;
+      case 6:
+        return true;
+      case ACADEMY_STEP.id:
+        return academy.name.trim().length > 1 && academy.sports.length > 0 && Number(academy.price) > 0 && academy.days.length > 0;
+      default:
+        return false;
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-cream-200">
       <div className="sticky top-0 z-10 flex items-center justify-between bg-gradient-to-r from-vibe-indigo via-vibe-violet to-vibe-violetSoft px-4 py-4 text-white shadow-pop sm:px-8">
@@ -4882,27 +4920,39 @@ export function PackageStudio({
 
       <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">
         <div className="mb-6 flex flex-nowrap overflow-x-auto scrollbar-none gap-2 pb-2">
-          {stepsFor(draft.type, showAcademyStep).map((s) => (
-            <button
-              key={s.id}
-              onClick={() => goTo(s.id)}
-              className={`flex shrink-0 items-center transition-all duration-300 ${
-                step === s.id
-                  ? "gap-2 rounded-xl border border-vibe-violet bg-vibe-violet/5 px-3 py-2"
-                  : "rounded-full border border-surface-border bg-white p-2 hover:bg-cream-300"
-              }`}
-            >
-              <span
-                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold ${
+          {stepsFor(draft.type, showAcademyStep).map((s) => {
+            const isCompleted = maxStep > s.id;
+            const isValid = isCompleted ? isStepValid(s.id) : false;
+            
+            return (
+              <button
+                key={s.id}
+                onClick={() => goTo(s.id)}
+                className={`flex shrink-0 items-center transition-all duration-300 ${
                   step === s.id
-                    ? "bg-vibe-violet text-white"
-                    : maxStep > s.id
-                    ? "bg-vibe-limeDark text-white"
-                    : "bg-cream-300 text-ink-faint"
+                    ? "gap-2 rounded-xl border border-vibe-violet bg-vibe-violet/5 px-3 py-2"
+                    : isCompleted && !isValid
+                    ? "rounded-full border border-rose-200 bg-rose-50/50 p-2 hover:bg-rose-100/50"
+                    : "rounded-full border border-surface-border bg-white p-2 hover:bg-cream-300"
                 }`}
               >
-                {maxStep > s.id ? <Check size={12} /> : s.id}
-              </span>
+                <span
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold transition-colors duration-300 ${
+                    step === s.id
+                      ? "bg-vibe-violet text-white"
+                      : isCompleted
+                      ? isValid 
+                        ? "bg-vibe-limeDark text-white" 
+                        : "bg-rose-500 text-white"
+                      : "bg-cream-300 text-ink-faint"
+                  }`}
+                >
+                  {isCompleted ? (
+                    isValid ? <Check size={12} strokeWidth={3} /> : <X size={12} strokeWidth={3} />
+                  ) : (
+                    s.id
+                  )}
+                </span>
               {step === s.id && (
                 <span className="animate-in fade-in slide-in-from-left-1 overflow-hidden whitespace-nowrap">
                   <p className="text-xs font-semibold leading-none text-ink">{s.label}</p>
@@ -4910,7 +4960,8 @@ export function PackageStudio({
                 </span>
               )}
             </button>
-          ))}
+            );
+          })}
         </div>
 
         {formError && (
@@ -4929,9 +4980,9 @@ export function PackageStudio({
               onToggleAcademy={canOfferAcademy ? setAcademyEnabled : undefined}
             />
           )}
-          {step === 2 && <BookingStep draft={draft} update={update} />}
-          {step === 3 && <DetailsStep draft={draft} update={update} updateMany={updateMany} audience={audience} />}
-          {step === 4 && <LocationStep draft={draft} update={update} />}
+          {step === 2 && <DetailsStep draft={draft} update={update} updateMany={updateMany} audience={audience} />}
+          {step === 3 && <LocationStep draft={draft} update={update} />}
+          {step === 4 && <BookingStep draft={draft} update={update} />}
           {step === 5 && <PricingStep draft={draft} update={update} audience={audience} />}
           {step === 6 && <LaunchStep draft={draft} update={update} updateMany={updateMany} />}
           {step === ACADEMY_STEP.id && showAcademyStep && (
