@@ -121,7 +121,7 @@ export function Hero({
                 fill
                 priority={i === 0}
                 loading={i === 0 ? "eager" : undefined}
-                sizes="100vw"
+                sizes="(max-width: 639px) 1px, 100vw"
                 className={`object-cover ${i === heroSlide ? "animate-[hero-kenburns_3.8s_ease-out_forwards]" : ""
                   }`}
               />

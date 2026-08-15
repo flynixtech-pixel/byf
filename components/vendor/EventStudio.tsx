@@ -119,9 +119,8 @@ function ToggleGroup<T extends string>({
           key={opt.value}
           type="button"
           onClick={() => onChange(opt.value)}
-          className={`px-3 py-1.5 ${
-            value === opt.value ? "bg-ink text-white" : "bg-white text-ink-soft hover:bg-cream-300"
-          }`}
+          className={`px-3 py-1.5 ${value === opt.value ? "bg-ink text-white" : "bg-white text-ink-soft hover:bg-cream-300"
+            }`}
         >
           {opt.label}
         </button>
@@ -156,8 +155,8 @@ function TagField({
     tone === "success"
       ? "bg-lime-100 text-vibe-limeDark"
       : tone === "danger"
-      ? "bg-rose-100 text-vibe-coral"
-      : "bg-vibe-violet/10 text-vibe-violet";
+        ? "bg-rose-100 text-vibe-coral"
+        : "bg-vibe-violet/10 text-vibe-violet";
 
   return (
     <div>
@@ -516,7 +515,7 @@ function EventPhotosStep({ draft, update, audience }: StepProps & { audience: Au
           </div>
           <span className="text-sm font-medium text-vibe-violet">{galleryImages.length} / 10 photos</span>
         </div>
-        
+
         <input
           ref={bulkInput}
           type="file"
@@ -596,11 +595,10 @@ function EventPhotosStep({ draft, update, audience }: StepProps & { audience: Au
               setVideoInputType("paste");
               update("videoUrl", "");
             }}
-            className={`rounded-lg px-3.5 py-2 text-xs font-semibold transition ${
-              videoInputType === "paste"
+            className={`rounded-lg px-3.5 py-2 text-xs font-semibold transition ${videoInputType === "paste"
                 ? "bg-vibe-violet text-white shadow-sm"
                 : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-            }`}
+              }`}
           >
             Paste YouTube/Vimeo Link
           </button>
@@ -610,11 +608,10 @@ function EventPhotosStep({ draft, update, audience }: StepProps & { audience: Au
               setVideoInputType("upload");
               update("videoUrl", "");
             }}
-            className={`rounded-lg px-3.5 py-2 text-xs font-semibold transition ${
-              videoInputType === "upload"
+            className={`rounded-lg px-3.5 py-2 text-xs font-semibold transition ${videoInputType === "upload"
                 ? "bg-vibe-violet text-white shadow-sm"
                 : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-            }`}
+              }`}
           >
             Upload MP4 File
           </button>
@@ -835,8 +832,8 @@ function LocationStep({ draft, update, updateMany }: StepProps) {
   const mapEmbedUrl = coords
     ? `https://maps.google.com/maps?q=${coords.lat},${coords.lon}&t=&z=16&ie=UTF8&iwloc=&output=embed`
     : draft.address
-    ? `https://maps.google.com/maps?q=${encodeURIComponent(draft.address)}&t=&z=16&ie=UTF8&iwloc=&output=embed`
-    : null;
+      ? `https://maps.google.com/maps?q=${encodeURIComponent(draft.address)}&t=&z=16&ie=UTF8&iwloc=&output=embed`
+      : null;
 
   const currentSubCat = draft.categories[0] === "Events" ? (draft.subCategories[0] || "") : (draft.categories[0] || "");
 
@@ -851,12 +848,6 @@ function LocationStep({ draft, update, updateMany }: StepProps) {
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <FieldLabel>Event Name *</FieldLabel>
-            <AiNameSuggestBot
-              type="Event"
-              category={currentSubCat}
-              venue={draft.address}
-              onSelectName={(name) => update("title", name)}
-            />
           </div>
           <input
             value={draft.title}
@@ -952,21 +943,21 @@ function LocationStep({ draft, update, updateMany }: StepProps) {
             <div className="mb-2 flex flex-wrap gap-2">
               {draft.cityMode === "multiple"
                 ? (draft.cities ?? []).map((c) => (
-                    <span key={c} className="inline-flex items-center gap-1.5 rounded-full bg-vibe-violet/10 border border-vibe-violet/20 px-3 py-1 text-xs font-extrabold text-vibe-violet">
-                      {c}
-                      <button type="button" onClick={() => update("cities", (draft.cities ?? []).filter((x) => x !== c))} className="hover:text-rose-600 transition cursor-pointer">
-                        <X size={12} />
-                      </button>
-                    </span>
-                  ))
+                  <span key={c} className="inline-flex items-center gap-1.5 rounded-full bg-vibe-violet/10 border border-vibe-violet/20 px-3 py-1 text-xs font-extrabold text-vibe-violet">
+                    {c}
+                    <button type="button" onClick={() => update("cities", (draft.cities ?? []).filter((x) => x !== c))} className="hover:text-rose-600 transition cursor-pointer">
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))
                 : draft.city && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-vibe-violet/10 border border-vibe-violet/20 px-3 py-1 text-xs font-extrabold text-vibe-violet">
-                      {draft.city}
-                      <button type="button" onClick={() => update("city", "")} className="hover:text-rose-600 transition cursor-pointer">
-                        <X size={12} />
-                      </button>
-                    </span>
-                  )}
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-vibe-violet/10 border border-vibe-violet/20 px-3 py-1 text-xs font-extrabold text-vibe-violet">
+                    {draft.city}
+                    <button type="button" onClick={() => update("city", "")} className="hover:text-rose-600 transition cursor-pointer">
+                      <X size={12} />
+                    </button>
+                  </span>
+                )}
             </div>
 
             <div className="flex items-center gap-2">
@@ -1870,14 +1861,12 @@ export function EventStudio({
               key={s.id}
               type="button"
               onClick={() => goTo(s.id)}
-              className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left transition-colors ${
-                step === s.id ? "border-vibe-violet bg-vibe-violet/5" : "border-surface-border bg-white hover:bg-cream-300"
-              }`}
+              className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left transition-colors ${step === s.id ? "border-vibe-violet bg-vibe-violet/5" : "border-surface-border bg-white hover:bg-cream-300"
+                }`}
             >
               <span
-                className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold ${
-                  step === s.id ? "bg-vibe-violet text-white" : maxStep > s.id ? "bg-vibe-limeDark text-white" : "bg-cream-300 text-ink-faint"
-                }`}
+                className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-semibold ${step === s.id ? "bg-vibe-violet text-white" : maxStep > s.id ? "bg-vibe-limeDark text-white" : "bg-cream-300 text-ink-faint"
+                  }`}
               >
                 {maxStep > s.id ? <Check size={12} /> : s.id}
               </span>
@@ -1927,8 +1916,8 @@ export function EventStudio({
             {step < 5
               ? "Save & Next"
               : mode === "edit"
-              ? "Update Event"
-              : "Publish Event"}
+                ? "Update Event"
+                : "Publish Event"}
           </button>
         </div>
       </div>
