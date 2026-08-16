@@ -19,6 +19,7 @@ export type Venue = {
   distanceKm: number;
   rating: number;
   pricePerHour: number;
+  strikePrice?: number;
   status: "Available" | "Filling Fast" | "Full";
   sport: string;
   image: string;
@@ -33,6 +34,7 @@ export function listingToVenue(listing: Listing): Venue {
     distanceKm: 0,
     rating: listing.rating || 0,
     pricePerHour: listing.price,
+    strikePrice: listing.strikePrice,
     status: "Available",
     sport: listing.categories.map(categoryLabel).join(", ") || "General",
     image: listing.coverImage ?? "",

@@ -266,8 +266,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-inter), "Avenir Next", "Segoe UI", "Trebuchet MS", Arial, sans-serif;
-  --font-display: var(--font-space-grotesk), "Avenir Next", "Segoe UI", "Trebuchet MS", Arial, sans-serif;
+  --font-sans: "Axiforma", var(--font-inter), "Avenir Next", "Segoe UI", "Trebuchet MS", Arial, sans-serif;
+  --font-display: "Axiforma", var(--font-space-grotesk), "Avenir Next", "Segoe UI", "Trebuchet MS", Arial, sans-serif;
   --font-mono: var(--font-plex-mono), "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
   --color-cream-100: #ffffff;
   --color-cream-200: #fbf7f1;
@@ -354,11 +354,11 @@ html,
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), "Avenir Next", "Segoe UI", "Trebuchet MS", Arial, sans-serif;
+  font-family: "Axiforma", var(--font-inter), "Avenir Next", "Segoe UI", "Trebuchet MS", Arial, sans-serif;
   font-size: 1rem;
   line-height: 1.5;
   -webkit-tap-highlight-color: transparent;
-  overflow-x: hidden;
+  overflow-x: clip;
   max-width: 100vw;
 }
 

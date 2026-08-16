@@ -74,10 +74,20 @@ function VenueCard({
           <MapPin className="h-3 w-3" aria-hidden /> <span className="truncate">{venue.area}</span>
         </p>
         <div className="mt-2.5 flex items-center justify-between">
-          <p className="text-sm font-bold text-slate-900">
-            ₹{venue.pricePerHour}
-            <span className="font-normal text-slate-400 text-[10px]"> /hr</span>
-          </p>
+          <div className="flex flex-col justify-center">
+            {venue.strikePrice && venue.strikePrice > venue.pricePerHour && (
+              <div className="mb-0.5 flex items-center gap-1.5">
+                <span className="text-[10px] font-semibold text-slate-400 line-through">₹{venue.strikePrice}</span>
+                <span className="text-[8px] font-bold text-emerald-600 bg-emerald-50 px-1 py-0.5 rounded-sm uppercase tracking-wide">
+                  {Math.round(((venue.strikePrice - venue.pricePerHour) / venue.strikePrice) * 100)}% OFF
+                </span>
+              </div>
+            )}
+            <p className="text-sm font-bold text-slate-900">
+              ₹{venue.pricePerHour}
+              <span className="font-normal text-slate-400 text-[10px]"> /hr</span>
+            </p>
+          </div>
           <PrimaryButton onClick={onBook} className="!px-3 !py-1.5 text-[11px] font-bold shadow-sm">
             Book
           </PrimaryButton>

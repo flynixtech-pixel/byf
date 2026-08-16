@@ -34,17 +34,57 @@ const TYPE_TONE: Record<Listing["type"], "info" | "success" | "pending"> = {
   Event: "pending",
 };
 
+const parseTime = (t: string) => {
+  if (!t) return 0;
+  const match12 = t.match(/(\d+):(\d+)\s*(AM|PM)/i);
+  if (match12) {
+    let h = parseInt(match12[1], 10);
+    const m = parseInt(match12[2], 10);
+    const isPM = match12[3].toUpperCase() === "PM";
+    if (isPM && h !== 12) h += 12;
+    if (!isPM && h === 12) h = 0;
+    return h * 60 + m;
+  }
+  const match24 = t.match(/(\d+):(\d+)/);
+  if (match24) {
+    return parseInt(match24[1], 10) * 60 + parseInt(match24[2], 10);
+  }
+  return 0;
+};
+
+const formatTime = (t: string) => {
+  const mins = parseTime(t);
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  const isPM = h >= 12;
+  const displayH = h % 12 || 12;
+  return `${displayH.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")} ${isPM ? "PM" : "AM"}`;
+};
+
 export default function ListingDetailPage() {
   const params = useParams<{ id: string }>();
   const [listing, setListing] = useState<Listing | undefined>(undefined);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("overview");
   const [studioOpen, setStudioOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
+    let currentTitle = "";
     getVendorListingById(params.id)
-      .then((l) => setListing(apiListingToMock(l)))
+      .then((l) => {
+        const mock = apiListingToMock(l);
+        currentTitle = mock.title;
+        setListing(mock);
+        return getVendorBookings();
+      })
+      .then((res) => {
+        if (res) {
+          const listingBookings = res.filter(b => b.listing === currentTitle || b.listing === params.id);
+          setBookings(listingBookings);
+        }
+      })
       .catch((err) => setToast(err instanceof ApiError ? err.describe() : "Failed to load listing"))
       .finally(() => setLoading(false));
   }, [params.id]);
@@ -134,29 +174,92 @@ export default function ListingDetailPage() {
               </button>
             </div>
 
-            <div className="rounded-xl2 border border-surface-border bg-white shadow-panel">
-              <div className="border-b border-surface-border p-4 sm:p-5">
-                <h2 className="font-bold text-ink">Basic Info</h2>
+            <div className="rounded-[1.25rem] border border-slate-100 bg-white shadow-sm overflow-hidden">
+              <div className="bg-slate-50/50 border-b border-slate-100 px-5 py-3.5">
+                <h2 className="text-sm font-bold text-slate-800">Basic Info</h2>
               </div>
-              <div className="grid gap-6 p-4 sm:grid-cols-2 sm:p-5">
+              <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-4 sm:p-5">
                 <InfoField label="Type">
-                  <p className="font-medium text-ink">{listing.type}</p>
+                  <p className="font-semibold text-slate-800">{listing.type}</p>
                 </InfoField>
                 <InfoField label="Categories">
                   <div className="flex flex-wrap gap-1">
                     {listing.categories.map((c) => (
-                      <Badge key={c} tone="neutral">
+                      <Badge key={c} tone="neutral" className="!text-[10px] !px-1.5 !py-0.5">
                         {categoryLabel(c)}
                       </Badge>
                     ))}
                   </div>
                 </InfoField>
                 <InfoField label="Base Price">
-                  <p className="font-medium text-ink">₹{listing.price}</p>
+                  <p className="font-semibold text-slate-800">₹{listing.price}</p>
                 </InfoField>
                 <InfoField label="Status">
-                  <Badge tone={listing.status === "Active" ? "success" : "neutral"}>{listing.status}</Badge>
+                  <Badge tone={listing.status === "Active" ? "success" : "neutral"} className="!text-[10px] !px-1.5 !py-0.5">
+                    {listing.status}
+                  </Badge>
                 </InfoField>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-4 sm:p-5 border-t border-slate-100">
+                <InfoField label="Open Time">
+                  <p className="font-semibold text-slate-800 flex items-center gap-1.5">
+                    <ClockIcon size={13} className="text-vibe-violet" /> 
+                    {(() => {
+                      let t = listing.reportingStartTime;
+                      if (listing.slotsList && listing.slotsList.length > 0) {
+                        let earliest = listing.slotsList[0].startTime;
+                        let earliestMins = parseTime(earliest);
+                        for (const s of listing.slotsList) {
+                          const m = parseTime(s.startTime);
+                          if (m < earliestMins) { earliestMins = m; earliest = s.startTime; }
+                        }
+                        if (earliest) t = formatTime(earliest);
+                      }
+                      return t || "N/A";
+                    })()}
+                  </p>
+                </InfoField>
+                <InfoField label="Close Time">
+                  <p className="font-semibold text-slate-800 flex items-center gap-1.5">
+                    <Clock3 size={13} className="text-vibe-violet" /> 
+                    {(() => {
+                      let t = listing.reportingEndTime;
+                      if (listing.slotsList && listing.slotsList.length > 0) {
+                        let latest = listing.slotsList[0].endTime;
+                        let latestMins = parseTime(latest);
+                        for (const s of listing.slotsList) {
+                          const m = parseTime(s.endTime);
+                          if (m > latestMins) { latestMins = m; latest = s.endTime; }
+                        }
+                        if (latest) t = formatTime(latest);
+                      }
+                      return t || "N/A";
+                    })()}
+                  </p>
+                </InfoField>
+                <InfoField label={listing.type === "Turf" ? "Slots Booked" : "Bookings"}>
+                  <p className="font-semibold text-slate-800 flex items-center gap-1.5">
+                    <Check size={14} className="text-emerald-500" />
+                    {bookings.filter(b => b.status !== "Cancelled").length}
+                  </p>
+                </InfoField>
+                {listing.type !== "Turf" && (
+                  <InfoField label="Tickets Sold">
+                    <p className="font-semibold text-slate-800 flex items-center gap-1.5">
+                      <User size={14} className="text-indigo-500" />
+                      {bookings.filter(b => b.status !== "Cancelled").reduce((sum, b) => sum + (b.numberOfPlayers || 1), 0)}
+                    </p>
+                  </InfoField>
+                )}
+                {listing.type === "Turf" && (
+                  <InfoField label="Total Slots">
+                    <p className="font-semibold text-slate-800 flex items-center gap-1.5">
+                      <LayoutGrid size={14} className="text-blue-500" />
+                      {listing.slotsList?.length || 0}
+                    </p>
+                  </InfoField>
+                )}
               </div>
             </div>
 
@@ -167,9 +270,9 @@ export default function ListingDetailPage() {
             </div>
           </div>
         )}
-        {tab === "agenda" && <AgendaTab listing={listing} />}
+        {tab === "agenda" && <AgendaTab listing={listing} onSeeBookings={() => setTab("registrations")} />}
         {tab === "media" && <MediaTab listing={listing} onSaveVideo={saveVideo} onReplaceImage={replaceImage} />}
-        {tab === "registrations" && <RegistrationsTab />}
+        {tab === "registrations" && <RegistrationsTab listing={listing} bookings={bookings} />}
       </div>
 
       {studioOpen && (
@@ -509,9 +612,9 @@ function MediaTab({
 
 function InfoField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div>
-      <p className="mb-1 text-[11px] text-ink-faint">{label}</p>
-      {children}
+    <div className="flex flex-col justify-center rounded-xl border border-slate-100 bg-white p-3 shadow-sm transition hover:shadow-md">
+      <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
+      <div className="text-sm">{children}</div>
     </div>
   );
 }
@@ -532,65 +635,41 @@ function ImageGallery({
   const handleNext = () => setActive((prev) => (prev === allImages.length - 1 ? 0 : prev + 1));
 
   return (
-    <div className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.05)] flex flex-col items-center">
-      {/* Premium Small Thumbnails Row on Top */}
-      {allImages.length > 0 && (
-        <div className="mb-5 flex gap-3 overflow-x-auto pb-2 w-full max-w-full scrollbar-none items-center justify-start sm:justify-center">
-          {allImages.map((img, i) => (
-            <button
-              key={img.id}
-              onClick={() => setActive(i)}
-              className={`relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-[14px] border-2 transition-all duration-300 ${
-                i === active ? "border-indigo-600 shadow-md ring-[3px] ring-indigo-50 scale-105 z-10" : "border-transparent opacity-60 hover:opacity-100 hover:scale-95"
-              }`}
-            >
-              <img src={img.url} alt={img.label} className="h-full w-full object-cover" loading="lazy" decoding="async" />
-            </button>
-          ))}
-          <button
-            onClick={() => addInput.current?.click()}
-            className="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 flex-col items-center justify-center rounded-[14px] border border-dashed border-slate-300 bg-slate-50 text-slate-400 hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-600 transition-colors shadow-sm hover:shadow-md"
-            title="Add Photo"
-          >
-            <Plus size={24} />
-          </button>
-        </div>
-      )}
-
+    <div className="rounded-[1.25rem] border border-slate-100 bg-white p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row gap-3 sm:gap-4">
       {/* Main Large Image Slider */}
-      <div className="relative w-full h-64 overflow-hidden rounded-[1.25rem] bg-slate-50 sm:h-[400px] shadow-inner group border border-slate-100">
+      <div className="relative w-full h-52 sm:h-64 sm:w-2/3 shrink-0 overflow-hidden rounded-xl bg-slate-50 shadow-inner group border border-slate-100">
         {activeImage ? (
           <>
-            <img src={activeImage.url} alt={activeImage.label} className="h-full w-full object-cover transition-opacity duration-500" loading="lazy" decoding="async" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#110826]/80 via-transparent to-transparent pointer-events-none" />
+            <img src={activeImage.url} alt={activeImage.label} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" decoding="async" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#110826]/70 via-transparent to-transparent pointer-events-none" />
             
             {/* Left/Right Controls */}
             {allImages.length > 1 && (
               <>
                 <button
                   onClick={handlePrev}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white border border-white/30 hover:bg-white/40 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 shadow-lg"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white border border-white/30 hover:bg-white/40 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 shadow-lg"
                 >
-                  <ChevronLeft size={24} />
+                  <ChevronLeft size={20} />
                 </button>
                 <button
                   onClick={handleNext}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white border border-white/30 hover:bg-white/40 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 shadow-lg"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white border border-white/30 hover:bg-white/40 hover:scale-110 transition-all opacity-0 group-hover:opacity-100 shadow-lg"
                 >
-                  <ChevronRight size={24} />
+                  <ChevronRight size={20} />
                 </button>
               </>
             )}
 
             {/* Bottom Info: Label and Indicator */}
-            <div className="absolute bottom-5 left-5 right-5 flex items-end justify-between">
-               <span className="bg-white/20 backdrop-blur-md text-white text-[12px] font-bold px-3 py-1.5 rounded-lg border border-white/20 shadow-sm inline-flex">
+            <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
+               <span className="bg-black/40 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 rounded-md border border-white/10 shadow-sm inline-flex">
                   {activeImage.label || "Gallery Photo"}
                </span>
                {allImages.length > 1 && (
-                 <div className="flex gap-1.5 bg-black/40 backdrop-blur-md px-3 py-2 rounded-full border border-white/10">
+                 <div className="flex gap-1 bg-black/40 backdrop-blur-md px-2 py-1.5 rounded-full border border-white/10">
                    {allImages.map((_, i) => (
-                     <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i === active ? "w-4 bg-white" : "w-1.5 bg-white/40"}`} />
+                     <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i === active ? "w-3 bg-white" : "w-1.5 bg-white/40"}`} />
                    ))}
                  </div>
                )}
@@ -598,42 +677,51 @@ function ImageGallery({
           </>
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
-            <div className="h-16 w-16 rounded-full bg-slate-200 flex items-center justify-center shadow-inner">
-               <Camera size={28} className="text-slate-400" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+              <Camera size={20} />
             </div>
-            <p className="text-lg font-black text-slate-700">No photos yet</p>
-            <p className="text-xs font-medium text-slate-500 max-w-xs">Upload your first photo to make your listing look premium and attractive.</p>
-            <button
-              onClick={() => addInput.current?.click()}
-              className="mt-3 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 hover:bg-indigo-700 hover:scale-105 transition-all"
-            >
-              <Camera size={16} /> Upload First Photo
-            </button>
+            <div>
+              <p className="text-sm font-semibold text-slate-700">No photos yet</p>
+              <p className="mt-1 text-[11px] text-slate-500">Upload a poster or gallery images</p>
+            </div>
           </div>
         )}
-        
-        {/* Top Right Add Photo Button */}
-        {activeImage && (
-           <button
-             onClick={() => addInput.current?.click()}
-             className="absolute top-5 right-5 inline-flex items-center gap-1.5 rounded-xl bg-black/40 backdrop-blur-md px-4 py-2 text-[11px] font-bold text-white hover:bg-black/60 border border-white/10 transition-all opacity-0 group-hover:opacity-100 shadow-lg hover:scale-105"
-           >
-             <Plus size={14} /> Add Photo
-           </button>
-        )}
-
-        <input
-          ref={addInput}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) onReplace(active, file);
-            e.target.value = "";
-          }}
-        />
       </div>
+
+      {/* Premium Small Thumbnails Row/Column */}
+      <div className="flex sm:flex-col flex-1 gap-2 overflow-x-auto sm:overflow-y-auto pb-1 sm:pb-0 scrollbar-none items-start content-start">
+        {allImages.map((img, i) => (
+          <button
+            key={img.id}
+            onClick={() => setActive(i)}
+            className={`relative h-14 w-16 sm:h-16 sm:w-full shrink-0 overflow-hidden rounded-lg border-2 transition-all duration-300 ${
+              i === active ? "border-vibe-violet shadow-md ring-2 ring-vibe-violet/20 z-10" : "border-transparent opacity-60 hover:opacity-100 hover:scale-[0.98] bg-slate-50"
+            }`}
+          >
+            <img src={img.url} alt={img.label} className="h-full w-full object-cover" loading="lazy" decoding="async" />
+          </button>
+        ))}
+        <button
+          onClick={() => addInput.current?.click()}
+          className="flex h-14 w-16 sm:h-16 sm:w-full shrink-0 flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50/50 text-slate-400 hover:border-vibe-violet/50 hover:bg-vibe-violet/5 hover:text-vibe-violet transition-colors shadow-sm"
+          title="Add Photo"
+        >
+          <Plus size={18} />
+          <span className="text-[9px] font-semibold mt-1 hidden sm:block">Add Photo</span>
+        </button>
+      </div>
+
+      <input
+        ref={addInput}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) onReplace(active, file);
+          e.target.value = "";
+        }}
+      />
     </div>
   );
 }
@@ -718,29 +806,79 @@ function FaqCard({ faqs }: { faqs: Listing["faqs"] }) {
   );
 }
 
-function RegistrationsTab() {
+function RegistrationsTab({ listing, bookings }: { listing: Listing; bookings: Booking[] }) {
+  const [filterStatus, setFilterStatus] = useState<string>("All");
+
+  const filtered = bookings.filter(b => filterStatus === "All" || b.status === filterStatus);
+  const totalEarnings = bookings.filter(b => b.status !== "Cancelled").reduce((sum, b) => sum + b.totalAmount, 0);
+
   return (
     <div className="space-y-5">
       <div>
         <h1 className="font-display text-xl font-semibold text-ink">Registrations</h1>
-        <p className="mt-0.5 text-xs text-ink-faint">Manage registrations and booking verifications for this listing.</p>
+        <p className="mt-0.5 text-xs text-ink-faint">Manage all bookings for {listing.title}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatTile label="Total Online Earnings" value="₹0" hint="Vendor's cut from online bookings (fees excluded)" />
-        <StatTile label="Total Offline Earnings" value="₹0" hint="Full cash collected directly from customers" />
-        <StatTile label="Settled Online Amount" value="₹0" hint="Amount already paid to the vendor's account" />
-        <StatTile label="Remaining Online" value="₹0" hint="Pending amount to be settled to vendor" />
+        <StatTile label="Total Bookings" value={bookings.length.toString()} hint="All time bookings" />
+        <StatTile label="Confirmed" value={bookings.filter(b => b.status === "Confirmed").length.toString()} hint="Fully paid and confirmed" />
+        <StatTile label="Part Paid" value={bookings.filter(b => b.status === "Part Paid" || b.paymentType === "partial").length.toString()} hint="Requires pending payment" />
+        <StatTile label="Total Earnings" value={`₹${totalEarnings}`} hint="Total value generated" />
       </div>
 
-      <div className="flex flex-col items-center gap-2 rounded-xl2 border border-dashed border-surface-border bg-white py-16 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cream-300 text-ink-faint">
-          <ClipboardList size={20} />
+      <div className="bg-white border border-slate-100 shadow-sm rounded-[1.25rem] overflow-hidden">
+        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+          <h2 className="text-sm font-bold text-slate-800">Booking History</h2>
+          <select 
+            value={filterStatus} 
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="text-xs border border-slate-200 rounded-lg px-2 py-1.5 focus:border-vibe-violet outline-none bg-white text-slate-700 font-medium"
+          >
+            <option value="All">All Statuses</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Part Paid">Part Paid</option>
+            <option value="Pending">Pending</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
         </div>
-        <p className="font-display font-semibold text-ink">No upcoming events or trips</p>
-        <p className="max-w-sm text-xs text-ink-faint">
-          Booking verification options will appear here once future event or trip dates are available for this listing.
-        </p>
+        
+        {filtered.length === 0 ? (
+           <div className="py-16 text-center text-xs text-slate-400">No bookings found for the selected filter.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs whitespace-nowrap">
+              <thead className="bg-slate-50 text-slate-500">
+                <tr>
+                  <th className="px-5 py-3 font-bold uppercase tracking-wider">Order ID</th>
+                  <th className="px-5 py-3 font-bold uppercase tracking-wider">Customer</th>
+                  <th className="px-5 py-3 font-bold uppercase tracking-wider">Date & Time</th>
+                  <th className="px-5 py-3 font-bold uppercase tracking-wider text-right">Amount</th>
+                  <th className="px-5 py-3 font-bold uppercase tracking-wider text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filtered.map((b, i) => (
+                  <tr key={i} className="hover:bg-slate-50 transition">
+                    <td className="px-5 py-4 font-medium text-slate-800">{b.orderId}</td>
+                    <td className="px-5 py-4">
+                      <p className="font-bold text-slate-800">{b.customer}</p>
+                      <p className="text-slate-500 mt-0.5">{b.phone}</p>
+                    </td>
+                    <td className="px-5 py-4 text-slate-600">
+                      {new Date(b.dateTime).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                    </td>
+                    <td className="px-5 py-4 text-right font-bold text-slate-800">₹{b.totalAmount}</td>
+                    <td className="px-5 py-4 text-center">
+                      <Badge tone={b.status === "Confirmed" ? "success" : b.status === "Cancelled" ? "danger" : "pending"} className="mx-auto">
+                        {b.status}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -763,19 +901,11 @@ type SlotStatus = "Available" | "Booked" | "Part Paid" | "Offline Booked" | "Blo
  * for bookings a registered customer made through the app, never for manual/walk-in ones. */
 type ApiBooking = Booking & { customerId?: string | null };
 
-function SeeBookingsButton({ resolvedSlots, onPick }: { resolvedSlots: AgendaSlot[]; onPick: (f: SlotStatus) => void }) {
+function SeeBookingsButton({ onSeeBookings }: { onSeeBookings: () => void }) {
   return (
-    <div className="relative group">
-      <button className="flex items-center gap-1.5 bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-full shadow-lg hover:bg-slate-800 transition">
-        SEE BOOKINGS <ChevronDown size={12} />
-      </button>
-      <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-white rounded-xl shadow-xl border border-slate-100 min-w-[180px] overflow-hidden opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity">
-        {(["Booked", "Part Paid", "Available"] as SlotStatus[]).map(f => (
-          <button key={f} onClick={() => onPick(f)}
-            className="w-full text-left px-3 py-2 text-[10px] font-bold text-slate-700 hover:bg-slate-50 border-b last:border-0">{f} ({resolvedSlots.filter(s => s.status === f).length})</button>
-        ))}
-      </div>
-    </div>
+    <button onClick={onSeeBookings} className="flex items-center gap-1.5 bg-slate-900 text-white text-xs font-bold px-5 py-2.5 rounded-full shadow-lg hover:bg-slate-800 transition">
+      SEE ALL BOOKINGS
+    </button>
   );
 }
 interface AgendaSlot {
@@ -788,13 +918,11 @@ interface AgendaSlot {
   customerName?: string;
 }
 
-function AgendaTab({ listing }: { listing: Listing }) {
+function AgendaTab({ listing, onSeeBookings }: { listing: Listing; onSeeBookings: () => void }) {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
   const [bookings, setBookings] = useState<ApiBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [daypart, setDaypart] = useState<"Morning" | "Afternoon" | "Night" | "Mid Night" | null>(null);
-  const [viewMode, setViewMode] = useState<"grid" | "clock">("grid");
-  const [cardSize, setCardSize] = useState<"S" | "M" | "L">("M");
   const [activeSlot, setActiveSlot] = useState<AgendaSlot | null>(null);
   const [groupedFilter, setGroupedFilter] = useState<SlotStatus | null>(null);
   const [localListing, setLocalListing] = useState<Listing>(listing);
@@ -822,7 +950,7 @@ function AgendaTab({ listing }: { listing: Listing }) {
   const dateOptions = useMemo(() => {
     const list: Date[] = [];
     const today = new Date();
-    for (let i = -3; i < 4; i++) {
+    for (let i = -7; i <= 180; i++) {
       const d = new Date(today);
       d.setDate(today.getDate() + i);
       list.push(d);
@@ -980,8 +1108,8 @@ function AgendaTab({ listing }: { listing: Listing }) {
     if (slot) setActiveSlot(slot);
   };
 
-  const cardH = cardSize === "S" ? "h-20" : cardSize === "M" ? "h-28" : "h-36";
-  const cardGrid = cardSize === "S" ? "grid-cols-4 sm:grid-cols-6" : cardSize === "M" ? "grid-cols-3 sm:grid-cols-4" : "grid-cols-2 sm:grid-cols-3";
+  const cardH = "h-10";
+  const cardGrid = "grid-cols-4 sm:grid-cols-8";
 
   if (loading) return <div className="p-8 text-center text-xs text-ink-faint">Loading bookings...</div>;
 
@@ -993,42 +1121,36 @@ function AgendaTab({ listing }: { listing: Listing }) {
           <h2 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Today&apos;s Agenda</h2>
           <p className="text-[11px] text-slate-400 mt-1">{new Date(selectedDate).toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}</p>
         </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          {/* View toggle */}
-          <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white">
-            <button onClick={() => setViewMode("grid")} className={`flex items-center gap-1 px-3 py-1.5 text-xs font-bold transition ${viewMode === "grid" ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"}`}>
-              <LayoutGrid size={12} /> Grid
-            </button>
-            <button onClick={() => setViewMode("clock")} className={`flex items-center gap-1 px-3 py-1.5 text-xs font-bold transition ${viewMode === "clock" ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"}`}>
-              <ClockIcon size={12} /> Clock
-            </button>
-          </div>
-          {/* Card size */}
-          {viewMode === "grid" && (
-            <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white">
-              {(["S", "M", "L"] as const).map(s => (
-                <button key={s} onClick={() => setCardSize(s)} className={`px-2.5 py-1.5 text-[11px] font-bold transition ${cardSize === s ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"}`}>{s}</button>
-              ))}
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Date slider */}
-      <div className="flex gap-2 py-1 overflow-x-auto scrollbar-none">
-        {dateOptions.map((d, i) => {
-          const iso = d.toISOString().slice(0, 10);
-          const isSel = iso === selectedDate;
-          return (
-            <button key={i} onClick={() => setSelectedDate(iso)}
-              className={`flex flex-col items-center min-w-[56px] py-1.5 rounded-xl border transition shrink-0 ${isSel ? "bg-slate-900 border-slate-900 text-white font-bold" : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"}`}
-            >
-              <span className="text-[9px] font-bold uppercase">{d.toLocaleDateString("en-US", { weekday: "short" })}</span>
-              <span className="text-lg font-extrabold leading-tight mt-0.5">{d.getDate()}</span>
-            </button>
-          );
-        })}
+      <div className="relative group -mx-2 sm:mx-0">
+        <div className="flex gap-2 py-3 px-2 sm:px-0 overflow-x-auto scrollbar-none snap-x snap-mandatory">
+          {dateOptions.map((d, i) => {
+            const iso = d.toISOString().slice(0, 10);
+            const isSel = iso === selectedDate;
+            const isToday = d.toDateString() === new Date().toDateString();
+            return (
+              <button key={i} onClick={() => setSelectedDate(iso)}
+                className={`flex flex-col items-center justify-center min-w-[52px] h-[64px] rounded-[14px] border transition-all shrink-0 snap-center ${
+                  isSel 
+                    ? "bg-gradient-to-br from-vibe-violet to-purple-800 border-transparent text-white shadow-md shadow-vibe-violet/30 scale-[1.03]" 
+                    : "bg-white border-slate-200/80 text-slate-500 hover:bg-slate-50 hover:border-slate-300"
+                }`}
+              >
+                <span className={`text-[8px] font-bold uppercase tracking-wider ${isSel ? "text-purple-200" : "text-slate-400"}`}>
+                  {isToday ? "Today" : d.toLocaleDateString("en-US", { weekday: "short" })}
+                </span>
+                <span className={`text-lg font-black leading-none mt-1 ${isSel ? "text-white" : "text-slate-700"}`}>
+                  {d.getDate()}
+                </span>
+                <span className={`text-[8px] font-bold uppercase tracking-wider mt-1 ${isSel ? "text-purple-200" : "text-slate-400"}`}>
+                  {d.toLocaleDateString("en-US", { month: "short" })}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Hours stats row */}
@@ -1066,25 +1188,14 @@ function AgendaTab({ listing }: { listing: Listing }) {
             ))}
           </div>
 
-          {viewMode === "grid" ? (
-            <AgendaGrid slots={visibleSlots} cardH={cardH} cardGrid={cardGrid} daypart={daypart} onSlotClick={setActiveSlot} />
-          ) : (
-            <div className="flex justify-center py-4 bg-white border border-slate-100 rounded-xl">
-              <ClockSlotsWidget
-                slots={resolvedSlots}
-                onSelectSlot={setActiveSlot}
-                onSelectHour={handleClockHour}
-                renderSeeBooking={() => <SeeBookingsButton resolvedSlots={resolvedSlots} onPick={setGroupedFilter} />}
-              />
-            </div>
-          )}
+          <AgendaGrid slots={visibleSlots} cardH={cardH} cardGrid={cardGrid} daypart={daypart} onSlotClick={setActiveSlot} />
         </>
       )}
 
-      {/* Bottom Floating "See Booking" button (grid mode only — clock mode has its own inline button) */}
-      {!groupedFilter && viewMode !== "clock" && (
+      {/* Bottom Floating "See Booking" button */}
+      {!groupedFilter && (
         <div className="flex justify-center py-2">
-          <SeeBookingsButton resolvedSlots={resolvedSlots} onPick={setGroupedFilter} />
+          <SeeBookingsButton onSeeBookings={onSeeBookings} />
         </div>
       )}
 
@@ -1182,12 +1293,12 @@ function AgendaGrid({ slots, cardH, cardGrid, daypart, onSlotClick }: {
             <div className={`grid ${cardGrid} gap-2`}>
               {partSlots.map((s, i) => {
                 const colors: Record<SlotStatus, string> = {
-                  Available: "bg-white border-slate-200 text-emerald-600",
-                  Booked: "bg-red-50 border-red-100 text-rose-600",
-                  "Part Paid": "bg-amber-50 border-amber-100 text-amber-600",
-                  "Offline Booked": "bg-orange-50 border-orange-100 text-orange-600",
-                  Blocked: "bg-slate-100 border-slate-200 text-slate-500",
-                  "On Hold": "bg-purple-50 border-purple-100 text-purple-600",
+                  Available: "bg-emerald-50/50 border-emerald-100 text-emerald-700",
+                  Booked: "bg-rose-50/50 border-rose-100 text-rose-700",
+                  "Part Paid": "bg-amber-50/50 border-amber-100 text-amber-700",
+                  "Offline Booked": "bg-orange-50/50 border-orange-100 text-orange-700",
+                  Blocked: "bg-slate-50 border-slate-200 text-slate-500",
+                  "On Hold": "bg-purple-50/50 border-purple-100 text-purple-700",
                   Empty: "bg-slate-50 border-slate-200 text-slate-400",
                 };
                 
@@ -1202,22 +1313,22 @@ function AgendaGrid({ slots, cardH, cardGrid, daypart, onSlotClick }: {
                   <button
                     key={i}
                     onClick={() => onSlotClick(s)}
-                    className={`flex flex-col items-center justify-center ${cardH} rounded-2xl border-2 ${
+                    className={`flex flex-col items-center justify-center ${cardH} rounded-xl border ${
                       isAvail
-                        ? "border-dashed border-emerald-200 bg-white hover:border-emerald-400 text-emerald-700"
+                        ? "border-emerald-200 bg-white hover:border-emerald-400 text-slate-700"
                         : `border-solid ${colors[s.status] || ""}`
-                    } hover:shadow transition-shadow`}
+                    } hover:shadow-sm transition-all relative overflow-hidden group`}
                   >
-                    <span className={`text-base font-extrabold ${isAvail ? "text-slate-800" : "font-mono"}`}>
+                    {isAvail && <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />}
+                    
+                    <span className={`text-xs font-extrabold z-10 ${isAvail ? "text-slate-700" : "font-semibold"}`}>
                       {isAvail ? formatHourRange(s.startTime, s.endTime) : `${s.startTime.slice(0, 5)}-${s.endTime.slice(0, 5)}`}
                     </span>
+                    
                     {isAvail ? (
-                      <>
-                        <span className="text-xl font-bold text-emerald-500 mt-1 leading-none">+</span>
-                        <span className="text-[10px] font-extrabold uppercase text-emerald-600 mt-0.5">FREE</span>
-                      </>
+                      <span className="text-[8px] font-black uppercase text-emerald-500 mt-0.5 tracking-[0.1em] z-10">AVAILABLE</span>
                     ) : (
-                      <span className="text-[9px] font-extrabold mt-1 uppercase tracking-wide">
+                      <span className="text-[8px] font-extrabold mt-0.5 uppercase tracking-wider z-10 opacity-80">
                         {s.status}
                       </span>
                     )}

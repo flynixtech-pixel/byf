@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useMemo, useEffect } from "react";
-import { Check, Loader2, Plus, Trash2, Upload, X, Clock3, ChevronLeft, ChevronRight, LayoutGrid, List, Sunrise, Sun, Sunset, Moon, Ban, Crop, ArrowUpDown, Lightbulb, Layers, Grid, LocateFixed, Pencil, Info, Camera, GraduationCap, MoreVertical, CheckCircle2, ImagePlus, Image as ImageIcon } from "lucide-react";
+import { Check, Loader2, Plus, Trash2, Upload, X, Clock3, ChevronLeft, ChevronRight, LayoutGrid, List, Sunrise, Sun, Sunset, Moon, Ban, Crop, ArrowUpDown, Lightbulb, Layers, Grid, LocateFixed, Pencil, Info, Camera, GraduationCap, MoreVertical, CheckCircle2, ImagePlus, Image as ImageIcon, CalendarDays } from "lucide-react";
 import { uploadAdminImage, uploadVendorImage } from "@/lib/api/uploads";
 import { ApiError } from "@/lib/api/client";
 import {
@@ -185,17 +185,20 @@ function uploadImage(audience: Audience, file: File) {
 /** The top-level `price` shown on listing cards / detail pages isn't edited directly anywhere in
  * this form — it must be derived from the per-slot pricing (Step 5) so customers and vendors see
  * the real "starting from" price instead of the 0 the draft is initialized with. */
-function computeStartingPrice(listing: Listing): number {
+function computeStartingPricing(listing: Listing): { price: number; strikePrice?: number } {
   if (listing.type === "Event") {
     const amounts = listing.priceTiers.map((t) => t.amount).filter((a) => a > 0);
-    return amounts.length ? Math.min(...amounts) : 0;
+    return { price: amounts.length ? Math.min(...amounts) : 0 };
   }
   const allSlots = [
     ...(listing.slotsList ?? []),
     ...((listing.dateOverrides ?? []).flatMap((o) => o.slots ?? [])),
   ];
-  const pricedSlots = allSlots.filter((s) => s.price > 0 && !s.blocked).map((s) => s.price);
-  return pricedSlots.length ? Math.min(...pricedSlots) : 0;
+  const pricedSlots = allSlots.filter((s) => s.price > 0 && !s.blocked);
+  if (!pricedSlots.length) return { price: 0 };
+  
+  const minSlot = pricedSlots.reduce((min, s) => (s.price < min.price ? s : min), pricedSlots[0]);
+  return { price: minSlot.price, strikePrice: minSlot.strikePrice };
 }
 
 const inputClass =
@@ -802,6 +805,10 @@ function GameCourtsModal({
       .filter(({ court }) => !hostsSport(court, sportLabel));
   }, [courts, sportLabel]);
 
+  const category = allCategories.find((c) => c.label === sportLabel);
+  const unit = category?.venueType || "Court";
+  const unitPlural = unit.endsWith("ch") || unit.endsWith("sh") || unit.endsWith("x") || unit.endsWith("s") ? unit + "es" : unit + "s";
+
   const [activeTab, setActiveTab] = useState<number>(0);
   const [showInfo, setShowInfo] = useState<boolean>(false);
   const [showPriceInfo, setShowPriceInfo] = useState<boolean>(false);
@@ -824,7 +831,7 @@ function GameCourtsModal({
       ...courts,
       {
         id: `court-${Date.now()}-${courts.length}`,
-        name: `Court ${courts.length + 1}`,
+        name: `${unit} ${courts.length + 1}`,
         sports: [sportLabel],
         priceOverride: null,
         sportPrices: [],
@@ -914,9 +921,9 @@ function GameCourtsModal({
           {/* Info guide panel */}
           {showInfo && (
             <div className="rounded-xl border border-surface-border bg-cream-200/40 p-3 text-[11px] text-ink-soft animate-in slide-in-from-top-1 duration-200 space-y-1">
-              <p>• Add and manage bookable courts/pitches that host this sport.</p>
-              <p>• Every court configured for this sport will sell at the slots hourly price by default.</p>
-              <p>• You can enable this sport on other existing courts if they are multi-purpose.</p>
+              <p>• Add and manage bookable {unitPlural.toLowerCase()} that host this sport.</p>
+              <p>• Every {unit.toLowerCase()} configured for this sport will sell at the slots hourly price by default.</p>
+              <p>• You can enable this sport on other existing {unitPlural.toLowerCase()} if they are multi-purpose.</p>
             </div>
           )}
 
@@ -930,18 +937,18 @@ function GameCourtsModal({
           {/* Active Sport Courts List */}
           <div className="space-y-3">
             <span className="text-[11px] font-bold uppercase tracking-wider text-ink-faint">
-              Courts hosting {sportLabel} ({activeCourtsWithIndices.length})
+              {unitPlural} hosting {sportLabel} ({activeCourtsWithIndices.length})
             </span>
             {activeCourtsWithIndices.length === 0 ? (
               <div className="rounded-xl border border-dashed border-surface-border p-6 text-center">
-                <p className="text-xs text-ink-soft font-semibold">No courts configured for {sportLabel} yet.</p>
-                <p className="text-[10px] text-ink-faint mt-1">Players won&apos;t be able to book this sport unless you add a court.</p>
+                <p className="text-xs text-ink-soft font-semibold">No {unitPlural.toLowerCase()} configured for {sportLabel} yet.</p>
+                <p className="text-[10px] text-ink-faint mt-1">Players won&apos;t be able to book this sport unless you add a {unit.toLowerCase()}.</p>
               </div>
             ) : (
               <div>
                 {/* Tabbed Court Selectors [Court 1] [Court 2] [Court 3] */}
                 <div className="flex items-center gap-2 border-b border-surface-border pb-3 mb-3">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-ink-faint shrink-0">Select Court:</span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-ink-faint shrink-0">Select {unit}:</span>
                   <div className="flex-1 flex gap-2 overflow-x-auto scrollbar-none pb-1 scroll-smooth">
                     {activeCourtsWithIndices.map(({ court }, i) => (
                       <button
@@ -953,7 +960,7 @@ function GameCourtsModal({
                           : "border border-surface-border bg-white text-ink-soft hover:bg-cream-200"
                           }`}
                       >
-                        {court.name || `Court ${i + 1}`}
+                        {court.name || `${unit} ${i + 1}`}
                       </button>
                     ))}
                   </div>
@@ -968,6 +975,7 @@ function GameCourtsModal({
                     <CourtRow
                       key={court.id}
                       court={court}
+                      unit={unit}
                       index={originalIndex}
                       sportLabels={sportLabels}
                       galleryImages={draft.images}
@@ -993,23 +1001,23 @@ function GameCourtsModal({
             onClick={addCourtForSport}
             className="w-full py-3 inline-flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-vibe-violet/40 bg-vibe-violet/5 hover:bg-vibe-violet/10 text-xs font-bold text-vibe-violet transition"
           >
-            <Plus size={14} /> Add Court for {sportLabel}
+            <Plus size={14} /> Add {unit} for {sportLabel}
           </button>
 
           {/* Other Existing Courts Section */}
           {otherCourtsWithIndices.length > 0 && (
             <div className="mt-4 pt-4 border-t border-surface-border space-y-2">
               <span className="text-[11px] font-bold uppercase tracking-wider text-ink-faint block">
-                Enable {sportLabel} for other existing courts
+                Enable {sportLabel} for other existing {unitPlural.toLowerCase()}
               </span>
               <p className="text-[10px] text-ink-faint">
-                You have courts configured for other games. You can enable {sportLabel} on them if they are multi-purpose.
+                You have {unitPlural.toLowerCase()} configured for other games. You can enable {sportLabel} on them if they are multi-purpose.
               </p>
               <div className="grid gap-2 sm:grid-cols-2">
                 {otherCourtsWithIndices.map(({ court, originalIndex }) => (
                   <div key={court.id} className="flex items-center justify-between rounded-xl border border-surface-border bg-cream-200/20 px-3 py-2">
                     <div className="min-w-0">
-                      <p className="text-xs font-bold text-ink truncate">{court.name || `Court ${originalIndex + 1}`}</p>
+                      <p className="text-xs font-bold text-ink truncate">{court.name || `${unit} ${originalIndex + 1}`}</p>
                       <p className="text-[10px] text-ink-faint truncate">
                         Hosts: {court.sports.length > 0 ? court.sports.join(", ") : "All games"}
                       </p>
@@ -1050,6 +1058,7 @@ function GameCourtsModal({
 /** One court's card in the courts builder — name, games, photo, surface and rates. */
 function CourtRow({
   court,
+  unit,
   index,
   sportLabels,
   galleryImages,
@@ -1059,6 +1068,7 @@ function CourtRow({
   onRemove,
 }: {
   court: Court;
+  unit: string;
   index: number;
   sportLabels: string[];
   galleryImages: ListingImage[];
@@ -1093,7 +1103,7 @@ function CourtRow({
         <input
           value={court.name}
           onChange={(e) => onPatch({ name: e.target.value })}
-          placeholder={`Court ${index + 1}`}
+          placeholder={`${unit} ${index + 1}`}
           className={inputClass}
         />
         <button
@@ -1111,7 +1121,7 @@ function CourtRow({
           type="button"
           onClick={onRemove}
           className="shrink-0 rounded-lg border border-surface-border bg-white p-2 text-ink-faint hover:text-red-500"
-          aria-label={`Remove ${court.name || `court ${index + 1}`}`}
+          aria-label={`Remove ${court.name || `${unit.toLowerCase()} ${index + 1}`}`}
         >
           <Trash2 size={14} />
         </button>
@@ -2406,10 +2416,33 @@ function fmtDur(mins: number) {
 function BookingStep({ draft, update }: StepProps) {
   const [slotPrice, setSlotPrice] = useState(1000);
   const [bulkDuration, setBulkDuration] = useState("60");
-  // Every venue's day starts at 5:00 AM by convention (3:00–5:00 AM is a fixed
-  // closed window for cleaning/maintenance) — the generator defaults to that.
+  
   const [bulkStartTime, setBulkStartTime] = useState("05:00");
   const [bulkEndTime, setBulkEndTime] = useState("22:00");
+
+  useEffect(() => {
+    const list = draft.slotsList ?? [];
+    if (list.length > 0) {
+      let earliest = t24m(list[0].startTime);
+      let startMins = t24m(list[0].startTime);
+      
+      list.forEach(s => {
+        const m = t24m(s.startTime);
+        if (m < earliest) earliest = m;
+        if (m < startMins) startMins = m;
+      });
+      
+      let latest = t24m(list[0].endTime);
+      list.forEach(s => {
+        let m = t24m(s.endTime);
+        if (m <= startMins && m !== 0) m += 1440; 
+        if (m > latest) latest = m;
+      });
+      
+      setBulkStartTime(m2t(earliest));
+      setBulkEndTime(m2t(latest % 1440 === 0 ? 0 : latest % 1440));
+    }
+  }, [draft.slotsList]);
 
   // Any closing time is valid because it will wrap to the next day if earlier than start time.
 
@@ -3288,6 +3321,30 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
   const [bulkStartTime, setBulkStartTime] = useState("05:00");
   const [bulkEndTime, setBulkEndTime] = useState("22:00");
 
+  useEffect(() => {
+    const list = draft.slotsList ?? [];
+    if (list.length > 0) {
+      let earliest = t24m(list[0].startTime);
+      let startMins = t24m(list[0].startTime);
+      
+      list.forEach(s => {
+        const m = t24m(s.startTime);
+        if (m < earliest) earliest = m;
+        if (m < startMins) startMins = m;
+      });
+      
+      let latest = t24m(list[0].endTime);
+      list.forEach(s => {
+        let m = t24m(s.endTime);
+        if (m <= startMins && m !== 0) m += 1440; 
+        if (m > latest) latest = m;
+      });
+      
+      setBulkStartTime(m2t(earliest));
+      setBulkEndTime(m2t(latest % 1440 === 0 ? 0 : latest % 1440));
+    }
+  }, [draft.slotsList]);
+
   function getBulkEndMins() {
     let startMin = t24m(bulkStartTime);
     let endMin = t24m(bulkEndTime);
@@ -3913,6 +3970,17 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
               </div>
             </div>
 
+            {/* Banner for Long Term Packages */}
+            <div className="mb-5 rounded-xl border border-indigo-100 bg-indigo-50/50 p-4 shadow-sm flex items-start gap-3">
+              <div className="rounded-full bg-indigo-100 p-2 text-indigo-600 shrink-0">
+                <CalendarDays size={18} />
+              </div>
+              <div>
+                <p className="text-[11px] font-bold text-indigo-900 uppercase tracking-wider mb-0.5">Looking to offer long-term subscriptions?</p>
+                <p className="text-xs font-medium text-indigo-700/80">You can also configure <span className="font-bold text-indigo-700">Weekly, Monthly, and Yearly</span> packages to maximize your venue&apos;s occupancy! Reach out to your account manager to enable this feature.</p>
+              </div>
+            </div>
+
             {/* Pricing Controls Row */}
             <div className="mb-5 flex flex-wrap items-end justify-between gap-4 rounded-2xl border border-violet-200 bg-white p-4 shadow-sm">
               <div className="flex flex-wrap items-center gap-4">
@@ -3997,7 +4065,12 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
                                   <div className="mt-1 flex flex-col items-center justify-center w-full">
                                     <div className="flex items-center gap-1">
                                       {s.strikePrice && s.strikePrice > s.price && (
-                                        <span className="text-[10px] font-medium text-slate-400 line-through">₹{s.strikePrice}</span>
+                                        <>
+                                          <span className="text-[10px] font-medium text-slate-400 line-through">₹{s.strikePrice}</span>
+                                          <span className="text-[8px] font-bold text-emerald-600 bg-emerald-50 px-1 py-0.5 rounded-sm">
+                                            {Math.round(((s.strikePrice - s.price) / s.strikePrice) * 100)}% OFF
+                                          </span>
+                                        </>
                                       )}
                                       <span className={`block text-[12px] font-display font-black leading-none tracking-tight ${s.price > 0 ? "text-vibe-violet" : "text-slate-400"}`}>
                                         {s.price > 0 ? `₹${s.price}` : "Not Set"}
@@ -4044,7 +4117,12 @@ function PricingStep({ draft, update, audience }: StepProps & { audience: Audien
                         <span className="text-[11px] font-bold text-slate-600 font-sans tracking-tight leading-none pt-0.5">{to12h(s.startTime)} - {to12h(s.endTime)}</span>
                         <div className="flex items-center gap-1.5 border-l border-slate-100 pl-2">
                           {s.strikePrice && s.strikePrice > s.price && (
-                            <span className="text-[10px] font-medium text-slate-400 line-through">₹{s.strikePrice}</span>
+                            <>
+                              <span className="text-[10px] font-medium text-slate-400 line-through">₹{s.strikePrice}</span>
+                              <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-sm">
+                                {Math.round(((s.strikePrice - s.price) / s.strikePrice) * 100)}% OFF
+                              </span>
+                            </>
                           )}
                           <span className="text-[12px] font-display font-black text-vibe-violet leading-none tracking-tight">₹{s.price}</span>
                           {s.sourceLabel && s.sourceLabel !== "Global Default" && (
@@ -4809,11 +4887,17 @@ export function PackageStudio({
 
     // Auto fallback for empty listing title to vendor profile business name
     const finalTitle = draft.title.trim() || profileName || `Udaipur ${draft.type} Club`;
-    const startingPrice = computeStartingPrice(draft);
+    const startingPricing = computeStartingPricing(draft);
     const finalDraft = {
       ...draft,
       title: finalTitle,
-      price: startingPrice,
+      price: startingPricing.price,
+      strikePrice: startingPricing.strikePrice,
+      slotsPerDay: Math.max(
+        draft.slotsPerDay ?? 0,
+        draft.slotsList?.length ?? 0,
+        ...(draft.dateOverrides?.map((o) => o.slots?.length ?? 0) ?? [0])
+      ),
       courts: (draft.courts ?? []).map((c) => ({
         ...c,
         active: c.active !== false,
@@ -4840,7 +4924,7 @@ export function PackageStudio({
       goTo(2); // Slots step
       return;
     }
-    if (startingPrice <= 0) {
+    if (startingPricing.price <= 0) {
       setFormError(
         finalDraft.type === "Event"
           ? "Set a price for at least one participant tier before publishing."
@@ -4887,7 +4971,7 @@ export function PackageStudio({
       case 4:
         return draft.type === "Event" ? true : (draft.slotsPerDay ?? 0) > 0;
       case 5:
-        return computeStartingPrice(draft) > 0;
+        return computeStartingPricing(draft).price > 0;
       case 6:
         return true;
       case ACADEMY_STEP.id:

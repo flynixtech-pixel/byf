@@ -278,6 +278,22 @@ export default function VenueDetailPage() {
 
   const isEvent = venue.type === "Event";
   const highlights = getVenueHighlights(venue);
+
+  let displayPrice = venue.price || 0;
+  let displayStrikePrice = venue.strikePrice;
+
+  if (venue.slotsList && venue.slotsList.length > 0) {
+    const activeSlots = venue.slotsList.filter((s) => !s.blocked && s.price > 0);
+    if (activeSlots.length > 0) {
+      const minSlot = activeSlots.reduce((prev, curr) => (curr.price < prev.price ? curr : prev));
+      displayPrice = minSlot.price;
+      if (minSlot.strikePrice && minSlot.strikePrice > minSlot.price) {
+        displayStrikePrice = minSlot.strikePrice;
+      } else {
+        displayStrikePrice = undefined;
+      }
+    }
+  }
   const inclusions = venue.inclusions.length > 0 ? venue.inclusions : DEFAULT_INCLUSIONS;
   const exclusions = venue.exclusions.length > 0 ? venue.exclusions : DEFAULT_EXCLUSIONS;
   const desktopAmenities = inclusions.map((item) => {
@@ -454,98 +470,6 @@ export default function VenueDetailPage() {
             )}
 
 
-          </div>
-
-          {/* RIGHT — sticky booking card */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="lg:sticky lg:top-24 lg:self-start min-w-0"
-          >
-            <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-200/40">
-              <div className="flex items-start justify-between gap-3">
-                <div className="relative">
-                  <h1 className="text-2xl font-extrabold text-slate-900 leading-tight">
-                    {venue.title}
-                  </h1>
-                </div>
-                {venue.reviewCount && venue.reviewCount > 0 ? (
-                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#0b9c65]/20 bg-[#0b9c65]/10 px-2.5 py-1 text-sm font-bold text-[#0b9c65]">
-                    {venue.rating?.toFixed(1)} <Star className="h-3 w-3 fill-[#0b9c65] text-[#0b9c65]" /> <span className="text-[#0b9c65]/80 font-semibold">({venue.reviewCount})</span>
-                  </span>
-                ) : (
-                  <span className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-500">
-                    <Star className="h-3 w-3" /> No ratings
-                  </span>
-                )}
-              </div>
-              <p className="mt-1.5 text-xs font-bold uppercase tracking-widest text-[#7f1d1d]">
-                {categoryText} • {venue.city}
-              </p>
-
-              <p className="mt-5 text-3xl font-black text-slate-900">
-                ₹{venue.price.toLocaleString("en-IN")}
-              </p>
-              <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">Starting price</p>
-
-              <div className="mt-4 border-y border-slate-100 py-4 text-sm text-slate-600">
-                {isEvent && venue.availableFrom && (
-                  <p className="flex items-center gap-2 font-semibold text-slate-800 mb-2">
-                    <CalendarDays className="h-4 w-4 text-[#7f1d1d]" />
-                    {new Date(venue.availableFrom).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
-                    {(venue.reportingStartTime || venue.reportingEndTime) && (
-                      <span className="text-slate-500">
-                        · {venue.reportingStartTime ?? "—"}{venue.reportingEndTime ? `–${venue.reportingEndTime}` : ""}
-                      </span>
-                    )}
-                  </p>
-                )}
-                <p className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 text-[#7f1d1d] shrink-0 mt-0.5" />
-                  <span>
-                    <span className="block font-semibold text-slate-800">{venue.address || `${venue.city}, Rajasthan`}</span>
-                    <span className="block text-xs text-slate-400">{venue.city} District</span>
-                  </span>
-                </p>
-              </div>
-
-              <div className="mt-4 flex items-center justify-between gap-2 border-b border-slate-100 pb-4">
-                 <div className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 p-2.5 text-center flex-1">
-                   <Zap className="h-4 w-4 text-[#7f1d1d]" strokeWidth={2} />
-                   <span className="text-[9px] font-bold text-slate-700 leading-tight">Instant<br/>Confirmation</span>
-                 </div>
-                 <div className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 p-2.5 text-center flex-1">
-                   <ListChecks className="h-4 w-4 text-[#7f1d1d]" strokeWidth={2} />
-                   <span className="text-[9px] font-bold text-slate-700 leading-tight">Real-time<br/>Availability</span>
-                 </div>
-                 <div className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 p-2.5 text-center flex-1">
-                   <UserRoundCog className="h-4 w-4 text-[#7f1d1d]" strokeWidth={2} />
-                   <span className="text-[9px] font-bold text-slate-700 leading-tight">Trusted<br/>Venue</span>
-                 </div>
-              </div>
-
-              <motion.button
-                whileHover={{ y: -2, boxShadow: "0 10px 25px -5px rgba(127, 29, 29, 0.4)" }}
-                type="button"
-                onClick={() => {
-                  const sports = venueSports(venue);
-                  if (!isEvent && sports.length > 1) {
-                    setSportModalOpen(true);
-                  } else {
-                    setSelectedSportForBooking(sports.length === 1 ? categoryLabel(sports[0]) : "");
-                    setBooking(true);
-                  }
-                }}
-                className="group mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#7f1d1d] px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-[#450a0a] shadow-md cursor-pointer"
-              >
-                <span>Book Now</span>
-                <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </motion.button>
-            </div>
-          </motion.div>
-        </div>
-
         <div className="mt-2">
           {/* Same info the mobile view shows — specs, weather, sports, amenities, players, reviews. */}
           {!isEvent && (
@@ -616,6 +540,110 @@ export default function VenueDetailPage() {
 
 
         </div>
+          </div>
+
+          {/* RIGHT — sticky booking card */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="lg:sticky lg:top-24 lg:self-start min-w-0"
+          >
+            <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-200/40">
+              <div className="flex items-start justify-between gap-3">
+                <div className="relative">
+                  <h1 className="text-2xl font-extrabold text-slate-900 leading-tight">
+                    {venue.title}
+                  </h1>
+                </div>
+                {venue.reviewCount && venue.reviewCount > 0 ? (
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#0b9c65]/20 bg-[#0b9c65]/10 px-2.5 py-1 text-sm font-bold text-[#0b9c65]">
+                    {venue.rating?.toFixed(1)} <Star className="h-3 w-3 fill-[#0b9c65] text-[#0b9c65]" /> <span className="text-[#0b9c65]/80 font-semibold">({venue.reviewCount})</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-500">
+                    <Star className="h-3 w-3" /> No ratings
+                  </span>
+                )}
+              </div>
+              <p className="mt-1.5 text-xs font-bold uppercase tracking-widest text-[#7f1d1d]">
+                {categoryText} • {venue.city}
+              </p>
+
+              <div className="mt-5 flex items-end gap-3">
+                <div className="flex flex-col">
+                  {displayStrikePrice && displayStrikePrice > displayPrice && (
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-lg font-bold text-slate-400 line-through">₹{displayStrikePrice.toLocaleString("en-IN")}</span>
+                      <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded uppercase tracking-widest ring-1 ring-emerald-600/10">
+                        {Math.round(((displayStrikePrice - displayPrice) / displayStrikePrice) * 100)}% OFF
+                      </span>
+                    </div>
+                  )}
+                  <p className="text-4xl font-black text-slate-900 leading-none">
+                    ₹{displayPrice.toLocaleString("en-IN")}
+                  </p>
+                </div>
+              </div>
+              <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">Starting price</p>
+
+              <div className="mt-4 border-y border-slate-100 py-4 text-sm text-slate-600">
+                {isEvent && venue.availableFrom && (
+                  <p className="flex items-center gap-2 font-semibold text-slate-800 mb-2">
+                    <CalendarDays className="h-4 w-4 text-[#7f1d1d]" />
+                    {new Date(venue.availableFrom).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+                    {(venue.reportingStartTime || venue.reportingEndTime) && (
+                      <span className="text-slate-500">
+                        · {venue.reportingStartTime ?? "—"}{venue.reportingEndTime ? `–${venue.reportingEndTime}` : ""}
+                      </span>
+                    )}
+                  </p>
+                )}
+                <p className="flex items-start gap-2">
+                  <MapPin className="h-4 w-4 text-[#7f1d1d] shrink-0 mt-0.5" />
+                  <span>
+                    <span className="block font-semibold text-slate-800">{venue.address || `${venue.city}, Rajasthan`}</span>
+                    <span className="block text-xs text-slate-400">{venue.city} District</span>
+                  </span>
+                </p>
+              </div>
+
+              <div className="mt-4 flex items-center justify-between gap-2 border-b border-slate-100 pb-4">
+                 <div className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 p-2.5 text-center flex-1">
+                   <Zap className="h-4 w-4 text-[#7f1d1d]" strokeWidth={2} />
+                   <span className="text-[9px] font-bold text-slate-700 leading-tight">Instant<br/>Confirmation</span>
+                 </div>
+                 <div className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 p-2.5 text-center flex-1">
+                   <ListChecks className="h-4 w-4 text-[#7f1d1d]" strokeWidth={2} />
+                   <span className="text-[9px] font-bold text-slate-700 leading-tight">Real-time<br/>Availability</span>
+                 </div>
+                 <div className="flex flex-col items-center justify-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50/50 p-2.5 text-center flex-1">
+                   <UserRoundCog className="h-4 w-4 text-[#7f1d1d]" strokeWidth={2} />
+                   <span className="text-[9px] font-bold text-slate-700 leading-tight">Trusted<br/>Venue</span>
+                 </div>
+              </div>
+
+              <motion.button
+                whileHover={{ y: -2, boxShadow: "0 10px 25px -5px rgba(127, 29, 29, 0.4)" }}
+                type="button"
+                onClick={() => {
+                  const sports = venueSports(venue);
+                  if (!isEvent && sports.length > 1) {
+                    setSportModalOpen(true);
+                  } else {
+                    setSelectedSportForBooking(sports.length === 1 ? categoryLabel(sports[0]) : "");
+                    setBooking(true);
+                  }
+                }}
+                className="group mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#7f1d1d] px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition hover:bg-[#450a0a] shadow-md cursor-pointer"
+              >
+                <span>Book Now</span>
+                <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </motion.button>
+            </div>
+          </motion.div>
+        </div>
+
       </main>
 
       {/* Bottom Feature Footer Bar */}
@@ -672,7 +700,7 @@ export default function VenueDetailPage() {
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Starting at</p>
-            <p className="text-xl font-black text-slate-900 leading-tight">₹{venue.price.toLocaleString("en-IN")}</p>
+            <p className="text-xl font-black text-slate-900 leading-tight">₹{displayPrice.toLocaleString("en-IN")}</p>
           </div>
           <button
             type="button"
@@ -936,6 +964,64 @@ function VenueInfoSections({
 }) {
   const activeCourts = (venue.courts ?? []).filter((c) => c.active !== false);
 
+  let displayStartTime = venue.reportingStartTime;
+  let displayEndTime = venue.reportingEndTime;
+
+  if (venue.slotsList && venue.slotsList.length > 0) {
+    const parseTime = (t: string) => {
+      if (!t) return 0;
+      const match12 = t.match(/(\d+):(\d+)\s*(AM|PM)/i);
+      if (match12) {
+        let h = parseInt(match12[1]);
+        const m = parseInt(match12[2]);
+        const isPM = match12[3].toUpperCase() === "PM";
+        if (isPM && h !== 12) h += 12;
+        if (!isPM && h === 12) h = 0;
+        return h * 60 + m;
+      }
+      const match24 = t.match(/(\d+):(\d+)/);
+      if (match24) {
+        return parseInt(match24[1]) * 60 + parseInt(match24[2]);
+      }
+      return 0;
+    };
+
+    const formatTime = (t: string) => {
+      if (!t) return "";
+      const mins = parseTime(t);
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      const isPM = h >= 12;
+      const h12 = h % 12 || 12;
+      const mStr = m.toString().padStart(2, '0');
+      return `${h12.toString().padStart(2, '0')}:${mStr} ${isPM ? 'PM' : 'AM'}`;
+    };
+    
+    let earliest = venue.slotsList[0].startTime;
+    let earliestMins = parseTime(earliest);
+    let latest = venue.slotsList[0].endTime;
+    let latestMins = parseTime(latest);
+
+    for (const s of venue.slotsList) {
+      const sMins = parseTime(s.startTime);
+      const eMins = parseTime(s.endTime);
+      if (sMins < earliestMins) {
+        earliestMins = sMins;
+        earliest = s.startTime;
+      }
+      if (eMins > latestMins) {
+        latestMins = eMins;
+        latest = s.endTime;
+      }
+    }
+    
+    if (earliest) displayStartTime = formatTime(earliest);
+    if (latest) displayEndTime = formatTime(latest);
+  }
+
+  displayStartTime = displayStartTime || "06:00 AM";
+  displayEndTime = displayEndTime || "11:00 PM";
+
   return (
     <>
       {/* 1. ROW 1: Quick Status Pills & Amenities */}
@@ -947,51 +1033,48 @@ function VenueInfoSections({
         initial="hidden"
         whileInView="show"
         viewport={{ once: true }}
-        className="mt-4 flex flex-col lg:flex-row gap-3 items-stretch"
+        className="mt-4 flex flex-col gap-3 items-stretch"
       >
         {/* Quick Status Pills */}
-        <div className="grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-4 flex-1">
-          <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-2 sm:gap-3 rounded-2xl bg-white px-2.5 py-3 sm:px-3 sm:py-3 shadow-sm border border-slate-100 min-w-0">
-            <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 flex-1">
+          <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-3 rounded-2xl bg-white p-3 sm:p-4 shadow-sm border border-slate-100 min-w-0">
+            <Clock className="h-5 w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
             <div className="min-w-0 flex-1">
-              <span className="block text-[11px] sm:text-xs font-extrabold text-slate-900 leading-tight">
+              <span className="block text-xs sm:text-sm font-extrabold text-slate-900 leading-tight">
                 Open Today
               </span>
-              <span className="block text-[9px] sm:text-[10px] font-medium text-slate-500 truncate mt-0.5">
-                {venue.reportingStartTime ?? "06:00 AM"} – {venue.reportingEndTime ?? "11:00 PM"}
+              <span className="block text-[10px] sm:text-xs font-medium text-slate-500 mt-0.5">
+                {displayStartTime} – {displayEndTime}
               </span>
             </div>
-            <span className="shrink-0 rounded-md bg-emerald-50 px-1 py-0.5 text-[7px] sm:text-[8px] font-black uppercase tracking-wider text-emerald-600 border border-emerald-100">
-              OPEN
-            </span>
           </motion.div>
-          <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-2 sm:gap-3 rounded-2xl bg-white px-2.5 py-3 sm:px-4 sm:py-3.5 shadow-sm border border-slate-100 min-w-0">
-            <LayoutGrid className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
+          <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-3 rounded-2xl bg-white p-3 sm:p-4 shadow-sm border border-slate-100 min-w-0">
+            <LayoutGrid className="h-5 w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
             <div className="min-w-0 flex-1">
-              <span className="block text-[11px] sm:text-xs font-extrabold text-slate-900 leading-tight">
+              <span className="block text-xs sm:text-sm font-extrabold text-slate-900 leading-tight">
                 {activeCourts.length > 0 ? `${activeCourts.length} Court` : "1 Court"}
               </span>
-              <span className="block text-[9px] sm:text-[10px] font-medium text-slate-500 truncate mt-0.5">Available</span>
+              <span className="block text-[10px] sm:text-xs font-medium text-slate-500 mt-0.5">Available</span>
             </div>
           </motion.div>
-          <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-2 sm:gap-3 rounded-2xl bg-white px-2.5 py-3 sm:px-4 sm:py-3.5 shadow-sm border border-slate-100 min-w-0">
-            <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
+          <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-3 rounded-2xl bg-white p-3 sm:p-4 shadow-sm border border-slate-100 min-w-0">
+            <Zap className="h-5 w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
             <div className="min-w-0 flex-1">
-              <span className="block text-[11px] sm:text-xs font-extrabold text-slate-900 leading-tight">Instant Booking</span>
-              <span className="block text-[9px] sm:text-[10px] font-medium text-slate-500 truncate mt-0.5">Quick &amp; easy</span>
+              <span className="block text-xs sm:text-sm font-extrabold text-slate-900 leading-tight">Instant Booking</span>
+              <span className="block text-[10px] sm:text-xs font-medium text-slate-500 mt-0.5">Quick &amp; easy</span>
             </div>
           </motion.div>
-          <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-2 sm:gap-3 rounded-2xl bg-white px-2.5 py-3 sm:px-4 sm:py-3.5 shadow-sm border border-slate-100 min-w-0">
-            <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
+          <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="flex items-center gap-3 rounded-2xl bg-white p-3 sm:p-4 shadow-sm border border-slate-100 min-w-0">
+            <ShieldCheck className="h-5 w-5 text-brand-600 shrink-0" strokeWidth={1.5} />
             <div className="min-w-0 flex-1">
-              <span className="block text-[11px] sm:text-xs font-extrabold text-slate-900 leading-tight">Confirmed</span>
-              <span className="block text-[9px] sm:text-[10px] font-medium text-slate-500 truncate mt-0.5">Real-time availability</span>
+              <span className="block text-xs sm:text-sm font-extrabold text-slate-900 leading-tight">Confirmed</span>
+              <span className="block text-[10px] sm:text-xs font-medium text-slate-500 mt-0.5">Real-time availability</span>
             </div>
           </motion.div>
         </div>
 
         {/* Amenities Bar */}
-        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="rounded-2xl bg-white p-3 shadow-sm flex items-center gap-4 overflow-x-auto border border-slate-50 lg:flex-[1.5]">
+        <motion.div variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className="rounded-2xl bg-white p-3 shadow-sm flex items-center gap-4 overflow-x-auto border border-slate-50">
           <div className="flex items-center gap-2 text-xs font-extrabold text-slate-900 shrink-0">
             <UserRoundCog className="h-4 w-4 text-brand-600" /> Amenities
           </div>
@@ -1002,7 +1085,7 @@ function VenueInfoSections({
                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand-50 text-brand-600 border border-brand-100/50">
                   <Icon className="h-4 w-4" />
                 </span>
-                <span className="text-[9px] font-bold text-center leading-tight whitespace-pre-wrap">{label.replace(" ", "\n")}</span>
+                <span className="text-[10px] font-bold text-center whitespace-nowrap">{label}</span>
               </motion.span>
             ))}
           </div>
@@ -1015,7 +1098,7 @@ function VenueInfoSections({
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
         transition={{ duration: 0.5 }}
-        className="mt-3 grid gap-3 grid-cols-1 lg:grid-cols-4 items-start"
+        className="mt-4 grid gap-4 grid-cols-1 lg:grid-cols-2 items-stretch pb-24 lg:pb-32"
       >
         {/* Col 1: Highlights */}
         <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm h-full">
@@ -1044,54 +1127,20 @@ function VenueInfoSections({
           </div>
         </div>
 
-        {/* Col 2: Packages */}
-        <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm h-full">
-          <div className="flex flex-col gap-1.5">
-            <h2 className="text-sm font-extrabold text-slate-900">Packages</h2>
-            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[8px] font-bold text-amber-700 border border-amber-200 w-max">
-              Same owner-configured format
-            </span>
-          </div>
-          <div className="mt-4 flex flex-col border border-slate-100 divide-y divide-slate-100 rounded-xl overflow-hidden">
-            {(venue.priceTiers.length > 0 ? venue.priceTiers : [
-              { id: "1", label: "Weekday (Day)", time: "06:00 AM – 06:00 PM", amount: venue.price },
-              { id: "2", label: "Weekday (Night)", time: "06:00 PM – 11:00 PM", amount: Math.round(venue.price * 1.25) },
-              { id: "3", label: "Weekend", time: "All Day", amount: Math.round(venue.price * 1.5) },
-            ]).map((tier: any) => (
-              <motion.div
-                whileHover="hover"
-                key={tier.id || tier.label}
-                className="group flex flex-col p-3.5 bg-white transition hover:bg-slate-50 cursor-pointer"
-              >
-                <div className="flex justify-between items-center mb-1">
-                  <p className="text-[11px] font-extrabold text-slate-900">{tier.label}</p>
-                  <motion.p variants={{ hover: { scale: 1.04 } }} className="text-sm font-black text-[#0b9c65]">
-                    ₹{tier.amount.toLocaleString("en-IN")}
-                  </motion.p>
-                </div>
-                <p className="text-[9px] font-medium text-slate-500">{tier.time || "06:00 AM - 11:00 PM"}</p>
-              </motion.div>
-            ))}
-          </div>
-          <button className="w-full mt-3 text-xs font-bold text-brand-600 hover:text-brand-700 transition flex items-center justify-center gap-1">
-            View all packages <ChevronRight className="h-3.5 w-3.5" />
-          </button>
-        </div>
-
-        {/* Col 3: Technical Specs */}
+        {/* Col 2: Technical Specs */}
         <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm h-full">
           <h2 className="text-sm font-extrabold text-slate-900">Technical Specifications</h2>
-          <div className="mt-4 grid grid-cols-2 gap-x-2 gap-y-4">
+          <div className="mt-4 flex flex-col gap-4">
             {((venue.technicalSpecs && venue.technicalSpecs.length > 0) ? venue.technicalSpecs : DEFAULT_TECHNICAL_SPECS).map((spec) => {
               const IconComponent = getSpecIcon(spec.icon);
               return (
-                <div key={spec.label} className="flex flex-col gap-1.5">
-                  <span className={`flex h-6 w-6 items-center justify-center rounded-lg border border-slate-100 bg-slate-50 text-slate-600`}>
-                    <IconComponent className="h-3 w-3 stroke-[2]" />
+                <div key={spec.label} className="flex items-start gap-3">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
+                    <IconComponent className="h-4 w-4 stroke-[2]" />
                   </span>
-                  <div>
-                    <h4 className="text-[10px] font-bold text-slate-900 leading-tight">{spec.label}</h4>
-                    <p className="mt-0.5 text-[9px] text-slate-500 leading-snug line-clamp-2">{spec.value}</p>
+                  <div className="flex flex-col pt-0.5">
+                    <h4 className="text-[11px] font-extrabold text-slate-900 leading-tight">{spec.label}</h4>
+                    <p className="mt-0.5 text-[10px] text-slate-500 leading-snug">{spec.value}</p>
                   </div>
                 </div>
               );
@@ -1099,11 +1148,11 @@ function VenueInfoSections({
           </div>
         </div>
 
-        {/* Col 4: Weather & Location Stacked */}
+        {/* Col 3: Weather & Location Stacked */}
         <div className="flex flex-col gap-3 h-full">
-          <div className="rounded-3xl border border-red-900 bg-gradient-to-br from-[#7f1d1d] to-[#450a0a] p-5 text-white shadow-lg flex flex-col justify-between flex-1">
+          <div className="rounded-3xl border border-red-900 bg-gradient-to-br from-[#7f1d1d] to-[#450a0a] p-5 text-white shadow-lg flex flex-col gap-4">
             <h2 className="text-[11px] font-extrabold text-white/90">Local Weather</h2>
-            <div className="mt-2 flex items-center justify-between">
+            <div className="flex items-center justify-between">
               <div>
                 <motion.p initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-3xl font-black">
                   24°
@@ -1114,7 +1163,7 @@ function VenueInfoSections({
                 <Cloud className="h-8 w-8 text-white/90" strokeWidth={1.5} />
               </motion.div>
             </div>
-            <div className="mt-4 flex items-center justify-between border-t border-white/20 pt-3 text-center">
+            <div className="flex items-center justify-between border-t border-white/20 pt-4 text-center">
               <div>
                 <p className="text-[8px] font-bold text-white/80">WED</p>
                 <CloudRain className="mx-auto h-3 w-3 my-1 text-white" strokeWidth={1.5} />
@@ -1140,7 +1189,7 @@ function VenueInfoSections({
                 <p className="mt-0.5 text-[10px] text-slate-500 truncate">{venue.address || venue.city}</p>
               )}
             </div>
-            <div className="relative flex-1 min-h-[100px] w-full bg-slate-100">
+            <div className="relative flex-1 min-h-[240px] w-full bg-slate-100">
               <iframe
                 title="Venue Map"
                 src={`https://maps.google.com/maps?q=${encodeURIComponent(venue.address || venue.city)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
@@ -1158,16 +1207,6 @@ function VenueInfoSections({
             </a>
           </div>
         </div>
-      </motion.div>
-
-      {/* 3. ROW 3: Reviews + Write Form + Summary */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.5 }}
-        className="mt-3 grid gap-3 grid-cols-1 lg:grid-cols-3 items-stretch pb-24 lg:pb-32"
-      >
         {/* Reviews & Community */}
         <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm flex flex-col h-full">
           <div className="flex items-center justify-between mb-4">
@@ -1604,10 +1643,20 @@ function MobileVenueDetail({
           )}
         </div>
 
-        {/* Price + Book Now — the only price/booking CTA on this page (no separate sticky bar) */}
-        <div id="price-block" className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-lg font-black text-slate-900">₹{venue.price.toLocaleString("en-IN")}</p>
+        {/* Mobile Sticky Booking Bar */}
+        <div id="price-block" className="fixed bottom-0 left-0 right-0 z-50 flex items-center gap-3 border-t border-slate-200/60 bg-white/95 backdrop-blur-md px-4 py-3 pb-safe shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] lg:hidden">
+          <div className="min-w-0 flex-1 flex flex-col justify-center">
+            {venue.strikePrice && venue.strikePrice > venue.price && (
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-xs font-semibold text-slate-400 line-through">₹{venue.strikePrice.toLocaleString("en-IN")}</span>
+                <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-sm uppercase tracking-wider ring-1 ring-emerald-600/10">
+                  {Math.round(((venue.strikePrice - venue.price) / venue.strikePrice) * 100)}% OFF
+                </span>
+              </div>
+            )}
+            <div className="flex items-baseline gap-1.5">
+              <p className="truncate text-xl font-black text-slate-900 leading-none">₹{venue.price.toLocaleString("en-IN")}</p>
+            </div>
             <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
               {venue.type === "Event" ? "Per person" : "Starting price"}
             </p>
@@ -1634,27 +1683,8 @@ function MobileVenueDetail({
           </button>
         </div>
 
-        {/* Tabs — a lone "Home" tab is just noise, so Events get no tab bar at all. */}
-        {showAcademyTab && (
-          <div className="mt-4 grid grid-cols-2 gap-1 rounded-2xl bg-slate-100 p-1">
-            {([{ id: "home", label: "Home" }, { id: "academy", label: "Academy" }] as const).map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`rounded-xl py-2 text-[10px] font-bold uppercase tracking-wide transition ${currentTab === tab.id ? "bg-white text-brand-600 shadow-sm" : "text-slate-500"
-                  }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {currentTab === "home" && (
-          <>
-            {/* ── TURF / GAME — show specs, weather, sports, amenities, players, reviews ── */}
-            {venue.type !== "Event" && (
+        {/* ── TURF / GAME — show specs, weather, sports, amenities, players, reviews ── */}
+        {venue.type !== "Event" && (
               <VenueInfoSections
                 venue={venue}
                 highlights={highlights}
@@ -1763,42 +1793,33 @@ function MobileVenueDetail({
 
             {/* Video — shown for all types when videoUrl exists */}
 
-            {/* Video — shown for all types when videoUrl exists */}
-            {venue.videoUrl && (
-              <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-                <h2 className="text-sm font-extrabold text-slate-900">🎥 {venue.type === "Event" ? "Event Video" : "Venue Video"}</h2>
-                <div className="mt-3 aspect-video w-full overflow-hidden rounded-2xl bg-black border border-slate-100 shadow-sm">
-                  {venue.videoUrl.includes("youtube.com") || venue.videoUrl.includes("youtu.be") ? (
-                    <iframe
-                      src={getYouTubeEmbedUrl(venue.videoUrl)}
-                      className="h-full w-full border-0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                    />
-                  ) : venue.videoUrl.includes("vimeo.com") ? (
-                    <iframe
-                      src={getVimeoEmbedUrl(venue.videoUrl)}
-                      className="h-full w-full border-0"
-                      allowFullScreen
-                    />
-                  ) : (
-                    <video src={venue.videoUrl} controls className="h-full w-full" />
-                  )}
-                </div>
-              </section>
-            )}
-
-            {/* Itinerary + FAQs — only for Events */}
-            {venue.type === "Event" && <EventItineraryFaqs itinerary={venue.itinerary} faqs={venue.faqs} />}
-          </>
-        )}
-
-        {currentTab === "academy" && (
-          <section className="mt-5">
-            <h2 className="text-sm font-extrabold text-slate-900">Academy &amp; Coaches</h2>
-            <AcademyTabContent venue={venue} />
+        {/* Video — shown for all types when videoUrl exists */}
+        {venue.videoUrl && (
+          <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+            <h2 className="text-sm font-extrabold text-slate-900">🎥 {venue.type === "Event" ? "Event Video" : "Venue Video"}</h2>
+            <div className="mt-3 aspect-video w-full overflow-hidden rounded-2xl bg-black border border-slate-100 shadow-sm">
+              {venue.videoUrl.includes("youtube.com") || venue.videoUrl.includes("youtu.be") ? (
+                <iframe
+                  src={getYouTubeEmbedUrl(venue.videoUrl)}
+                  className="h-full w-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : venue.videoUrl.includes("vimeo.com") ? (
+                <iframe
+                  src={getVimeoEmbedUrl(venue.videoUrl)}
+                  className="h-full w-full border-0"
+                  allowFullScreen
+                />
+              ) : (
+                <video src={venue.videoUrl} controls className="h-full w-full" />
+              )}
+            </div>
           </section>
         )}
+
+        {/* Itinerary + FAQs — only for Events */}
+        {venue.type === "Event" && <EventItineraryFaqs itinerary={venue.itinerary} faqs={venue.faqs} />}
       </div>
 
       {/* Sport Selection Bottom Sheet */}

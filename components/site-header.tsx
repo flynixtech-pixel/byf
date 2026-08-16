@@ -26,6 +26,7 @@ export function SiteHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [authView, setAuthView] = useState<"login" | "signup" | null>(null);
   const [imgError, setImgError] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
   const { customer, status, logout } = useCustomerAuth();
   const isLoggedIn = status === "authenticated";
@@ -34,6 +35,14 @@ export function SiteHeader() {
   useEffect(() => {
     setImgError(false);
   }, [customer?.avatarUrl]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const getInitials = () => {
     if (customer?.name) {
@@ -53,8 +62,14 @@ export function SiteHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-slate-100 bg-white/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-2.5 py-2 sm:gap-4 sm:px-6">
+      <header
+        className={`sticky top-0 z-50 transition-all duration-300 ${
+          isScrolled
+            ? "bg-white/80 backdrop-blur-xl shadow-md border-b border-white/20 py-1.5"
+            : "bg-white border-b border-slate-100 py-2.5"
+        }`}
+      >
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 sm:gap-4 sm:px-6">
         <BrandLogo
           className="shrink min-w-0"
           logoBoxClassName="h-8 w-8 sm:h-10 sm:w-10 rounded-xl shrink-0"
