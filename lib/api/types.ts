@@ -101,6 +101,8 @@ export interface Listing {
   /** Bookable units in this venue. Empty/absent = the venue itself is the only unit. */
   courts?: Court[];
   price: number;
+  /** Optional original price shown struck through when a listing is discounted. */
+  strikePrice?: number;
   /** Ticket cap for type: "Event" listings — unused for Turf/Game. */
   capacity?: number;
   /** Present on the public detail response for type: "Event" listings with a capacity set. */

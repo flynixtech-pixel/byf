@@ -981,7 +981,7 @@ function AgendaTab({ listing, onSeeBookings }: { listing: Listing; onSeeBookings
         const bkTime = new Date(bk.dateTime).toLocaleTimeString("en-US", {
           hour12: false, hour: "2-digit", minute: "2-digit",
         });
-        return (bk.listing === localListing.id || (bk as any).listingId === localListing.id)
+        return bk.listingId === localListing.id
           && bkDate === selectedDate
           && bkTime === slot.startTime;
       });
