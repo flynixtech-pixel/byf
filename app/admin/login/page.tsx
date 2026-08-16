@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { adminLogin, restoreAdminSession } from "@/lib/api/auth";
 import { ApiError } from "@/lib/api/client";
-
 function AdminLoginInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
