@@ -11,7 +11,14 @@ import { X, QrCode, CheckCircle2, AlertTriangle, Keyboard } from "lucide-react";
  * Older/other tickets may encode the bare order id, so both are accepted.
  */
 
-type Phase = "scanning" | "working" | "done" | "error";
+type Phase = "scanning" | "working" | "done" | "already" | "error";
+
+export class TicketAlreadyScannedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "TicketAlreadyScannedError";
+  }
+}
 
 /** Pull an order id out of whatever the QR encodes. */
 export function parseTicketQr(raw: string): string | null {
@@ -84,7 +91,7 @@ export function QrScannerModal({
         setPhase("done");
       } catch (e) {
         setMessage(e instanceof Error ? e.message : "Could not check in this ticket.");
-        setPhase("error");
+        setPhase(e instanceof TicketAlreadyScannedError ? "already" : "error");
       }
     },
     [onCheckIn, onChallengeCheckIn, stopCamera]
@@ -247,6 +254,25 @@ export function QrScannerModal({
               <p className="mt-1 text-[11px] font-medium text-slate-500">{message}</p>
               <button onClick={handleClose} className="mt-4 w-full rounded-xl bg-emerald-600 py-3 text-[11px] font-black uppercase tracking-wide text-white">
                 Done
+              </button>
+            </div>
+          )}
+
+          {phase === "already" && (
+            <div className="py-8 text-center">
+              <AlertTriangle size={40} className="mx-auto text-amber-500" />
+              <p className="mt-3 text-[13px] font-black text-slate-900">Already Scanned</p>
+              <p className="mt-1 text-[11px] font-medium text-slate-500">{message}</p>
+              <button
+                onClick={() => {
+                  lockRef.current = false;
+                  setMessage("");
+                  setManualId("");
+                  setPhase("scanning");
+                }}
+                className="mt-4 w-full rounded-xl bg-amber-500 py-3 text-[11px] font-black uppercase tracking-wide text-white"
+              >
+                Scan Another Ticket
               </button>
             </div>
           )}

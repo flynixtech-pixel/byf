@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { CheckCircle2, Mail, Phone, QrCode, RefreshCw, Users } from "lucide-react";
 import { PageHero } from "@/components/vendor/ui";
-import { QrScannerModal } from "@/components/vendor/bookings/QrScannerModal";
+import { QrScannerModal, TicketAlreadyScannedError } from "@/components/vendor/bookings/QrScannerModal";
 import { checkInEventBooking, getVendorEventArrivals, type EventArrival } from "@/lib/api/vendor";
 import { ApiError } from "@/lib/api/client";
 
@@ -43,7 +43,10 @@ export default function EventScannerPage() {
     }
     if (res.alreadyCheckedIn) {
       // Repeated scan of a ticket that already arrived.
-      throw new Error(`${res.booking.customerName} is already checked in.`);
+      const scannedAt = res.booking.checkedInAt
+        ? new Date(res.booking.checkedInAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+        : "earlier";
+      throw new TicketAlreadyScannedError(`${res.booking.customerName}'s pass was already scanned on ${scannedAt}.`);
     }
     loadArrivals();
     return `${res.booking.customerName} · ${res.booking.listingTitle}`;
