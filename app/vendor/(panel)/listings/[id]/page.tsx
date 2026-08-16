@@ -23,7 +23,7 @@ import {
 import { apiListingToMock, mockListingToApiInput } from "@/lib/api/listingAdapter";
 import { getVenueById, getListingImage } from "@/lib/api/venues";
 import { ApiError } from "@/lib/api/client";
-import { Booking } from "@/lib/types";
+import type { Booking } from "@/lib/api/types";
 import { categoryLabel } from "@/lib/taxonomy";
 
 type Tab = "overview" | "registrations" | "agenda" | "media";
@@ -861,7 +861,7 @@ function RegistrationsTab({ listing, bookings }: { listing: Listing; bookings: B
                   <tr key={i} className="hover:bg-slate-50 transition">
                     <td className="px-5 py-4 font-medium text-slate-800">{b.orderId}</td>
                     <td className="px-5 py-4">
-                      <p className="font-bold text-slate-800">{b.customer}</p>
+                      <p className="font-bold text-slate-800">{b.customerName}</p>
                       <p className="text-slate-500 mt-0.5">{b.phone}</p>
                     </td>
                     <td className="px-5 py-4 text-slate-600">
