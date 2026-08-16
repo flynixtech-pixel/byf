@@ -1,5 +1,4 @@
 import { apiRequest } from "./api/client";
-
 export interface EventProperties {
   [key: string]: any;
 }
