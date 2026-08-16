@@ -124,7 +124,7 @@ export function TrendingVenues({
         onAction={onViewAll}
       />
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
-        {venues.slice(0, 5).map((v) => (
+        {venues.slice(0, 4).map((v) => (
           <VenueCard
             key={v.id}
             venue={v}

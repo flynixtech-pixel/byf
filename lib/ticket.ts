@@ -109,197 +109,117 @@ function downloadCanvas(canvas: HTMLCanvasElement, fileName: string): Promise<vo
   });
 }
 
-/** Draws a vertical printable ticket for a booking and triggers a PNG download. */
+/** Draws a landscape printable ticket for a booking and triggers a PNG download. */
 export async function downloadBookingTicket(booking: Booking) {
   try {
-    // Vertical Ticket Dimensions
-    const width = 560;
-    const height = 960;
+    const width = 1536;
+    const height = 1024;
     const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Background Card - Slate Dark Theme Gradient
-    const cardGradient = ctx.createLinearGradient(0, 0, 0, height);
-    cardGradient.addColorStop(0, "#0b0f19");
-    cardGradient.addColorStop(0.5, "#151d2a");
-    cardGradient.addColorStop(1, "#0d131f");
-    ctx.fillStyle = cardGradient;
-    ctx.fillRect(0, 0, width, height);
+    // Load custom fonts
+    try {
+      const loadFont = async (name: string, url: string, weight = "normal") => {
+        const font = new FontFace(name, `url(${url})`, { weight });
+        await font.load();
+        (document.fonts as any).add(font);
+      };
+      await Promise.all([
+        loadFont("Axiforma", "/fonts/Axiforma-Regular.ttf", "normal"),
+        loadFont("Axiforma", "/fonts/Axiforma-Bold.ttf", "bold"),
+      ]);
+    } catch (e) {
+      console.warn("Failed to load custom fonts for ticket", e);
+    }
 
-    // Outer Decorative Border
-    ctx.strokeStyle = "#334155";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(8, 8, width - 16, height - 16);
-
-    // Inner Accent Glow Box for Top Header
-    const headerBg = ctx.createLinearGradient(20, 20, width - 40, 140);
-    headerBg.addColorStop(0, "#1e293b");
-    headerBg.addColorStop(1, "#0f172a");
-    ctx.fillStyle = headerBg;
-    drawRoundRect(ctx, 24, 24, width - 48, 126, 18);
-    ctx.fill();
-    ctx.strokeStyle = "#475569";
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // Top Brand Header
-    ctx.fillStyle = "#f59e0b";
-    ctx.font = "bold 14px sans-serif";
-    ctx.fillText("BOOK YOUR VIBE", 44, 54);
-
-    ctx.fillStyle = "#38bdf8";
-    ctx.font = "bold 11px sans-serif";
-    ctx.textAlign = "right";
-    ctx.fillText("OFFICIAL TICKET", width - 44, 54);
-    ctx.textAlign = "left";
+    // Load background image
+    const bgImg = await loadImage("/images/ticketimg.png");
+    ctx.drawImage(bgImg, 0, 0, width, height);
 
     // Listing Title (Venue Name)
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 24px sans-serif";
+    ctx.font = "bold 42px Axiforma, sans-serif";
     const titleText = booking.listingTitle || (booking.sport ? `${booking.sport} Venue` : "Venue");
-    ctx.fillText(titleText.length > 28 ? `${titleText.slice(0, 28)}…` : titleText, 44, 92);
+    ctx.fillText(titleText.length > 30 ? `${titleText.slice(0, 30)}…` : titleText, 100, 420);
 
     // Order ID Badge
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "12px sans-serif";
-    ctx.fillText("ORDER ID:", 44, 122);
-    ctx.fillStyle = "#fbbf24";
-    ctx.font = "bold 14px monospace";
-    ctx.fillText(booking.orderId, 116, 122);
+    ctx.fillStyle = "#fbbf24"; // Amber 400
+    ctx.font = "bold 20px Axiforma, monospace";
+    ctx.fillText(`ORDER ID: ${booking.orderId}`, 100, 470);
 
-    // Format Date & Time
+    // Format Data
     const { date, time } = formatDateTime(booking.dateTime);
-    
-    // Format Duration
-    const durationText = booking.duration
-      ? booking.duration
-      : booking.durationMinutes
-      ? `${booking.durationMinutes} Mins`
-      : "1 Hour";
-
-    // Format Court
-    const courtText = booking.courtName
-      ? booking.courtName
-      : booking.courtNames && booking.courtNames.length > 0
-      ? booking.courtNames.join(", ")
-      : "Court 1";
-
-    // Format Sport
-    const sportText = booking.sport ? booking.sport : "Turf Sports";
-
-    // Grid Section Background Card
-    ctx.fillStyle = "rgba(30, 41, 59, 0.4)";
-    drawRoundRect(ctx, 24, 168, width - 48, 480, 20);
-    ctx.fill();
-    ctx.strokeStyle = "rgba(148, 163, 184, 0.15)";
-    ctx.lineWidth = 1;
-    ctx.stroke();
+    const durationText = booking.duration || (booking.durationMinutes ? `${booking.durationMinutes} Mins` : "1 Hour");
+    const courtText = booking.courtName || (booking.courtNames?.length ? booking.courtNames.join(", ") : "Court 1");
+    const sportText = booking.sport || "Turf Sports";
+    const paidAmt = booking.paidAmount ?? booking.totalAmount;
 
     // Helper to draw a key-value block
-    const drawFieldBlock = (
-      label: string,
-      value: string,
-      x: number,
-      y: number,
-      w: number,
-      valueColor = "#ffffff",
-      isBadge = false
-    ) => {
-      // Label
-      ctx.font = "bold 11px sans-serif";
-      ctx.fillStyle = "#94a3b8";
+    const drawFieldBlock = (label: string, value: string, x: number, y: number, valueColor = "#ffffff") => {
+      ctx.font = "bold 16px Axiforma, sans-serif";
+      ctx.fillStyle = "#94a3b8"; // Slate 400
       ctx.fillText(label.toUpperCase(), x, y);
 
-      // Value
-      if (isBadge) {
-        const isConfirmed = value === "Confirmed" || value === "Completed";
-        const badgeBg = isConfirmed ? "rgba(16, 185, 129, 0.2)" : "rgba(245, 158, 11, 0.2)";
-        const badgeText = isConfirmed ? "#34d399" : "#fbbf24";
-
-        ctx.fillStyle = badgeBg;
-        drawRoundRect(ctx, x, y + 8, ctx.measureText(value).width + 24, 28, 8);
-        ctx.fill();
-
-        ctx.font = "bold 13px sans-serif";
-        ctx.fillStyle = badgeText;
-        ctx.fillText(value, x + 12, y + 27);
-      } else {
-        ctx.font = "bold 17px sans-serif";
-        ctx.fillStyle = valueColor;
-        const truncated = value.length > 18 ? `${value.slice(0, 18)}…` : value;
-        ctx.fillText(truncated, x, y + 26);
-      }
+      ctx.font = "bold 26px Axiforma, sans-serif";
+      ctx.fillStyle = valueColor;
+      const truncated = value.length > 25 ? `${value.slice(0, 25)}…` : value;
+      ctx.fillText(truncated, x, y + 36);
     };
 
-    const col1X = 48;
-    const col2X = 300;
-    const colW = 210;
+    // 2-Column Layout, pushed down and spaced properly to fit within the diamond shape
+    const col1X = 100;
+    const col2X = 480;
+    const row1Y = 560;
+    const row2Y = 660;
+    const row3Y = 760;
+    const row4Y = 860;
 
-    // Row 1: DATE & TIME
-    drawFieldBlock("Date", date, col1X, 200, colW);
-    drawFieldBlock("Time", time, col2X, 200, colW);
+    // Row 1: DATE, TIME
+    drawFieldBlock("Date", date, col1X, row1Y);
+    drawFieldBlock("Time", time, col2X, row1Y);
 
-    // Row 2: DURATION & COURT
-    drawFieldBlock("Duration", durationText, col1X, 310, colW, "#38bdf8");
-    drawFieldBlock("Court", courtText, col2X, 310, colW);
+    // Row 2: DURATION, COURT
+    drawFieldBlock("Duration", durationText, col1X, row2Y, "#38bdf8"); // Sky 400
+    drawFieldBlock("Court", courtText, col2X, row2Y);
 
-    // Row 3: SPORTS & BOOKED BY (CUSTOMER)
-    drawFieldBlock("Sports", sportText, col1X, 420, colW, "#f472b6");
-    drawFieldBlock("Booked By (Customer)", booking.customerName || "Customer", col2X, 420, colW);
+    // Row 3: SPORTS, AMOUNT PAID
+    const getSportIcon = (s: string) => {
+      const lower = s.toLowerCase();
+      if (lower.includes("cricket")) return "🏏 ";
+      if (lower.includes("foot") || lower.includes("futsal")) return "⚽ ";
+      if (lower.includes("tennis") && !lower.includes("table")) return "🎾 ";
+      if (lower.includes("badminton")) return "🏸 ";
+      if (lower.includes("basket")) return "🏀 ";
+      if (lower.includes("volley")) return "🏐 ";
+      if (lower.includes("table") || lower.includes("ping")) return "🏓 ";
+      if (lower.includes("pool") || lower.includes("snooker")) return "🎱 ";
+      if (lower.includes("swim")) return "🏊 ";
+      return "🏟️ ";
+    };
 
-    // Row 4: STATUS & AMOUNT PAID
-    drawFieldBlock("Status", booking.status || "Confirmed", col1X, 530, colW, "#ffffff", true);
-    const paidAmt = booking.paidAmount ?? booking.totalAmount;
-    drawFieldBlock("Amount Paid", `Rs ${paidAmt}`, col2X, 530, colW, "#facc15");
+    drawFieldBlock("Sports", `${getSportIcon(sportText)}${sportText}`, col1X, row3Y, "#f472b6"); // Pink 400
+    drawFieldBlock("Amount Paid", `Rs ${paidAmt}`, col2X, row3Y, "#facc15"); // Yellow 400
 
-    // Perforation Notch Y Position
-    const perfY = 670;
+    // Row 4: CUSTOMER, STATUS
+    drawFieldBlock("Customer", booking.customerName || "Customer", col1X, row4Y);
+    const isConfirmed = booking.status === "Confirmed" || booking.status === "Completed";
+    drawFieldBlock("Status", booking.status || "Confirmed", col2X, row4Y, isConfirmed ? "#34d399" : "#fbbf24"); // Emerald 400
 
-    // Perforation Dashed Line
-    ctx.setLineDash([8, 6]);
-    ctx.strokeStyle = "#475569";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(28, perfY);
-    ctx.lineTo(width - 28, perfY);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Circular Cutout Notches (Left & Right)
-    ctx.fillStyle = "#ffffff";
-    ctx.beginPath();
-    ctx.arc(0, perfY, 18, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(width, perfY, 18, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Bottom Stub Container (Scanner Section)
-    ctx.fillStyle = "rgba(15, 23, 42, 0.6)";
-    drawRoundRect(ctx, 24, 690, width - 48, 245, 20);
-    ctx.fill();
-    ctx.strokeStyle = "rgba(148, 163, 184, 0.2)";
-    ctx.stroke();
-
-    // Stub Title
-    ctx.fillStyle = "#f59e0b";
-    ctx.font = "bold 13px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("ENTRY SCANNER QR", width / 2, 715);
-
-    const qrSize = 160;
-    const qrX = (width - qrSize) / 2;
-    const qrY = 728;
+    // Right Stub: QR Code
+    const stubCenterX = 1305;
+    const qrSize = 260;
+    const qrX = stubCenterX - qrSize / 2;
+    const qrY = 380;
 
     // White Background Frame for QR Code
     ctx.fillStyle = "#ffffff";
-    drawRoundRect(ctx, qrX - 8, qrY - 8, qrSize + 16, qrSize + 16, 14);
+    drawRoundRect(ctx, qrX - 16, qrY - 16, qrSize + 32, qrSize + 32, 16);
     ctx.fill();
 
-    // Directly draw QR using offscreen canvas to avoid async image load failures
+    // Directly draw QR using offscreen canvas
     const qrCanvas = document.createElement("canvas");
     await QRCode.toCanvas(qrCanvas, bookingQrPayload(booking), {
       margin: 1,
@@ -309,17 +229,16 @@ export async function downloadBookingTicket(booking: Booking) {
     ctx.drawImage(qrCanvas, qrX, qrY, qrSize, qrSize);
 
     // Instructions text below QR
-    ctx.font = "12px sans-serif";
+    ctx.textAlign = "center";
+    ctx.font = "bold 16px Axiforma, sans-serif";
     ctx.fillStyle = "#94a3b8";
-    ctx.fillText("Scan at venue entrance for check-in", width / 2, qrY + qrSize + 26);
+    ctx.fillText("Scan at venue entrance for check-in", stubCenterX, qrY + qrSize + 50);
 
-    ctx.font = "bold 12px monospace";
+    ctx.font = "bold 18px Axiforma, monospace";
     ctx.fillStyle = "#cbd5e1";
-    ctx.fillText(`REF: ${booking.orderId}`, width / 2, qrY + qrSize + 44);
+    ctx.fillText(`REF: ${booking.orderId}`, stubCenterX, qrY + qrSize + 80);
 
-    ctx.textAlign = "left";
-
-    // Trigger Download using Blob URL for maximum browser compatibility
+    // Trigger Download
     await downloadCanvas(canvas, `byv-ticket-${booking.orderId}.png`);
   } catch (err) {
     console.error("Failed to generate booking ticket download:", err);

@@ -304,7 +304,7 @@ function SportChips({
             type="button"
             onClick={() => handleSelect(name)}
             className={`group relative flex h-10 shrink-0 items-center gap-2 rounded-2xl border px-3.5 text-center text-xs font-extrabold transition-all duration-200 cursor-pointer ${active
-              ? "border-[#0b9c65] bg-emerald-50/80 text-[#0b9c65] ring-2 ring-[#0b9c65]/30 shadow-xs"
+              ? "border-brand-500 bg-brand-50/80 text-brand-500 ring-2 ring-brand-500/30 shadow-xs"
               : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
               }`}
           >
@@ -313,7 +313,7 @@ function SportChips({
             </span>
             <span className="capitalize">{name}</span>
             {active && (
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <span className="h-1.5 w-1.5 rounded-full bg-brand-500" />
             )}
           </button>
         );
@@ -440,9 +440,17 @@ export default function BookingFlow({
   // The game being booked — seeded from whatever the player picked outside,
   // but changeable from the chips inside the flow.
   const [sport, setSport] = useState(dealContext?.sport ?? selectedSport ?? "");
-  // Google/OTP signups may have no phone on file — bookings need one, so collect it inline.
-  const needsPhone = !customer?.phone;
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+
+  useEffect(() => {
+    if (customer) {
+      setName((prev) => prev || customer.name || "");
+      setEmail((prev) => prev || customer.email || "");
+      setPhone((prev) => prev || customer.phone || "");
+    }
+  }, [customer]);
   // Add-ons the player picked — only ones actually configured on the listing.
   const [selectedAddOnIds, setSelectedAddOnIds] = useState<string[]>([]);
   const toggleAddOn = (id: string) =>
@@ -1026,9 +1034,11 @@ export default function BookingFlow({
     return { originalPrice: original, discountedPrice: discounted, savings: original - discounted };
   }, [listing, generatedSlots, selectedSlotIndices, selectedCourts, courtsForSport, sport]);
 
-  const phoneValid = !needsPhone || /^[6-9]\d{9}$/.test(phone);
+  const phoneValid = /^[6-9]\d{9}$/.test(phone);
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const contactValid = name.trim().length > 0 && phoneValid && emailValid;
   const canPay =
-    phoneValid &&
+    contactValid &&
     !!date &&
     (listing.type !== "Turf"
       ? !!time
@@ -1112,7 +1122,9 @@ export default function BookingFlow({
         courtId: effectiveCourtIds[0] || undefined,
         courtIds: effectiveCourtIds.length > 0 ? effectiveCourtIds : undefined,
         priceTierId: listing.type === "Event" ? undefined : selectedPriceTierId || undefined,
-        phone: needsPhone ? phone : undefined,
+        customerName: name || undefined,
+        email: email || undefined,
+        phone: phone || undefined,
         addOnIds: selectedAddOnIds.length > 0 ? selectedAddOnIds : undefined,
         playProtect,
         gameReminders,
@@ -1125,7 +1137,7 @@ export default function BookingFlow({
           title: listing.title,
           sport: sport || selectedSport,
           dateTime: created.dateTime ? new Date(created.dateTime).toISOString() : dateTime,
-          customerName: customer?.name || created.customerName,
+          customerName: name || created.customerName,
         });
       }
 
@@ -1204,7 +1216,11 @@ export default function BookingFlow({
           canPay={canPay}
           submitting={submitting}
           error={error}
-          needsPhone={needsPhone}
+          contactValid={contactValid}
+          name={name}
+          setName={setName}
+          email={email}
+          setEmail={setEmail}
           phone={phone}
           setPhone={setPhone}
           selectedAddOnIds={selectedAddOnIds}
@@ -1265,7 +1281,7 @@ export default function BookingFlow({
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
           <div className="relative w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
             {/* Gateway Header */}
-            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 p-5 text-white">
+            <div className="bg-gradient-to-r from-brand-600 via-accent-600 to-brand-700 p-5 text-white">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/20 backdrop-blur-xs">
@@ -1273,7 +1289,7 @@ export default function BookingFlow({
                   </span>
                   <div>
                     <h3 className="text-sm font-extrabold tracking-wide uppercase">BYV Secure Checkout</h3>
-                    <p className="text-[10px] text-emerald-100 font-medium">Powered by BYV Payment Gateway</p>
+                    <p className="text-[10px] text-brand-100 font-medium">Powered by BYV Payment Gateway</p>
                   </div>
                 </div>
                 <button
@@ -1290,11 +1306,11 @@ export default function BookingFlow({
 
               <div className="mt-4 rounded-2xl bg-white/10 backdrop-blur-xs p-3 flex items-center justify-between border border-white/20">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-100">Order Reference</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-brand-100">Order Reference</p>
                   <p className="text-xs font-mono font-bold text-white">{pendingBooking.orderId}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-100">Venue</p>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-brand-100">Venue</p>
                   <p className="text-xs font-extrabold text-white truncate max-w-[140px]">{listing.title}</p>
                 </div>
               </div>
@@ -1307,9 +1323,9 @@ export default function BookingFlow({
                   <span>Total Booking Price</span>
                   <span className="font-bold text-slate-800">₹{pendingBooking.totalAmount.toLocaleString("en-IN")}</span>
                 </div>
-                <div className="flex items-center justify-between font-bold text-emerald-700 bg-emerald-50 p-2.5 rounded-xl border border-emerald-100">
+                <div className="flex items-center justify-between font-bold text-brand-700 bg-brand-50 p-2.5 rounded-xl border border-brand-100">
                   <span className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span className="h-2 w-2 rounded-full bg-brand-500 animate-ping"></span>
                     {pendingBooking.paymentType === "full" || (pendingBooking.paidAmount ?? payNowAmount) >= pendingBooking.totalAmount
                       ? "Full Online Payment (Paying Now)"
                       : "Partial Payment Deposit (Paying Now)"}
@@ -1332,7 +1348,7 @@ export default function BookingFlow({
                     type="button"
                     onClick={() => setSelectedPayMethod("UPI")}
                     className={`flex flex-col items-center justify-center rounded-2xl border p-3 transition ${selectedPayMethod === "UPI"
-                      ? "border-emerald-600 bg-emerald-50/50 text-emerald-900 ring-2 ring-emerald-500 font-bold"
+                      ? "border-brand-600 bg-brand-50/50 text-brand-900 ring-2 ring-brand-500 font-bold"
                       : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
                       }`}
                   >
@@ -1343,7 +1359,7 @@ export default function BookingFlow({
                     type="button"
                     onClick={() => setSelectedPayMethod("Card")}
                     className={`flex flex-col items-center justify-center rounded-2xl border p-3 transition ${selectedPayMethod === "Card"
-                      ? "border-emerald-600 bg-emerald-50/50 text-emerald-900 ring-2 ring-emerald-500 font-bold"
+                      ? "border-brand-600 bg-brand-50/50 text-brand-900 ring-2 ring-brand-500 font-bold"
                       : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
                       }`}
                   >
@@ -1354,7 +1370,7 @@ export default function BookingFlow({
                     type="button"
                     onClick={() => setSelectedPayMethod("NetBanking")}
                     className={`flex flex-col items-center justify-center rounded-2xl border p-3 transition ${selectedPayMethod === "NetBanking"
-                      ? "border-emerald-600 bg-emerald-50/50 text-emerald-900 ring-2 ring-emerald-500 font-bold"
+                      ? "border-brand-600 bg-brand-50/50 text-brand-900 ring-2 ring-brand-500 font-bold"
                       : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
                       }`}
                   >
@@ -1371,7 +1387,7 @@ export default function BookingFlow({
                 type="button"
                 disabled={confirmingPayment}
                 onClick={handleConfirmPayment}
-                className="w-full rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 py-4 text-sm font-extrabold uppercase tracking-wide text-white shadow-lg shadow-emerald-600/30 transition hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+                className="w-full rounded-2xl bg-gradient-to-r from-brand-600 to-accent-600 py-4 text-sm font-extrabold uppercase tracking-wide text-white shadow-lg shadow-brand-600/30 transition hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
               >
                 {confirmingPayment
                   ? "Processing Payment..."
@@ -1460,7 +1476,11 @@ function ReviewStep(props: {
   /** Courts the player has taken for the selected slots — several are allowed. */
   selectedCourtIds: string[];
   onToggleCourt: (id: string) => void;
-  needsPhone: boolean;
+  contactValid: boolean;
+  name: string;
+  setName: (v: string) => void;
+  email: string;
+  setEmail: (v: string) => void;
   phone: string;
   setPhone: (v: string) => void;
   selectedAddOnIds: string[];
@@ -1522,7 +1542,11 @@ function ReviewStep(props: {
     setVisibleYear,
     selectedSport,
     onSelectSport,
-    needsPhone,
+    contactValid,
+    name,
+    setName,
+    email,
+    setEmail,
     phone,
     setPhone,
     selectedAddOnIds,
@@ -1532,10 +1556,12 @@ function ReviewStep(props: {
   } = props;
 
   const today = new Date();
-  // Events have a fixed organizer schedule, so players land directly on checkout.
-  const [mobileStep, setMobileStep] = useState<"slots" | "checkout">(
+  // Step-by-step wizard state (used for both mobile and desktop)
+  const [flowStep, setFlowStep] = useState<"slots" | "details" | "checkout">(
     listing.type === "Event" ? "checkout" : "slots"
   );
+  
+
 
   const dateStripRef = useRef<HTMLDivElement>(null);
 
@@ -1775,34 +1801,50 @@ function ReviewStep(props: {
 
       {/* Mobile Header */}
       {!embedded && (
-        <div className="px-4 pt-3.5 pb-2 lg:hidden border-b border-slate-100 bg-white">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => (mobileStep === "checkout" && listing.type !== "Event" ? setMobileStep("slots") : onClose())}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </button>
-            <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
-              {mobileStep === "slots" ? listing.title : "Checkout"}
-            </h3>
+        <div className="px-4 pt-3.5 pb-2 border-b border-slate-100 bg-white">
+          {/* Header title and back button */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => {
+                  if (flowStep === "checkout" && listing.type !== "Event") setFlowStep("details");
+                  else if (flowStep === "details" && listing.type !== "Event") setFlowStep("slots");
+                  else onClose();
+                }}
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
+                {flowStep === "slots" ? listing.title : flowStep === "details" ? "Details & Add-ons" : "Checkout"}
+              </h3>
+            </div>
+            
+            {/* Step Indicators */}
+            <div className="hidden sm:flex items-center gap-2">
+              <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full ${flowStep === "slots" ? "bg-brand-100 text-brand-700" : "text-slate-400"}`}>1. Slots</span>
+              <span className="text-slate-200">/</span>
+              <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full ${flowStep === "details" ? "bg-brand-100 text-brand-700" : "text-slate-400"}`}>2. Details</span>
+              <span className="text-slate-200">/</span>
+              <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full ${flowStep === "checkout" ? "bg-brand-100 text-brand-700" : "text-slate-400"}`}>3. Payment</span>
+            </div>
           </div>
           {/* Game selector in the header — the player picks the sport they're booking. */}
-          {mobileStep === "slots" && (
+          {flowStep === "slots" && (
             <SportChips listing={listing} sport={selectedSport} onSelect={onSelectSport} className="mt-2" />
           )}
         </div>
       )}
 
       <div className={embedded ? "" : "overflow-y-auto scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden p-4 pt-3 pb-28 sm:p-6 lg:p-8"}>
-        {!embedded && <h2 className="hidden lg:block text-xl font-extrabold text-slate-900 mb-2">Review &amp; Confirm Your Booking</h2>}
+        {!embedded && <h2 className="hidden lg:block text-xl font-extrabold text-slate-900 mb-2">{flowStep === "slots" ? "Review & Confirm Your Booking" : flowStep === "details" ? "Details & Add-ons" : "Checkout"}</h2>}
 
-        <div className="mt-2 lg:mt-4 flex flex-col gap-4 lg:gap-6 lg:flex-row">
-          {/* LEFT COLUMN */}
-          <div className={`flex flex-col gap-5 flex-1 min-w-0 ${listing.type === "Event" ? "hidden" : mobileStep === "checkout" ? "hidden lg:flex" : "flex"}`}>
+        <div className="mt-2 lg:mt-4 flex flex-col gap-4 lg:gap-6 w-full max-w-2xl mx-auto">
+          {/* LEFT COLUMN (Step 1) */}
+          <div className={`flex flex-col gap-5 flex-1 min-w-0 ${listing.type === "Event" ? "hidden" : flowStep !== "slots" ? "hidden" : "flex"}`}>
             {/* Venue info (Desktop only — mobile already displays venue in header) */}
             <div className="hidden lg:flex items-center gap-4 rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-50 to-sky-50 text-xl ring-1 ring-slate-100">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-50 to-sky-50 text-xl ring-1 ring-slate-100">
                 {sportEmoji(listing.categories[0] ? categoryLabel(listing.categories[0]) : listing.type)}
               </span>
               <div className="min-w-0">
@@ -1907,9 +1949,9 @@ function ReviewStep(props: {
                         textClass = "text-slate-300";
                         priceClass = "text-slate-300";
                       } else if (isSelected) {
-                        bgClass = "bg-emerald-600 border-emerald-600 text-white shadow-md ring-2 ring-emerald-500/40";
+                        bgClass = "bg-brand-600 border-brand-600 text-white shadow-md ring-2 ring-brand-500/40";
                         textClass = "text-white font-black";
-                        priceClass = "text-emerald-100 font-bold";
+                        priceClass = "text-brand-100 font-bold";
                       } else if (cell.isHoliday) {
                         bgClass = "bg-amber-50/80 border-amber-200 text-amber-900 hover:border-amber-300";
                         textClass = "text-amber-900 font-black";
@@ -1953,7 +1995,7 @@ function ReviewStep(props: {
                     <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-amber-400" /> Holiday</span>
                     <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-orange-500" /> 3+ day holiday stretch</span>
                     <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-purple-500" /> Corporate booking</span>
-                    <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-500" /> Custom price</span>
+                    <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-brand-500" /> Custom price</span>
                   </div>
                 </div>
               ) : (
@@ -2006,19 +2048,19 @@ function ReviewStep(props: {
                 </div>
               ) : listing.type === "Turf" ? (
                 <>
-                  <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
-                    <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wide">Time Slots</span>
-                    <select
-                      value={activeDaypart}
-                      onChange={(e) => setActiveDaypart(e.target.value)}
-                      className="text-[11px] font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded-lg outline-none cursor-pointer"
-                    >
-                      <option value="All">All Times</option>
-                      <option value="Morning">Morning</option>
-                      <option value="Afternoon">Afternoon</option>
-                      <option value="Evening">Evening</option>
-                      <option value="Night">Night</option>
-                    </select>
+                  <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4">
+                    <span className="text-[11px] font-bold text-slate-800 uppercase tracking-wide">Time Filter</span>
+                    <div className="flex flex-wrap gap-2">
+                      {["All", "Morning", "Afternoon", "Evening", "Night"].map((part) => (
+                        <button
+                          key={part}
+                          onClick={() => setActiveDaypart(part)}
+                          className={`px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wide transition-all duration-200 ${activeDaypart === part ? "bg-brand-500 text-white shadow-md ring-2 ring-brand-500/20" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}
+                        >
+                          {part === "All" ? "All Times" : part}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   {isDateHoliday ? (
@@ -2038,9 +2080,9 @@ function ReviewStep(props: {
                       ) : (
                         <div className="mt-3 space-y-3">
                           {/* Selected Time Summary Box */}
-                          <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-gradient-to-r from-emerald-50/80 via-teal-50/40 to-white p-3.5 shadow-sm">
+                          <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-gradient-to-r from-brand-50/80 via-accent-50/40 to-white p-3.5 shadow-sm">
                             <div className="flex items-center gap-3 min-w-0">
-                              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-sm ring-1 ring-emerald-200">
+                              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white shadow-sm ring-1 ring-brand-200">
                                 <Clock className="h-4 w-4" />
                               </span>
                               <div className="min-w-0">
@@ -2059,53 +2101,11 @@ function ReviewStep(props: {
                               </div>
                             </div>
 
-                            {/* Interactive Plus / Minus Hour Selector */}
-                            <div className="flex items-center gap-1 rounded-full bg-emerald-100/90 border border-emerald-300/80 px-1.5 py-1 text-emerald-900 shrink-0 shadow-2xs">
-                              <button
-                                type="button"
-                                disabled={selectedSlotIndices.length <= 1 || (selectedSlotIndices.length === 1 && generatedSlots[selectedSlotIndices[0]]?.isClubSlot)}
-                                onClick={() => {
-                                  if (selectedSlotIndices.length > 1 && !generatedSlots[selectedSlotIndices[0]]?.isClubSlot) {
-                                    const maxIdx = Math.max(...selectedSlotIndices);
-                                    onToggleSlotSelection(maxIdx);
-                                  }
-                                }}
-                                aria-label="Decrease hour selection"
-                                title="Decrease duration"
-                                className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-emerald-700 shadow-2xs border border-emerald-200 transition hover:bg-emerald-50 active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white"
-                              >
-                                <Minus className="h-3 w-3 stroke-[3]" />
-                              </button>
-                              <span className="px-1.5 text-xs font-black text-emerald-950 select-none min-w-[52px] text-center">
-                                {durationMin} min
-                              </span>
-                              <button
-                                type="button"
-                                disabled={selectedSlotIndices.length === 1 && generatedSlots[selectedSlotIndices[0]]?.isClubSlot}
-                                onClick={() => {
-                                  if (selectedSlotIndices.length === 1 && generatedSlots[selectedSlotIndices[0]]?.isClubSlot) return;
-                                  if (selectedSlotIndices.length === 0) {
-                                    const firstAvail = orderedSlots.find((s) => s.status === "Available");
-                                    if (firstAvail) onToggleSlotSelection(firstAvail.originalIndex);
-                                  } else {
-                                    const maxIdx = Math.max(...selectedSlotIndices);
-                                    const nextSlot = generatedSlots.find(
-                                      (s) => s.originalIndex > maxIdx && s.status === "Available"
-                                    );
-                                    if (nextSlot) onToggleSlotSelection(nextSlot.originalIndex);
-                                  }
-                                }}
-                                aria-label="Increase hour selection"
-                                title="Increase duration"
-                                className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-emerald-700 shadow-2xs border border-emerald-200 transition hover:bg-emerald-50 active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white"
-                              >
-                                <Plus className="h-3 w-3 stroke-[3]" />
-                              </button>
-                            </div>
+
                           </div>
 
                           {/* Time slots — compact, ultra-sleek, single-line pills grid */}
-                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 max-h-[320px] overflow-y-auto pr-2 text-center">
+                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 max-h-[220px] overflow-y-auto pr-2 text-center scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
                             {orderedSlots.map((slot) => {
                               const isSelected = selectedSlotIndices.includes(slot.originalIndex);
                               const available = slot.status === "Available";
@@ -2125,16 +2125,16 @@ function ReviewStep(props: {
                                       onToggleSlotSelection(slot.originalIndex);
                                     }}
                                     className={`relative flex flex-col items-center justify-center rounded-2xl px-2.5 py-2 transition-all duration-200 cursor-pointer border min-h-[54px] col-span-2 sm:col-span-2 ${isSelected
-                                      ? "bg-[#0b9c65] text-white border-[#0b9c65] shadow-md shadow-[#0b9c65]/30 ring-2 ring-[#0b9c65]/30 scale-[1.02]"
+                                      ? "bg-brand-500 text-white border-brand-500 shadow-md shadow-brand-500/30 ring-2 ring-brand-500/30 scale-[1.02]"
                                       : available
-                                        ? "bg-gradient-to-r from-emerald-50/90 via-teal-50/80 to-white text-slate-900 border-emerald-300 hover:border-[#0b9c65] hover:bg-emerald-100/70 shadow-2xs"
+                                        ? "bg-gradient-to-r from-brand-50/90 via-accent-50/80 to-white text-slate-900 border-brand-300 hover:border-brand-500 hover:bg-brand-100/70 shadow-2xs"
                                         : "bg-slate-100/80 text-slate-400 border-slate-200/60 cursor-not-allowed opacity-50"
                                       }`}
                                   >
                                     <span
                                       className={`rounded-full px-2.5 py-0.5 text-[8px] font-black uppercase tracking-wider mb-1 ${isSelected
-                                        ? "bg-white text-[#0b9c65]"
-                                        : "bg-emerald-100 text-emerald-900 border border-emerald-300/80 shadow-2xs"
+                                        ? "bg-white text-brand-500"
+                                        : "bg-brand-100 text-brand-900 border border-brand-300/80 shadow-2xs"
                                         }`}
                                     >
                                       🏷️ CLUB SLOT ({formatDurationText(slot.durationMinutes || 120)})
@@ -2149,7 +2149,7 @@ function ReviewStep(props: {
 
                                     <div className="mt-0.5 flex items-center justify-center gap-1">
                                       {available ? (
-                                        <span className={`text-[10.5px] font-black ${isSelected ? "text-white/90" : "text-emerald-800"}`}>
+                                        <span className={`text-[10.5px] font-black ${isSelected ? "text-white/90" : "text-brand-800"}`}>
                                           ₹{finalPrice.toLocaleString("en-IN")}
                                         </span>
                                       ) : isPending ? (
@@ -2177,16 +2177,16 @@ function ReviewStep(props: {
                                     onToggleSlotSelection(slot.originalIndex);
                                   }}
                                   className={`relative flex flex-col items-center justify-center rounded-xl px-2 py-2 transition-all duration-200 cursor-pointer active:scale-95 border min-h-[54px] ${isSelected
-                                    ? "bg-[#0b9c65] text-white border-[#0b9c65] shadow-md shadow-[#0b9c65]/30 ring-2 ring-[#0b9c65]/30 scale-[1.02]"
+                                    ? "bg-brand-500 text-white border-brand-500 shadow-md shadow-brand-500/30 ring-2 ring-brand-500/30 scale-[1.02]"
                                     : available
-                                      ? "bg-white text-slate-900 border-slate-200 hover:border-[#0b9c65] hover:bg-emerald-50/30 shadow-2xs"
+                                      ? "bg-white text-slate-900 border-slate-200 hover:border-brand-500 hover:bg-brand-50/30 shadow-2xs"
                                       : "bg-slate-100/80 text-slate-400 border-slate-200/60 cursor-not-allowed opacity-50"
                                     }`}
                                 >
                                   {/* Last Minute Deal Badge */}
                                   {available && displayBoostPct > 0 && (
                                     <span
-                                      className={`absolute -top-1.5 -right-1 rounded-full px-1.5 py-0.2 text-[7.5px] font-black uppercase tracking-wider ${isSelected ? "bg-white text-[#0b9c65] shadow-xs" : "bg-red-500 text-white shadow-xs"
+                                      className={`absolute -top-1.5 -right-1 rounded-full px-1.5 py-0.2 text-[7.5px] font-black uppercase tracking-wider ${isSelected ? "bg-white text-brand-500 shadow-xs" : "bg-red-500 text-white shadow-xs"
                                         }`}
                                     >
                                       {displayBoostPct}% OFF
@@ -2268,9 +2268,9 @@ function ReviewStep(props: {
                                     onToggleCourt(court.id);
                                   }}
                                   className={`flex w-full items-center gap-3 rounded-2xl border p-2.5 text-left transition ${active
-                                    ? "border-[#0b9c65] bg-[#0b9c65]/5 shadow-sm"
+                                    ? "border-brand-500 bg-brand-500/5 shadow-sm"
                                     : isFree
-                                      ? "border-slate-200 bg-white hover:border-[#0b9c65]/60"
+                                      ? "border-slate-200 bg-white hover:border-brand-500/60"
                                       : "cursor-not-allowed border-slate-100 bg-slate-50 opacity-60"
                                     }`}
                                 >
@@ -2320,7 +2320,7 @@ function ReviewStep(props: {
 
                                   <span
                                     className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border transition ${active
-                                      ? "border-[#0b9c65] bg-[#0b9c65] text-white"
+                                      ? "border-brand-500 bg-brand-500 text-white"
                                       : isFree
                                         ? "border-slate-300 bg-white text-transparent"
                                         : "border-slate-200 bg-slate-100 text-transparent"
@@ -2382,12 +2382,23 @@ function ReviewStep(props: {
                 </div>
               )}
             </div>
+            
+            {/* Next Button for Step 1 */}
+            <div className="mt-4 pb-2">
+              <button
+                type="button"
+                disabled={selectedSlotIndices.length === 0}
+                onClick={() => setFlowStep("details")}
+                className="w-full rounded-2xl bg-brand-500 py-4 text-sm font-extrabold uppercase tracking-wide text-white shadow-lg shadow-brand-500/30 transition hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                Proceed to Details <ArrowRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
-          {/* RIGHT COLUMN */}
+          {/* RIGHT COLUMN (Step 2 & 3) */}
           <div
-            className={`flex flex-col gap-5 shrink-0 ${listing.type === "Event" ? "w-full max-w-2xl mx-auto lg:w-full" : "w-full lg:w-80 lg:max-w-xs xl:max-w-sm"
-              } ${mobileStep === "slots" ? "hidden lg:flex" : "flex"}`}
+            className={`flex flex-col gap-5 shrink-0 w-full ${flowStep === "slots" ? "hidden" : "flex"}`}
           >
             {/* Checkout Header Card */}
             <div className="rounded-3xl border border-slate-100 bg-white p-5 lg:p-6">
@@ -2433,16 +2444,19 @@ function ReviewStep(props: {
               </div>
             </div>
 
-            {/* Apply Coupon Code */}
-            <button type="button" className="flex items-center justify-between rounded-3xl border border-slate-100 bg-white p-5 lg:p-6 transition hover:bg-slate-50">
-              <div className="flex items-center gap-2">
-                <div className="text-brand-500 text-lg">🏷️</div>
-                <span className="text-sm font-bold text-slate-800">Apply Coupon Code</span>
-              </div>
-              <ChevronRight className="h-4 w-4 text-slate-400" />
-            </button>
+            {/* Apply Coupon Code (Step 3) */}
+            {flowStep === "checkout" && (
+              <button type="button" className="flex items-center justify-between rounded-3xl border border-slate-100 bg-white p-5 lg:p-6 transition hover:bg-slate-50">
+                <div className="flex items-center gap-2">
+                  <div className="text-brand-500 text-lg">🏷️</div>
+                  <span className="text-sm font-bold text-slate-800">Apply Coupon Code</span>
+                </div>
+                <ChevronRight className="h-4 w-4 text-slate-400" />
+              </button>
+            )}
 
-            {/* Game Reminders */}
+            {/* Game Reminders (Step 2) */}
+            {flowStep === "details" && (
             <div className="rounded-3xl border border-slate-100 bg-white p-5 lg:p-6 shadow-xs">
               <div className="flex items-center justify-between">
                 <div>
@@ -2478,7 +2492,9 @@ function ReviewStep(props: {
               )} */}
             </div>
 
-            {/* Add-ons — filtered specifically to the currently selected game. */}
+            )}
+
+            {/* Add-ons (Step 2) */}
             {listing.type !== "Event" && (() => {
               const allAddOns = listing.addOns ?? [];
               if (allAddOns.length === 0) return null;
@@ -2542,11 +2558,12 @@ function ReviewStep(props: {
               );
             })()}
 
-            {/* Payment Option Selection & Breakdown */}
+            {/* Payment Option Selection & Breakdown (Step 3) */}
+            {flowStep === "checkout" && (
             <div className="rounded-3xl border border-slate-200 bg-white p-5 lg:p-6 shadow-sm space-y-4">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 text-white text-xs font-bold shadow-xs">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-600 text-white text-xs font-bold shadow-xs">
                     💳
                   </span>
                   <span className="text-xs font-extrabold text-slate-800 uppercase tracking-wide">
@@ -2565,18 +2582,18 @@ function ReviewStep(props: {
                     type="button"
                     onClick={() => setPaymentOption("partial")}
                     className={`relative flex flex-col justify-between rounded-2xl border p-3.5 text-left transition-all ${paymentOption === "partial"
-                      ? "border-emerald-600 bg-emerald-50/70 ring-2 ring-emerald-500 shadow-sm"
+                      ? "border-brand-600 bg-brand-50/70 ring-2 ring-brand-500 shadow-sm"
                       : "border-slate-200 bg-white hover:border-slate-300"
                       }`}
                   >
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-xs font-black text-slate-900">Partial Payment</span>
-                      <span className={`rounded-full px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider ${paymentOption === "partial" ? "bg-emerald-600 text-white" : "bg-emerald-100 text-emerald-800"
+                      <span className={`rounded-full px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider ${paymentOption === "partial" ? "bg-brand-600 text-white" : "bg-brand-100 text-brand-800"
                         }`}>
                         {partialConfig.type === "fixed" ? `₹${partialConfig.value} Deposit` : `${partialConfig.value}% Deposit`}
                       </span>
                     </div>
-                    <p className="text-[11px] font-bold text-emerald-700">
+                    <p className="text-[11px] font-bold text-brand-700">
                       Pay Advance Now
                     </p>
                     <p className="text-[10px] text-slate-500 mt-1 font-medium">
@@ -2589,18 +2606,18 @@ function ReviewStep(props: {
                     type="button"
                     onClick={() => setPaymentOption("full")}
                     className={`relative flex flex-col justify-between rounded-2xl border p-3.5 text-left transition-all ${paymentOption === "full"
-                      ? "border-emerald-600 bg-emerald-50/70 ring-2 ring-emerald-500 shadow-sm"
+                      ? "border-brand-600 bg-brand-50/70 ring-2 ring-brand-500 shadow-sm"
                       : "border-slate-200 bg-white hover:border-slate-300"
                       }`}
                   >
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-xs font-black text-slate-900">Full Payment</span>
-                      <span className={`rounded-full px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider ${paymentOption === "full" ? "bg-emerald-600 text-white" : "bg-emerald-100 text-emerald-800"
+                      <span className={`rounded-full px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider ${paymentOption === "full" ? "bg-brand-600 text-white" : "bg-brand-100 text-brand-800"
                         }`}>
                         100% Online
                       </span>
                     </div>
-                    <p className="text-[11px] font-bold text-emerald-700">
+                    <p className="text-[11px] font-bold text-brand-700">
                       Pay ₹{activePrice.toLocaleString("en-IN")} Now
                     </p>
                     <p className="text-[10px] text-slate-500 mt-1 font-medium">
@@ -2609,18 +2626,6 @@ function ReviewStep(props: {
                   </button>
                 </div>
               )}
-
-              {/* Play Protect */}
-              <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4">
-                <label className="flex items-start gap-3 cursor-pointer">
-                  <input type="checkbox" checked={playProtect} onChange={(e) => setPlayProtect(e.target.checked)} className="mt-1 h-4 w-4 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-600 accent-indigo-600" />
-                  <div>
-                    <p className="text-sm font-bold text-indigo-900 flex items-center gap-1.5">Add Play Protect <ShieldCheck className="h-4 w-4 text-indigo-700" /></p>
-                    <p className="text-[11px] text-indigo-700/80 mt-1 font-medium leading-relaxed">Get 100% refund on cancellation &amp; accidental injury cover up to ₹10K.</p>
-                    <p className="text-[11px] font-bold text-indigo-900 mt-1.5">+ ₹19 added to total</p>
-                  </div>
-                </label>
-              </div>
 
               {dealSavings && (
                 <div className="rounded-xl border border-orange-200 bg-orange-50/80 p-3 text-xs">
@@ -2641,7 +2646,7 @@ function ReviewStep(props: {
                   </div>
                   <div className="mt-1 flex items-center justify-between">
                     <span className="text-slate-500">You Save</span>
-                    <span className="font-black text-emerald-600">₹{dealSavings.savings.toLocaleString("en-IN")}</span>
+                    <span className="font-black text-brand-600">₹{dealSavings.savings.toLocaleString("en-IN")}</span>
                   </div>
                 </div>
               )}
@@ -2653,12 +2658,12 @@ function ReviewStep(props: {
                   <span className="font-bold text-slate-900">₹{activePrice.toLocaleString("en-IN")}</span>
                 </div>
 
-                <div className="flex items-center justify-between rounded-lg bg-emerald-100/90 px-3 py-2 text-emerald-950 font-bold">
+                <div className="flex items-center justify-between rounded-lg bg-brand-100/90 px-3 py-2 text-brand-950 font-bold">
                   <span className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-emerald-600 animate-pulse" />
+                    <span className="h-2 w-2 rounded-full bg-brand-600 animate-pulse" />
                     Pay Now ({paymentOption === "full" || !canPartial ? "Full Payment" : "Advance Deposit"})
                   </span>
-                  <span className="text-sm font-black text-emerald-800">₹{payNowAmount.toLocaleString("en-IN")}</span>
+                  <span className="text-sm font-black text-brand-800">₹{payNowAmount.toLocaleString("en-IN")}</span>
                 </div>
 
                 {payAtVenueAmount > 0 ? (
@@ -2667,15 +2672,15 @@ function ReviewStep(props: {
                     <span className="font-bold text-amber-800">₹{payAtVenueAmount.toLocaleString("en-IN")}</span>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between rounded-lg bg-emerald-50 border border-emerald-100 px-3 py-2 text-emerald-900 font-semibold">
+                  <div className="flex items-center justify-between rounded-lg bg-brand-50 border border-brand-100 px-3 py-2 text-brand-900 font-semibold">
                     <span>Remaining Balance (Pay at Venue)</span>
-                    <span className="font-bold text-emerald-700">₹0 (Fully Paid)</span>
+                    <span className="font-bold text-brand-700">₹0 (Fully Paid)</span>
                   </div>
                 )}
               </div>
 
               <p className="text-[10px] font-medium leading-relaxed text-slate-500 flex items-start gap-1.5 pt-0.5">
-                <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                <ShieldCheck className="h-3.5 w-3.5 text-brand-600 shrink-0 mt-0.5" />
                 <span>
                   {paymentOption === "full" || !canPartial
                     ? `Full online payment of ₹${payNowAmount.toLocaleString("en-IN")} will confirm your booking with no balance due at the venue.`
@@ -2683,48 +2688,119 @@ function ReviewStep(props: {
                 </span>
               </p>
             </div>
+            )}
 
-            {/* Shown on both mobile and desktop checkout — collecting a phone number
-                can't be desktop-only, mobile is the primary surface. */}
-            <div className="mt-3">
-              {needsPhone && (
-                <div className="mb-3">
-                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                    Mobile Number *
-                  </label>
-                  <input
-                    type="tel"
-                    inputMode="numeric"
-                    maxLength={10}
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                    placeholder="10-digit mobile number"
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none placeholder:font-normal placeholder:text-slate-400 focus:border-brand-500"
-                  />
-                  <p className="mt-1 text-[10px] text-slate-400">
-                    Needed for your booking confirmation — we&apos;ll save it to your profile.
+            {/* Play Protect (Premium UI) */}
+            {flowStep === "checkout" && (
+            <div className={`relative overflow-hidden rounded-3xl border transition-all duration-300 shadow-sm ${playProtect ? "border-brand-500 ring-2 ring-brand-500/20 bg-gradient-to-br from-brand-500/5 to-white" : "border-slate-200 bg-white hover:border-slate-300"}`}>
+              {playProtect && (
+                <div className="absolute top-0 left-0 w-1.5 h-full bg-brand-500"></div>
+              )}
+              <label className="flex items-start gap-3 cursor-pointer p-4 lg:p-5">
+                <div className="relative flex items-center justify-center mt-1 shrink-0">
+                  <input type="checkbox" checked={playProtect} onChange={(e) => setPlayProtect(e.target.checked)} className="peer sr-only" />
+                  <div className="w-5 h-5 rounded-md border-2 border-slate-300 peer-checked:border-brand-500 peer-checked:bg-brand-500 transition-colors flex items-center justify-center">
+                    <Check className={`w-3.5 h-3.5 text-white transition-transform duration-200 ${playProtect ? "scale-100" : "scale-0"}`} strokeWidth={3} />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center justify-between gap-1">
+                    <p className="text-sm font-black text-slate-900 tracking-wide flex items-center gap-1.5">
+                      Play Protect <ShieldCheck className="h-4 w-4 text-brand-500" strokeWidth={2.5} />
+                    </p>
+                    <span className="text-[10px] font-extrabold text-brand-500 bg-brand-500/10 px-2 py-0.5 rounded-full border border-brand-500/20 shrink-0">+ ₹19 added to total</span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1.5 font-medium leading-relaxed">
+                    Get 100% refund on cancellation &amp; accidental injury cover up to ₹10K.
                   </p>
                 </div>
-              )}
+              </label>
+            </div>
+            )}
+
+            {/* Contact Details (Step 2) */}
+            {flowStep === "details" && (
+            <div className="mt-3">
+              <div className="mb-4">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-3">Contact Details</p>
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Enter your name"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none placeholder:font-normal placeholder:text-slate-400 focus:border-brand-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none placeholder:font-normal placeholder:text-slate-400 focus:border-brand-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      Mobile Number *
+                    </label>
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      maxLength={10}
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                      placeholder="10-digit mobile number"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none placeholder:font-normal placeholder:text-slate-400 focus:border-brand-500"
+                    />
+                  </div>
+                </div>
+                <p className="mt-2 text-[10px] text-slate-400">
+                  Booking confirmation & notifications will be sent to these details.
+                </p>
+              </div>
               {error && <p className="mb-3 rounded-lg bg-rose-50 px-3 py-1.5 text-[11px] text-rose-600">{error}</p>}
-              {!embedded && (
+              
+              <div className="mt-4">
                 <button
                   type="button"
-                  disabled={!canPay || submitting}
-                  onClick={onPay}
-                  className={`hidden w-full rounded-xl py-3 text-xs font-bold uppercase tracking-wide transition lg:block ${canPay && !submitting
-                    ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/30 hover:scale-[1.01]"
-                    : "cursor-not-allowed bg-slate-300 text-white"
-                    }`}
+                  disabled={!contactValid}
+                  onClick={() => setFlowStep("checkout")}
+                  className="w-full rounded-2xl bg-brand-500 py-4 text-sm font-extrabold uppercase tracking-wide text-white shadow-lg shadow-brand-500/30 transition hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  {submitting
-                    ? "Booking..."
-                    : selectedTier
-                      ? `Confirm ${selectedTier.label}`
-                      : `PAY ₹${payNowAmount.toLocaleString("en-IN")} TO CONFIRM`}
+                  Proceed to Payment <ArrowRight className="h-4 w-4" />
                 </button>
-              )}
+              </div>
             </div>
+            )}
+
+            {/* Pay Button (Step 3) */}
+            {flowStep === "checkout" && !embedded && (
+              <button
+                type="button"
+                disabled={!canPay || submitting}
+                onClick={onPay}
+                className={`w-full rounded-2xl py-4 text-sm font-extrabold uppercase tracking-wide transition ${canPay && !submitting
+                  ? "bg-gradient-to-r from-brand-600 to-accent-600 text-white shadow-lg shadow-brand-600/30 hover:scale-[1.01] active:scale-[0.99]"
+                  : "cursor-not-allowed bg-slate-300 text-white"
+                  }`}
+              >
+                {submitting
+                  ? "Booking..."
+                  : selectedTier
+                    ? `Confirm ${selectedTier.label}`
+                    : `PAY ₹${payNowAmount.toLocaleString("en-IN")} TO CONFIRM`}
+              </button>
+            )}
+
             {embedded && (
               <p className="text-center text-[11px] font-semibold text-slate-500 hidden lg:block">
                 {canPay ? "All set — tap Book Now above to confirm." : "Complete the steps above, then Book Now activates."}
@@ -2735,10 +2811,10 @@ function ReviewStep(props: {
       </div>
 
       {/* Mobile Sticky Footers */}
-      {!embedded && mobileStep === "slots" && (
+      {!embedded && flowStep === "slots" && (
         <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 flex items-center justify-between z-20 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] rounded-t-3xl">
           <div className="min-w-0">
-            <p className="text-[10px] font-bold text-[#0b9c65] uppercase">Pay Now: ₹{payNowAmount.toLocaleString("en-IN")} • Total: ₹{activePrice.toLocaleString("en-IN")}</p>
+            <p className="text-[10px] font-bold text-brand-500 uppercase">Pay Now: ₹{payNowAmount.toLocaleString("en-IN")} • Total: ₹{activePrice.toLocaleString("en-IN")}</p>
             <p className="text-2xl font-black text-slate-900">₹{payNowAmount.toLocaleString("en-IN")}</p>
             {listing.type === "Turf" && courtsForSport.length > 0 && selectedSlotIndices.length > 0 && (
               <p className="truncate text-[11px] font-semibold text-slate-500">
@@ -2748,7 +2824,7 @@ function ReviewStep(props: {
             )}
           </div>
           <button
-            onClick={() => setMobileStep("checkout")}
+            onClick={() => setFlowStep("details")}
             disabled={
               !date ||
               (listing.type === "Turf" &&
@@ -2762,12 +2838,27 @@ function ReviewStep(props: {
         </div>
       )}
 
-      {!embedded && mobileStep === "checkout" && (
+      {!embedded && flowStep === "details" && (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 flex items-center justify-between z-20 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] rounded-t-3xl">
+          <button
+            onClick={() => setFlowStep("checkout")}
+            disabled={!contactValid}
+            className="w-full rounded-2xl bg-brand-500 py-4 text-base font-bold tracking-wide text-white shadow-lg shadow-brand-500/30 flex items-center justify-between px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span>
+              PROCEED TO PAYMENT
+            </span>
+            <ArrowRight className="h-5 w-5" />
+          </button>
+        </div>
+      )}
+
+      {!embedded && flowStep === "checkout" && (
         <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 flex items-center justify-between z-20 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] rounded-t-3xl">
           <button
             onClick={onPay}
             disabled={!canPay || submitting}
-            className="w-full rounded-2xl bg-[#0b9c65] py-4 text-base font-bold tracking-wide text-white shadow-lg shadow-[#0b9c65]/30 flex items-center justify-between px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-2xl bg-brand-500 py-4 text-base font-bold tracking-wide text-white shadow-lg shadow-brand-500/30 flex items-center justify-between px-6 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <span>
               PAY ₹{payNowAmount.toLocaleString("en-IN")} TO CONFIRM
@@ -2818,7 +2909,7 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
 
   const innerCard = (
     <div className="w-full max-w-md mx-auto rounded-[1.75rem] sm:rounded-[2rem] bg-white p-3.5 sm:p-4 text-center shadow-2xl border border-slate-100/80 animate-in zoom-in-95 duration-200">
-      <div className="mx-auto flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+      <div className="mx-auto flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-brand-100 text-brand-600">
         <Check className="h-5 w-5 sm:h-5.5 sm:w-5.5" strokeWidth={3} />
       </div>
       <h2 className="mt-1.5 sm:mt-2 text-base sm:text-lg font-extrabold text-slate-900">Booking Confirmed!</h2>
@@ -2847,7 +2938,7 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
             </div>
             <div className="mt-0.5 flex items-center justify-between text-[10px]">
               <span className="text-slate-500">You Saved</span>
-              <span className="font-black text-emerald-600">
+              <span className="font-black text-brand-600">
                 ₹{booking.lastMinuteBoost.discountAmount.toLocaleString("en-IN")} ({booking.lastMinuteBoost.discountPct}%)
               </span>
             </div>
@@ -2861,7 +2952,7 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
             </div>
             <div className="mt-0.5 flex items-center justify-between">
               <span className="font-bold text-slate-900">Paid Now</span>
-              <span className="font-extrabold text-emerald-600">₹{paidAmount.toLocaleString("en-IN")}</span>
+              <span className="font-extrabold text-brand-600">₹{paidAmount.toLocaleString("en-IN")}</span>
             </div>
             <div className="mt-0.5 flex items-center justify-between">
               <span className="font-bold text-slate-900">Remaining (pay at venue)</span>
@@ -2871,7 +2962,7 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
         ) : (
           <div className="mt-1.5 flex items-center justify-between border-t border-slate-200 pt-1.5">
             <span className="font-bold text-slate-900">{booking.paymentStatus === "paid" ? "Paid" : "Payment"}</span>
-            <span className="font-extrabold text-emerald-600">₹{booking.totalAmount.toLocaleString("en-IN")}</span>
+            <span className="font-extrabold text-brand-600">₹{booking.totalAmount.toLocaleString("en-IN")}</span>
           </div>
         )}
       </div>
@@ -2882,7 +2973,7 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
           </span>
         </div>
       ) : (
-        <div className="mt-2 sm:mt-2.5 flex items-center gap-2 rounded-xl border-l-4 border-emerald-400 bg-emerald-50 px-2.5 py-1.5 text-left text-[11px] text-emerald-800">
+        <div className="mt-2 sm:mt-2.5 flex items-center gap-2 rounded-xl border-l-4 border-brand-400 bg-brand-50 px-2.5 py-1.5 text-left text-[11px] text-brand-800">
           <span>
             <span className="font-black">Fully Paid Online</span> — zero balance due at venue.
           </span>

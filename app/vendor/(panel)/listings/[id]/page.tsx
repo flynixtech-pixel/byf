@@ -80,8 +80,8 @@ export default function ListingDetailPage() {
         return getVendorBookings();
       })
       .then((res) => {
-        if (res) {
-          const listingBookings = res.filter(b => b.listing === currentTitle || b.listing === params.id);
+        if (res && res.items) {
+          const listingBookings = res.items.filter(b => b.listingTitle === currentTitle || b.listingId === params.id);
           setBookings(listingBookings);
         }
       })
@@ -916,13 +916,14 @@ interface AgendaSlot {
   status: SlotStatus;
   bookingId?: string;
   customerName?: string;
+  phone?: string;
 }
 
 function AgendaTab({ listing, onSeeBookings }: { listing: Listing; onSeeBookings: () => void }) {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0, 10));
   const [bookings, setBookings] = useState<ApiBooking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [daypart, setDaypart] = useState<"Morning" | "Afternoon" | "Night" | "Mid Night" | null>(null);
+  const [daypart, setDaypart] = useState<"Morning" | "Afternoon" | "Evening" | "Night" | "Mid Night" | null>(null);
   const [activeSlot, setActiveSlot] = useState<AgendaSlot | null>(null);
   const [groupedFilter, setGroupedFilter] = useState<SlotStatus | null>(null);
   const [localListing, setLocalListing] = useState<Listing>(listing);
@@ -988,14 +989,16 @@ function AgendaTab({ listing, onSeeBookings }: { listing: Listing; onSeeBookings
       let status: SlotStatus = "Available";
       let bookingId: string | undefined;
       let customerName: string | undefined;
+      let phone: string | undefined;
 
       if (match) {
         bookingId = match.orderId;
-        customerName = match.customer;
+        customerName = match.customerName ?? (match as any).customer;
+        phone = match.phone;
         // Walk-in = no customerId (vendor typed it in manually) — not payment method,
         // since a real BYV customer can still choose to pay cash at the venue.
         const isWalkIn = !match.customerId;
-        const isHold = match.customer === "Hold";
+        const isHold = customerName === "Hold";
         if (isHold && match.status === "Pending") status = "On Hold";
         else if (match.status === "Pending") status = "Part Paid";
         else if (match.status === "Confirmed" && isWalkIn) status = "Offline Booked";
@@ -1010,6 +1013,7 @@ function AgendaTab({ listing, onSeeBookings }: { listing: Listing; onSeeBookings
         status,
         bookingId,
         customerName,
+        phone,
       };
     });
   }, [localListing, selectedDate, bookings]);
@@ -1108,7 +1112,7 @@ function AgendaTab({ listing, onSeeBookings }: { listing: Listing; onSeeBookings
     if (slot) setActiveSlot(slot);
   };
 
-  const cardH = "h-10";
+  const cardH = "h-14";
   const cardGrid = "grid-cols-4 sm:grid-cols-8";
 
   if (loading) return <div className="p-8 text-center text-xs text-ink-faint">Loading bookings...</div>;
@@ -1180,7 +1184,7 @@ function AgendaTab({ listing, onSeeBookings }: { listing: Listing; onSeeBookings
         <>
           {/* Dayparts tabs */}
           <div className="flex items-center gap-1 overflow-x-auto scrollbar-none py-1">
-            {(["Morning", "Afternoon", "Night", "Mid Night"] as const).map(dp => (
+            {(["Morning", "Afternoon", "Evening", "Night", "Mid Night"] as const).map(dp => (
               <button key={dp} onClick={() => setDaypart(daypart === dp ? null : dp)}
                 className={`px-3 py-1 rounded-full text-[10px] font-bold shrink-0 transition ${daypart === dp ? "bg-slate-900 text-white" : "bg-white text-slate-500 border border-slate-200"}`}>
                 {dp}
@@ -1220,6 +1224,7 @@ function AgendaTab({ listing, onSeeBookings }: { listing: Listing; onSeeBookings
               <div className="space-y-2">
                 <div className="bg-slate-50 rounded-xl p-3 text-xs space-y-1.5">
                   {activeSlot.customerName && <div className="flex justify-between"><span className="text-slate-400">Customer</span><span className="font-bold">{activeSlot.customerName}</span></div>}
+                  {activeSlot.phone && <div className="flex justify-between"><span className="text-slate-400">Phone</span><span className="font-bold">{activeSlot.phone}</span></div>}
                   <div className="flex justify-between"><span className="text-slate-400">Price</span><span className="font-bold">₹{activeSlot.price}</span></div>
                   <div className="flex justify-between"><span className="text-slate-400">Duration</span><span className="font-bold">{durHrs(activeSlot.startTime, activeSlot.endTime)} hrs</span></div>
                 </div>
@@ -1302,12 +1307,6 @@ function AgendaGrid({ slots, cardH, cardGrid, daypart, onSlotClick }: {
                   Empty: "bg-slate-50 border-slate-200 text-slate-400",
                 };
                 
-                const formatHourRange = (start24: string, end24: string) => {
-                  const startHour = parseInt(start24.split(":")[0], 10);
-                  const endHour = parseInt(end24.split(":")[0], 10);
-                  return `${startHour}-${endHour}`;
-                };
-                
                 const isAvail = s.status === "Available";
                 return (
                   <button
@@ -1317,12 +1316,12 @@ function AgendaGrid({ slots, cardH, cardGrid, daypart, onSlotClick }: {
                       isAvail
                         ? "border-emerald-200 bg-white hover:border-emerald-400 text-slate-700"
                         : `border-solid ${colors[s.status] || ""}`
-                    } hover:shadow-sm transition-all relative overflow-hidden group`}
+                    } hover:shadow-sm transition-all relative overflow-hidden group px-1`}
                   >
                     {isAvail && <div className="absolute inset-0 bg-gradient-to-br from-emerald-50/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />}
                     
-                    <span className={`text-xs font-extrabold z-10 ${isAvail ? "text-slate-700" : "font-semibold"}`}>
-                      {isAvail ? formatHourRange(s.startTime, s.endTime) : `${s.startTime.slice(0, 5)}-${s.endTime.slice(0, 5)}`}
+                    <span className={`text-[10px] font-extrabold z-10 text-center leading-[1.2] tracking-tight ${isAvail ? "text-slate-700" : "font-semibold"}`}>
+                      {to12h(s.startTime)} <br/> {to12h(s.endTime)}
                     </span>
                     
                     {isAvail ? (

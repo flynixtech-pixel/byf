@@ -56,6 +56,7 @@ import {
 import { browsePublicCoaches } from "@/lib/api/coaches";
 import type { Coach } from "@/lib/api/types";
 import { SiteHeader } from "@/components/site-header";
+import { Footer } from "@/components/home/Footer";
 import BookingFlow, { type DealContext } from "@/components/booking-flow";
 import { ImageCarousel } from "@/components/ImageCarousel";
 import {
@@ -154,7 +155,6 @@ export default function VenueDetailPage() {
   // Desktop sport picker (the mobile shell owns its own copy of this state).
   const [selectedSport, setSelectedSport] = useState<string>("");
   const [sportModalOpen, setSportModalOpen] = useState(false);
-  const [favorite, setFavorite] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewName, setReviewName] = useState("");
@@ -331,8 +331,6 @@ export default function VenueDetailPage() {
             setSelectedSportForBooking(sport);
             setBooking(true);
           }}
-          favorite={favorite}
-          onToggleFavorite={() => setFavorite((v) => !v)}
           reviewProps={reviewProps}
         />
       </div>
@@ -348,16 +346,17 @@ export default function VenueDetailPage() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setFavorite((v) => !v)}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm transition hover:border-brand-300 hover:text-brand-600 cursor-pointer"
-            >
-              <Heart className={`h-3.5 w-3.5 ${favorite ? "fill-accent-500 text-accent-500" : "text-slate-400"}`} />
-              {favorite ? "Favourited" : "Favourite"}
-            </button>
-            <button
-              type="button"
               onClick={() => {
-                navigator.clipboard?.writeText(window.location.href).catch(() => { });
+                const shareData = {
+                  title: venue?.title,
+                  text: `Check out this venue: ${venue?.title} on Book Your Vibe`,
+                  url: window.location.href,
+                };
+                if (navigator.share) {
+                  navigator.share(shareData).catch(() => { });
+                } else {
+                  navigator.clipboard?.writeText(window.location.href).catch(() => { });
+                }
               }}
               className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm transition hover:border-brand-300 hover:text-brand-600 cursor-pointer"
             >
@@ -690,12 +689,14 @@ export default function VenueDetailPage() {
         </div>
       </div>
 
-      {/* Mobile Sticky Booking Bar */}
+      <Footer className="mt-0" />
+
+      {/* The mobile booking action lives in the in-content card below the hero. */}
       <motion.div
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="fixed bottom-0 left-0 right-0 z-50 lg:hidden border-t border-slate-200 bg-white px-4 py-3 shadow-[0_-10px_20px_-10px_rgba(0,0,0,0.1)] pb-safe"
+        className="hidden"
       >
         <div className="flex items-center justify-between gap-4">
           <div>
@@ -1561,8 +1562,6 @@ function MobileVenueDetail({
   categoryText,
   galleryImages,
   onOpenBooking,
-  favorite,
-  onToggleFavorite,
   reviewProps,
 }: {
   venue: Listing;
@@ -1571,8 +1570,6 @@ function MobileVenueDetail({
   categoryText: string;
   galleryImages: string[];
   onOpenBooking: (sport: string) => void;
-  favorite: boolean;
-  onToggleFavorite: () => void;
   reviewProps: any;
 }) {
   const router = useRouter();
@@ -1595,7 +1592,7 @@ function MobileVenueDetail({
   const mapsQuery = encodeURIComponent(venue.address || venue.city);
 
   return (
-    <div className="pb-24">
+    <div className="pb-8">
       {/* Hero gallery with floating header */}
       <div className="relative h-72 w-full bg-slate-900 overflow-hidden rounded-b-3xl">
         <ImageCarousel images={galleryImages} alt={venue.title} className="h-full w-full" />
@@ -1611,17 +1608,20 @@ function MobileVenueDetail({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={onToggleFavorite}
-              aria-label="Toggle favorite"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm"
-            >
-              <Heart className={`h-4 w-4 ${favorite ? "fill-accent-500 text-accent-500" : ""}`} />
-            </button>
-            <button
-              type="button"
-              onClick={() => navigator.clipboard?.writeText(window.location.href).catch(() => { })}
+              onClick={() => {
+                const shareData = {
+                  title: venue?.title,
+                  text: `Check out this venue: ${venue?.title} on Book Your Vibe`,
+                  url: window.location.href,
+                };
+                if (navigator.share) {
+                  navigator.share(shareData).catch(() => { });
+                } else {
+                  navigator.clipboard?.writeText(window.location.href).catch(() => { });
+                }
+              }}
               aria-label="Share venue"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition hover:bg-black/60"
             >
               <Share2 className="h-4 w-4" />
             </button>
@@ -1643,8 +1643,8 @@ function MobileVenueDetail({
           )}
         </div>
 
-        {/* Mobile Sticky Booking Bar */}
-        <div id="price-block" className="fixed bottom-0 left-0 right-0 z-50 flex items-center gap-3 border-t border-slate-200/60 bg-white/95 backdrop-blur-md px-4 py-3 pb-safe shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] lg:hidden">
+        {/* Premium Mobile Sticky Booking Bar */}
+        <div id="price-block" className="sticky top-[76px] z-40 mt-5 mb-6 flex items-center justify-between gap-3 overflow-hidden rounded-[1.35rem] border border-brand-200 bg-gradient-to-r from-white via-[#fff8f8] to-[#fff1f2] p-3.5 shadow-[0_14px_34px_-12px_rgba(127,29,29,0.38)] ring-1 ring-white transition-all duration-300 lg:hidden">
           <div className="min-w-0 flex-1 flex flex-col justify-center">
             {venue.strikePrice && venue.strikePrice > venue.price && (
               <div className="flex items-center gap-2 mb-0.5">

@@ -38,9 +38,9 @@ function FooterLinkItem({ link }: { link: FooterLink }) {
   );
 }
 
-export function Footer() {
+export function Footer({ className = "mt-20" }: { className?: string }) {
   return (
-    <footer className="relative mt-20 hidden overflow-hidden border-t border-white/10 bg-[#060a15] text-slate-300 sm:block">
+    <footer className={`relative hidden overflow-hidden border-t border-white/10 bg-[#060a15] text-slate-300 sm:block ${className}`}>
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute left-0 top-0 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-500/10 blur-3xl" />
         <div className="absolute right-0 top-24 h-72 w-72 translate-x-1/3 rounded-full bg-sky-500/10 blur-3xl" />
