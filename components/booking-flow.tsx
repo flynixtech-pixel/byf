@@ -981,7 +981,7 @@ export default function BookingFlow({
     const addOnsTotal = (listing.addOns ?? [])
       .filter((a) => selectedAddOnIds.includes(a.id))
       .reduce((sum, a) => sum + a.price, 0);
-    const playProtectFee = 0;
+    const playProtectFee = listing.type === "Turf" && playProtect ? 19 : 0;
     if (listing.type === "Turf") {
       if (selectedSlotIndices.length === 0) return addOnsTotal;
       const matchSport = sport?.toLowerCase();
@@ -1159,7 +1159,7 @@ export default function BookingFlow({
         email: email || undefined,
         phone: phone || undefined,
         addOnIds: selectedAddOnIds.length > 0 ? selectedAddOnIds : undefined,
-        playProtect: false,
+        playProtect: listing.type === "Turf" ? playProtect : false,
         gameReminders: listing.type === "Event" ? false : gameReminders,
         durationMinutes,
       });
@@ -2787,8 +2787,8 @@ function ReviewStep(props: {
             </div>
             )}
 
-            {/* Play Protect removed from checkout. */}
-            {false && flowStep === "checkout" && (
+            {/* Sports protection is relevant only to turf play, never event tickets. */}
+            {listing.type === "Turf" && flowStep === "checkout" && (
             <div className={`relative overflow-hidden rounded-3xl border transition-all duration-300 shadow-sm ${playProtect ? "border-brand-500 ring-2 ring-brand-500/20 bg-gradient-to-br from-brand-500/5 to-white" : "border-slate-200 bg-white hover:border-slate-300"}`}>
               {playProtect && (
                 <div className="absolute top-0 left-0 w-1.5 h-full bg-brand-500"></div>
