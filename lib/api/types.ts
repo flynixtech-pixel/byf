@@ -95,6 +95,7 @@ export interface Listing {
   type: ListingType;
   categories: string[];
   subCategories: string[];
+  alcoholAvailable?: boolean;
   customSports?: { id: string; name: string; venueType: string }[];
   /** Max players allowed per selected sport — Turf/Game listings only, one entry per category. */
   sportCapacities?: SportCapacity[];
@@ -209,6 +210,7 @@ export interface Booking {
   /** Court names as they were at booking time, aligned with `courtIds`. */
   courtNames?: string[];
   numberOfPlayers?: number;
+  ticketSelections?: { priceTierId: string; label: string; amount: number; gstRate: number; quantity: number }[];
   foodIncluded?: boolean;
   dateTime: string;
   totalAmount: number;

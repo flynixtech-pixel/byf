@@ -74,6 +74,7 @@ import { ApiError } from "@/lib/api/client";
 import { Listing } from "@/lib/api/types";
 import { categoryLabel, matchesCourtSport } from "@/lib/taxonomy";
 import { trackVenueView } from "@/lib/analytics";
+import { eventTierName } from "@/lib/eventPricing";
 
 const DEFAULT_HIGHLIGHTS = ["Well-maintained facility", "Floodlit for evening play", "Easy online booking"];
 const DEFAULT_INCLUSIONS = ["Venue access", "Drinking water", "Changing room"];
@@ -569,7 +570,8 @@ export default function VenueDetailPage() {
                 {categoryText} • {venue.city}
               </p>
 
-              <div className="mt-5 flex items-end gap-3">
+              {isEvent && venue.priceTiers.length > 0 && <div className="mt-5"><p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">Ticket options</p><div className="flex flex-wrap gap-2">{venue.priceTiers.map((tier) => <div key={tier.id} className="rounded-xl border border-rose-100 bg-rose-50/70 px-3 py-2"><p className="text-[10px] font-bold uppercase text-slate-500">{eventTierName(tier.label)}</p><p className="text-lg font-black text-slate-900">₹{tier.amount.toLocaleString("en-IN")}</p></div>)}</div></div>}
+              {!isEvent && <div className="mt-5 flex items-end gap-3">
                 <div className="flex flex-col">
                   {displayStrikePrice && displayStrikePrice > displayPrice && (
                     <div className="flex items-center gap-2 mb-1.5">
@@ -583,8 +585,8 @@ export default function VenueDetailPage() {
                     ₹{displayPrice.toLocaleString("en-IN")}
                   </p>
                 </div>
-              </div>
-              <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">Starting price</p>
+              </div>}
+              {!isEvent && <p className="mt-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-500">Starting price</p>}
 
               <div className="mt-4 border-y border-slate-100 py-4 text-sm text-slate-600">
                 {isEvent && venue.availableFrom && (
@@ -1646,6 +1648,7 @@ function MobileVenueDetail({
         {/* Premium Mobile Sticky Booking Bar */}
         <div id="price-block" className="sticky top-[76px] z-40 mt-5 mb-6 flex items-center justify-between gap-3 overflow-hidden rounded-[1.35rem] border border-brand-200 bg-gradient-to-r from-white via-[#fff8f8] to-[#fff1f2] p-3.5 shadow-[0_14px_34px_-12px_rgba(127,29,29,0.38)] ring-1 ring-white transition-all duration-300 lg:hidden">
           <div className="min-w-0 flex-1 flex flex-col justify-center">
+            {venue.type === "Event" && venue.priceTiers.length > 0 && <div className="flex flex-wrap gap-1.5">{venue.priceTiers.map((tier) => <span key={tier.id} className="rounded-lg border border-rose-100 bg-white px-2 py-1 text-[10px] font-bold text-slate-800">{eventTierName(tier.label)} ₹{tier.amount.toLocaleString("en-IN")}</span>)}</div>}
             {venue.strikePrice && venue.strikePrice > venue.price && (
               <div className="flex items-center gap-2 mb-0.5">
                 <span className="text-xs font-semibold text-slate-400 line-through">₹{venue.strikePrice.toLocaleString("en-IN")}</span>
@@ -1654,11 +1657,11 @@ function MobileVenueDetail({
                 </span>
               </div>
             )}
-            <div className="flex items-baseline gap-1.5">
+            <div className={`${venue.type === "Event" && venue.priceTiers.length > 0 ? "hidden" : "flex"} items-baseline gap-1.5`}>
               <p className="truncate text-xl font-black text-slate-900 leading-none">₹{venue.price.toLocaleString("en-IN")}</p>
             </div>
             <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-              {venue.type === "Event" ? "Per person" : "Starting price"}
+              {venue.type === "Event" ? "Choose ticket while booking" : "Starting price"}
             </p>
           </div>
           <button

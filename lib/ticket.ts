@@ -152,6 +152,7 @@ export async function downloadBookingTicket(booking: Booking) {
 
     // Format Data
     const { date, time } = formatDateTime(booking.dateTime);
+    const isEvent = Boolean(booking.ticketSelections?.length);
     const durationText = booking.duration || (booking.durationMinutes ? `${booking.durationMinutes} Mins` : "1 Hour");
     const courtText = booking.courtName || (booking.courtNames?.length ? booking.courtNames.join(", ") : "Court 1");
     const sportText = booking.sport || "Turf Sports";
@@ -181,9 +182,21 @@ export async function downloadBookingTicket(booking: Booking) {
     drawFieldBlock("Date", date, col1X, row1Y);
     drawFieldBlock("Time", time, col2X, row1Y);
 
-    // Row 2: DURATION, COURT
-    drawFieldBlock("Duration", durationText, col1X, row2Y, "#38bdf8"); // Sky 400
-    drawFieldBlock("Court", courtText, col2X, row2Y);
+    if (isEvent) {
+      const ticketCount = booking.ticketSelections!.reduce((sum, ticket) => sum + ticket.quantity, 0);
+      const ticketTypes = booking.ticketSelections!
+        .map((ticket) => {
+          let name = ticket.label;
+          try { name = JSON.parse(ticket.label)?.type || ticket.label; } catch { /* legacy label */ }
+          return `${ticket.quantity}x ${name}`;
+        })
+        .join(", ");
+      drawFieldBlock("Attendees", `${ticketCount} ${ticketCount === 1 ? "Ticket" : "Tickets"}`, col1X, row2Y, "#38bdf8");
+      drawFieldBlock("Ticket Types", ticketTypes, col2X, row2Y);
+    } else {
+      drawFieldBlock("Duration", durationText, col1X, row2Y, "#38bdf8");
+      drawFieldBlock("Court", courtText, col2X, row2Y);
+    }
 
     // Row 3: SPORTS, AMOUNT PAID
     const getSportIcon = (s: string) => {
@@ -200,7 +213,7 @@ export async function downloadBookingTicket(booking: Booking) {
       return "🏟️ ";
     };
 
-    drawFieldBlock("Sports", `${getSportIcon(sportText)}${sportText}`, col1X, row3Y, "#f472b6"); // Pink 400
+    drawFieldBlock(isEvent ? "Pass Type" : "Sports", isEvent ? "Event Entry Pass" : `${getSportIcon(sportText)}${sportText}`, col1X, row3Y, "#f472b6"); // Pink 400
     drawFieldBlock("Amount Paid", `Rs ${paidAmt}`, col2X, row3Y, "#facc15"); // Yellow 400
 
     // Row 4: CUSTOMER, STATUS

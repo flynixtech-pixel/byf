@@ -17,10 +17,11 @@ import { type Venue, listingToVenue } from "@/lib/venues";
 import { browseVenues } from "@/lib/api/venues";
 import { getFoodOutlets } from "@/lib/api/foodOrders";
 import { browsePublicTournaments } from "@/lib/api/tournaments";
-import type { FoodOutlet, Tournament } from "@/lib/api/types";
+import type { FoodOutlet, Listing, Tournament } from "@/lib/api/types";
 import { SiteHeader } from "../site-header";
 import { Hero } from "./Hero";
 import { FoodAndBeverages } from "./FoodAndBeverages";
+import { HomeEvents } from "./HomeEvents";
 import { TopPlayersRanking } from "./TopPlayersRanking";
 import { TrendingVenues } from "./TrendingVenues";
 import { HowItWorks } from "./HowItWorks";
@@ -61,6 +62,7 @@ export default function HomePage() {
   const [venues, setVenues] = useState<Venue[]>([]);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [foodOutlets, setFoodOutlets] = useState<FoodOutlet[]>([]);
+  const [events, setEvents] = useState<Listing[]>([]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [challengeOpen, setChallengeOpen] = useState(false);
   const [joinInviteOpen, setJoinInviteOpen] = useState(false);
@@ -89,6 +91,10 @@ export default function HomePage() {
     browsePublicTournaments({ limit: 1 })
       .then((res) => setTournaments(res.items))
       .catch(() => setTournaments([]));
+
+    browseVenues({ limit: 8, type: "Event" })
+      .then((result) => setEvents(result.items.filter((item) => item.type === "Event")))
+      .catch(() => setEvents([]));
       
     getFoodOutlets({ kind: "dining", limit: 10 })
       .then((res) => setFoodOutlets(res.items))
@@ -227,6 +233,8 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        <HomeEvents events={events} />
 
         {tournaments.length > 0 && (
           <EventsAndOffers

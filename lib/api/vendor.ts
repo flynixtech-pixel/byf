@@ -47,7 +47,7 @@ const AUD = "vendor" as const;
 
 export interface AiParsedEventData {
   title: string;
-  category: "Alcoholic Party" | "Non-Alcoholic Party" | "Business" | "Sports" | "Performance";
+  category: "Party" | "DJ Night" | "Conference" | "Tournament" | "Live Performance" | "Cultural Event" | "Other";
   venue: string;
   price: number;
   capacity: number;

@@ -4,6 +4,7 @@ import type { Booking, BookingStatus, PaymentMethod } from "./types";
 export interface CreateBookingInput {
   listingId: string;
   priceTierId?: string;
+  ticketSelections?: { priceTierId: string; quantity: number }[];
   addOnIds?: string[];
   couponCode?: string;
   dateTime: string;

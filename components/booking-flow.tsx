@@ -25,9 +25,11 @@ import { ApiError } from "@/lib/api/client";
 import { categoryLabel, matchesCourtSport } from "@/lib/taxonomy";
 // `nowMinutes` is aliased: the slot generator already has a local of that name.
 import { activeBoostPct, boostedPrice, nowMinutes as minutesOfDay } from "@/lib/lastMinBoost";
+import { eventTierGst, eventTierName } from "@/lib/eventPricing";
 import { downloadBookingTicket } from "@/lib/ticket";
 import { BookingQrCode } from "@/components/BookingQrCode";
 import { trackEvent } from "@/lib/analytics";
+import { useTheme } from "@/components/theme/ThemeProvider";
 import type { AddOn, Booking, Court, Listing, PaymentMethod } from "@/lib/api/types";
 
 type Step = "review" | "confirmed";
@@ -395,6 +397,10 @@ export default function BookingFlow({
   const [time, setTime] = useState(() => listing.type === "Event" ? minutesToTime12(time24ToMinutes(eventTiming.startTime)) : START_TIMES[6]);
   const [endTime, setEndTime] = useState(() => listing.type === "Event" ? minutesToTime12(time24ToMinutes(eventTiming.endTime)) : START_TIMES[8]);
   const [selectedPriceTierId, setSelectedPriceTierId] = useState<string>("");
+  const [eventTicketQuantities, setEventTicketQuantities] = useState<Record<string, number>>({});
+  const { customColors } = useTheme();
+  const eventBrandColor = customColors?.brand ?? "var(--brand-600)";
+  const eventAccentColor = customColors?.accent ?? "var(--accent-500)";
 
   function toggleSlotSelection(index: number) {
     setCourtPicks(null);
@@ -503,7 +509,7 @@ export default function BookingFlow({
       const stillExists = listing.priceTiers.some((tier) => tier.id === selectedPriceTierId);
       if (stillExists) return;
     }
-    setSelectedPriceTierId(firstTier?.id ?? "");
+    setSelectedPriceTierId(listing.type === "Event" ? "" : firstTier?.id ?? "");
   }, [listing.priceTiers, selectedPriceTierId]);
 
   // Helper to format a Date to ISO (yyyy-mm-dd)
@@ -975,7 +981,7 @@ export default function BookingFlow({
     const addOnsTotal = (listing.addOns ?? [])
       .filter((a) => selectedAddOnIds.includes(a.id))
       .reduce((sum, a) => sum + a.price, 0);
-    const playProtectFee = playProtect ? 19 : 0;
+    const playProtectFee = 0;
     if (listing.type === "Turf") {
       if (selectedSlotIndices.length === 0) return addOnsTotal;
       const matchSport = sport?.toLowerCase();
@@ -994,13 +1000,34 @@ export default function BookingFlow({
       return slotsTotal + addOnsTotal + playProtectFee;
     }
     // An event's ticket price is fixed by the organizer; players do not choose a package.
-    if (listing.type === "Event") return listing.price + addOnsTotal + playProtectFee;
+    if (listing.type === "Event") {
+      const ticketsTotalWithGst = listing.priceTiers.reduce(
+        (sum, tier) => {
+          const subtotal = tier.amount * (eventTicketQuantities[tier.id] ?? 0);
+          return sum + subtotal + Math.round((subtotal * eventTierGst(tier.label)) / 100);
+        },
+        0
+      );
+      return ticketsTotalWithGst + addOnsTotal;
+    }
     const selectedTier = listing.priceTiers.find((tier) => tier.id === selectedPriceTierId);
     if (selectedTier) {
       return selectedTier.amount + addOnsTotal + playProtectFee;
     }
     return listing.price + addOnsTotal + playProtectFee;
-  }, [listing, generatedSlots, selectedSlotIndices, selectedAddOnIds, selectedPriceTierId, selectedCourts, courtsForSport, playProtect, sport]);
+  }, [listing, generatedSlots, selectedSlotIndices, selectedAddOnIds, selectedPriceTierId, eventTicketQuantities, selectedCourts, courtsForSport, playProtect, sport]);
+
+  const eventTicketCount = useMemo(
+    () => Object.values(eventTicketQuantities).reduce((sum, quantity) => sum + quantity, 0),
+    [eventTicketQuantities]
+  );
+  const eventTicketSubtotal = useMemo(() => listing.priceTiers.reduce(
+    (sum, tier) => sum + tier.amount * (eventTicketQuantities[tier.id] ?? 0), 0
+  ), [listing.priceTiers, eventTicketQuantities]);
+  const eventGstTotal = useMemo(() => listing.priceTiers.reduce((sum, tier) => {
+    const subtotal = tier.amount * (eventTicketQuantities[tier.id] ?? 0);
+    return sum + Math.round((subtotal * eventTierGst(tier.label)) / 100);
+  }, 0), [listing.priceTiers, eventTicketQuantities]);
 
   /** Whether the selected slot(s) are currently Last Minute Boost-discounted, and by how
    * much — so checkout can show "original price / discounted price / you saved X" instead
@@ -1040,6 +1067,7 @@ export default function BookingFlow({
   const canPay =
     contactValid &&
     !!date &&
+    (listing.type !== "Event" || eventTicketCount > 0) &&
     (listing.type !== "Turf"
       ? !!time
       : selectedSlotIndices.length > 0 &&
@@ -1121,17 +1149,22 @@ export default function BookingFlow({
         sport: sport || undefined,
         courtId: effectiveCourtIds[0] || undefined,
         courtIds: effectiveCourtIds.length > 0 ? effectiveCourtIds : undefined,
-        priceTierId: listing.type === "Event" ? undefined : selectedPriceTierId || undefined,
+        priceTierId: selectedPriceTierId || undefined,
+        ticketSelections: listing.type === "Event"
+          ? listing.priceTiers
+              .map((tier) => ({ priceTierId: tier.id, quantity: eventTicketQuantities[tier.id] ?? 0 }))
+              .filter((ticket) => ticket.quantity > 0)
+          : undefined,
         customerName: name || undefined,
         email: email || undefined,
         phone: phone || undefined,
         addOnIds: selectedAddOnIds.length > 0 ? selectedAddOnIds : undefined,
-        playProtect,
-        gameReminders,
+        playProtect: false,
+        gameReminders: listing.type === "Event" ? false : gameReminders,
         durationMinutes,
       });
 
-      if (gameReminders) {
+      if (listing.type !== "Event" && gameReminders) {
         scheduleGameReminder({
           orderId: created.orderId,
           title: listing.title,
@@ -1173,7 +1206,7 @@ export default function BookingFlow({
       });
 
       setBooking(confirmed);
-      if (gameReminders) {
+      if (listing.type !== "Event" && gameReminders) {
         scheduleGameReminder({
           orderId: confirmed.orderId,
           title: listing.title,
@@ -1227,6 +1260,13 @@ export default function BookingFlow({
           onToggleAddOn={toggleAddOn}
           selectedPriceTierId={selectedPriceTierId}
           setSelectedPriceTierId={setSelectedPriceTierId}
+          eventTicketQuantities={eventTicketQuantities}
+          setEventTicketQuantities={setEventTicketQuantities}
+          eventTicketCount={eventTicketCount}
+          eventTicketSubtotal={eventTicketSubtotal}
+          eventGstTotal={eventGstTotal}
+          eventBrandColor={eventBrandColor}
+          eventAccentColor={eventAccentColor}
           onClose={onClose}
           onPay={handlePay}
           dateOptions={dateOptions}
@@ -1332,10 +1372,12 @@ export default function BookingFlow({
                   </span>
                   <span className="text-base font-black">₹{(pendingBooking.paidAmount ?? payNowAmount).toLocaleString("en-IN")}</span>
                 </div>
-                <div className="flex items-center justify-between text-amber-800 font-semibold bg-amber-50/70 p-2 rounded-xl border border-amber-100/60">
-                  <span>Balance Due at Venue</span>
-                  <span className="font-extrabold">₹{(pendingBooking.totalAmount - (pendingBooking.paidAmount ?? payNowAmount)).toLocaleString("en-IN")}</span>
-                </div>
+                {listing.type !== "Event" && (
+                  <div className="flex items-center justify-between text-amber-800 font-semibold bg-amber-50/70 p-2 rounded-xl border border-amber-100/60">
+                    <span>Balance Due at Venue</span>
+                    <span className="font-extrabold">₹{(pendingBooking.totalAmount - (pendingBooking.paidAmount ?? payNowAmount)).toLocaleString("en-IN")}</span>
+                  </div>
+                )}
               </div>
 
               {/* Payment Methods */}
@@ -1391,7 +1433,9 @@ export default function BookingFlow({
               >
                 {confirmingPayment
                   ? "Processing Payment..."
-                  : `PAY ₹${(pendingBooking.paidAmount ?? payNowAmount).toLocaleString("en-IN")} TO LOCK SLOT`}
+                  : listing.type === "Event"
+                    ? `PAY ₹${(pendingBooking.paidAmount ?? payNowAmount).toLocaleString("en-IN")} & CONFIRM TICKETS`
+                    : `PAY ₹${(pendingBooking.paidAmount ?? payNowAmount).toLocaleString("en-IN")} TO LOCK SLOT`}
               </button>
 
               <p className="text-center text-[10px] text-slate-400">
@@ -1487,6 +1531,13 @@ function ReviewStep(props: {
   onToggleAddOn: (id: string) => void;
   selectedPriceTierId: string;
   setSelectedPriceTierId: (id: string) => void;
+  eventTicketQuantities: Record<string, number>;
+  setEventTicketQuantities: React.Dispatch<React.SetStateAction<Record<string, number>>>;
+  eventTicketCount: number;
+  eventTicketSubtotal: number;
+  eventGstTotal: number;
+  eventBrandColor: string;
+  eventAccentColor: string;
 }) {
   const {
     embedded,
@@ -1553,13 +1604,18 @@ function ReviewStep(props: {
     onToggleAddOn,
     selectedPriceTierId,
     setSelectedPriceTierId,
+    eventTicketQuantities,
+    setEventTicketQuantities,
+    eventTicketCount,
+    eventTicketSubtotal,
+    eventGstTotal,
+    eventBrandColor,
+    eventAccentColor,
   } = props;
 
   const today = new Date();
   // Step-by-step wizard state (used for both mobile and desktop)
-  const [flowStep, setFlowStep] = useState<"slots" | "details" | "checkout">(
-    listing.type === "Event" ? "checkout" : "slots"
-  );
+  const [flowStep, setFlowStep] = useState<"slots" | "details" | "checkout">("slots");
   
 
 
@@ -1699,6 +1755,9 @@ function ReviewStep(props: {
   const [calendarExpanded, setCalendarExpanded] = useState(false);
 
   const selectedTier = listing.priceTiers.find((tier) => tier.id === selectedPriceTierId);
+  const selectedEventTickets = listing.priceTiers
+    .map((tier) => ({ tier, quantity: eventTicketQuantities[tier.id] ?? 0 }))
+    .filter(({ quantity }) => quantity > 0);
 
   const selectedSlotSummaryText = useMemo(() => {
     if (selectedSlotIndices.length === 0) return "Tap available slots below";
@@ -1807,8 +1866,8 @@ function ReviewStep(props: {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => {
-                  if (flowStep === "checkout" && listing.type !== "Event") setFlowStep("details");
-                  else if (flowStep === "details" && listing.type !== "Event") setFlowStep("slots");
+                  if (flowStep === "checkout") setFlowStep("details");
+                  else if (flowStep === "details") setFlowStep("slots");
                   else onClose();
                 }}
                 className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition"
@@ -1841,7 +1900,29 @@ function ReviewStep(props: {
 
         <div className="mt-2 lg:mt-4 flex flex-col gap-4 lg:gap-6 w-full max-w-2xl mx-auto">
           {/* LEFT COLUMN (Step 1) */}
-          <div className={`flex flex-col gap-5 flex-1 min-w-0 ${listing.type === "Event" ? "hidden" : flowStep !== "slots" ? "hidden" : "flex"}`}>
+          <div className={`flex flex-col gap-5 flex-1 min-w-0 ${flowStep !== "slots" ? "hidden" : "flex"}`}>
+            {listing.type === "Event" ? (
+              <div className="space-y-5">
+                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                  <div className="border-b border-slate-100 px-5 py-4">
+                    <h3 className="text-lg font-bold text-slate-950">Select tickets</h3>
+                    <p className="mt-1 text-sm text-slate-500">Add different ticket types in one booking.</p>
+                  </div>
+                  <div className="divide-y divide-slate-100 px-5">
+                    {listing.priceTiers.map((tier) => {
+                      const quantity = eventTicketQuantities[tier.id] ?? 0;
+                      const changeQuantity = (change: number) => setEventTicketQuantities((current) => ({ ...current, [tier.id]: Math.max(0, Math.min(20, (current[tier.id] ?? 0) + change)) }));
+                      const gstRate = eventTierGst(tier.label);
+                      return <div key={tier.id} className={`-mx-2 flex items-center justify-between gap-4 rounded-xl px-2 py-4 transition-colors ${quantity > 0 ? "bg-slate-50" : ""}`}><div><div className="flex items-center gap-2"><p className="text-sm font-bold text-slate-900">{eventTierName(tier.label)}</p>{quantity > 0 && <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">Added</span>}</div><p className="mt-0.5 text-sm font-medium text-slate-500">₹{tier.amount.toLocaleString("en-IN")} per ticket{gstRate > 0 ? ` + ${gstRate}% GST` : ""}</p></div><div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-1 shadow-sm"><button type="button" aria-label={`Remove ${eventTierName(tier.label)} ticket`} disabled={quantity === 0} onClick={() => changeQuantity(-1)} className="grid h-9 w-9 place-items-center rounded-lg text-slate-600 transition hover:bg-slate-100 active:scale-95 disabled:cursor-not-allowed disabled:opacity-25"><Minus className="h-4 w-4" /></button><span className="w-6 text-center text-sm font-extrabold tabular-nums text-slate-950">{quantity}</span><button type="button" aria-label={`Add ${eventTierName(tier.label)} ticket`} onClick={() => changeQuantity(1)} className="grid h-9 w-9 place-items-center rounded-lg text-white shadow-sm transition hover:brightness-95 active:scale-95" style={{ backgroundColor: eventBrandColor }}><Plus className="h-4 w-4" /></button></div></div>;
+                    })}
+                  </div>
+                  {listing.priceTiers.length === 0 && <p className="mt-4 rounded-xl bg-amber-50 p-3 text-xs font-semibold text-amber-800">Tickets are not configured for this event yet.</p>}
+                  {eventTicketCount > 0 && <div className="border-t border-slate-100 bg-slate-50 px-5 py-3 text-sm"><div className="flex justify-between text-slate-600"><span>{eventTicketCount} {eventTicketCount === 1 ? "ticket" : "tickets"}</span><span>₹{eventTicketSubtotal.toLocaleString("en-IN")}</span></div>{eventGstTotal > 0 && <div className="mt-1 flex justify-between text-slate-500"><span>GST</span><span>+ ₹{eventGstTotal.toLocaleString("en-IN")}</span></div>}<div className="mt-2 flex justify-between border-t border-slate-200 pt-2 font-bold text-slate-950"><span>Total</span><span>₹{activePrice.toLocaleString("en-IN")}</span></div></div>}
+                </div>
+                <div className="rounded-2xl border border-slate-100 bg-white p-4 text-xs text-slate-600"><div className="grid grid-cols-2 gap-4"><div><p className="font-bold uppercase text-slate-400">Event date</p><p className="mt-1 font-extrabold text-slate-800">{date ? new Date(`${date}T00:00:00`).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "TBA"}</p></div><div><p className="font-bold uppercase text-slate-400">Event time</p><p className="mt-1 font-extrabold text-slate-800">{time}</p></div></div></div>
+                <button type="button" disabled={eventTicketCount === 0} onClick={() => setFlowStep("details")} className="group relative flex w-full items-center justify-between overflow-hidden rounded-2xl px-5 py-3.5 text-left text-white shadow-[0_10px_24px_rgba(15,23,42,0.16)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(15,23,42,0.22)] active:translate-y-0 active:scale-[0.995] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0" style={{ backgroundImage: `linear-gradient(110deg, ${eventBrandColor}, ${eventAccentColor})` }}><span className="relative z-10"><span className="block text-[10px] font-bold uppercase tracking-[0.16em] text-white/75">{eventTicketCount} {eventTicketCount === 1 ? "ticket" : "tickets"} selected</span><span className="mt-0.5 block text-base font-extrabold">Continue · ₹{activePrice.toLocaleString("en-IN")}</span></span><span className="relative z-10 grid h-10 w-10 place-items-center rounded-full bg-white/15 ring-1 ring-white/25 transition group-hover:translate-x-1 group-hover:bg-white/20"><ArrowRight className="h-5 w-5" /></span><span className="absolute inset-y-0 -left-24 w-20 skew-x-[-18deg] bg-white/15 blur-sm transition-all duration-700 group-hover:left-[110%]" /></button>
+              </div>
+            ) : (<>
             {/* Venue info (Desktop only — mobile already displays venue in header) */}
             <div className="hidden lg:flex items-center gap-4 rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-50 to-sky-50 text-xl ring-1 ring-slate-100">
@@ -2394,6 +2475,7 @@ function ReviewStep(props: {
                 Proceed to Details <ArrowRight className="h-4 w-4" />
               </button>
             </div>
+            </>)}
           </div>
 
           {/* RIGHT COLUMN (Step 2 & 3) */}
@@ -2442,10 +2524,11 @@ function ReviewStep(props: {
                   </div>
                 </div>
               </div>
+              {listing.type === "Event" && selectedEventTickets.length > 0 && <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5"><p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Selected tickets</p>{selectedEventTickets.map(({ tier, quantity }) => <div key={tier.id} className="mt-1.5 flex justify-between text-xs"><span className="font-semibold text-slate-700">{quantity} × {eventTierName(tier.label)}</span><span className="font-bold text-slate-900">₹{(tier.amount * quantity).toLocaleString("en-IN")}</span></div>)}</div>}
             </div>
 
             {/* Apply Coupon Code (Step 3) */}
-            {flowStep === "checkout" && (
+            {flowStep === "checkout" && listing.type !== "Event" && (
               <button type="button" className="flex items-center justify-between rounded-3xl border border-slate-100 bg-white p-5 lg:p-6 transition hover:bg-slate-50">
                 <div className="flex items-center gap-2">
                   <div className="text-brand-500 text-lg">🏷️</div>
@@ -2456,7 +2539,7 @@ function ReviewStep(props: {
             )}
 
             {/* Game Reminders (Step 2) */}
-            {flowStep === "details" && (
+            {flowStep === "details" && listing.type !== "Event" && (
             <div className="rounded-3xl border border-slate-100 bg-white p-5 lg:p-6 shadow-xs">
               <div className="flex items-center justify-between">
                 <div>
@@ -2653,8 +2736,20 @@ function ReviewStep(props: {
 
               {/* Payment Breakdown Box */}
               <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-3 space-y-2 text-xs">
+                {listing.type === "Event" && (
+                  <>
+                    <div className="flex items-center justify-between text-slate-600">
+                      <span>Ticket subtotal</span>
+                      <span className="font-semibold text-slate-800">₹{eventTicketSubtotal.toLocaleString("en-IN")}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-slate-600">
+                      <span>GST (as configured by vendor)</span>
+                      <span className="font-semibold text-slate-800">+ ₹{eventGstTotal.toLocaleString("en-IN")}</span>
+                    </div>
+                  </>
+                )}
                 <div className="flex items-center justify-between text-slate-600">
-                  <span>Total Booking Amount</span>
+                  <span>{listing.type === "Event" ? "Total payable" : "Total Booking Amount"}</span>
                   <span className="font-bold text-slate-900">₹{activePrice.toLocaleString("en-IN")}</span>
                 </div>
 
@@ -2666,7 +2761,7 @@ function ReviewStep(props: {
                   <span className="text-sm font-black text-brand-800">₹{payNowAmount.toLocaleString("en-IN")}</span>
                 </div>
 
-                {payAtVenueAmount > 0 ? (
+                {listing.type !== "Event" && (payAtVenueAmount > 0 ? (
                   <div className="flex items-center justify-between rounded-lg bg-amber-50 border border-amber-100 px-3 py-2 text-amber-900 font-semibold">
                     <span>Remaining Balance (Pay at Venue)</span>
                     <span className="font-bold text-amber-800">₹{payAtVenueAmount.toLocaleString("en-IN")}</span>
@@ -2676,13 +2771,15 @@ function ReviewStep(props: {
                     <span>Remaining Balance (Pay at Venue)</span>
                     <span className="font-bold text-brand-700">₹0 (Fully Paid)</span>
                   </div>
-                )}
+                ))}
               </div>
 
               <p className="text-[10px] font-medium leading-relaxed text-slate-500 flex items-start gap-1.5 pt-0.5">
                 <ShieldCheck className="h-3.5 w-3.5 text-brand-600 shrink-0 mt-0.5" />
                 <span>
-                  {paymentOption === "full" || !canPartial
+                  {listing.type === "Event"
+                    ? `Full online payment of ₹${payNowAmount.toLocaleString("en-IN")} will confirm all ${eventTicketCount} tickets.`
+                    : paymentOption === "full" || !canPartial
                     ? `Full online payment of ₹${payNowAmount.toLocaleString("en-IN")} will confirm your booking with no balance due at the venue.`
                     : `Partial payment of ₹${payNowAmount.toLocaleString("en-IN")} locks your slot now. Remaining balance ₹${payAtVenueAmount.toLocaleString("en-IN")} is payable at check-in.`}
                 </span>
@@ -2690,8 +2787,8 @@ function ReviewStep(props: {
             </div>
             )}
 
-            {/* Play Protect (Premium UI) */}
-            {flowStep === "checkout" && (
+            {/* Play Protect removed from checkout. */}
+            {false && flowStep === "checkout" && (
             <div className={`relative overflow-hidden rounded-3xl border transition-all duration-300 shadow-sm ${playProtect ? "border-brand-500 ring-2 ring-brand-500/20 bg-gradient-to-br from-brand-500/5 to-white" : "border-slate-200 bg-white hover:border-slate-300"}`}>
               {playProtect && (
                 <div className="absolute top-0 left-0 w-1.5 h-full bg-brand-500"></div>
@@ -2795,8 +2892,8 @@ function ReviewStep(props: {
               >
                 {submitting
                   ? "Booking..."
-                  : selectedTier
-                    ? `Confirm ${selectedTier.label}`
+                  : eventTicketCount > 0
+                    ? `Confirm ${eventTicketCount} ${eventTicketCount === 1 ? "ticket" : "tickets"}`
                     : `PAY ₹${payNowAmount.toLocaleString("en-IN")} TO CONFIRM`}
               </button>
             )}
@@ -2827,6 +2924,7 @@ function ReviewStep(props: {
             onClick={() => setFlowStep("details")}
             disabled={
               !date ||
+              (listing.type === "Event" && eventTicketCount === 0) ||
               (listing.type === "Turf" &&
                 (selectedSlotIndices.length === 0 ||
                   (courtsForSport.length > 0 && selectedCourtIds.length === 0)))
@@ -2912,13 +3010,16 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
       <div className="mx-auto flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-brand-100 text-brand-600">
         <Check className="h-5 w-5 sm:h-5.5 sm:w-5.5" strokeWidth={3} />
       </div>
-      <h2 className="mt-1.5 sm:mt-2 text-base sm:text-lg font-extrabold text-slate-900">Booking Confirmed!</h2>
-      <p className="mt-0.5 text-[11px] sm:text-xs text-slate-500">Your slot at {listing.title} is locked in.</p>
+      <h2 className="mt-1.5 sm:mt-2 text-base sm:text-lg font-extrabold text-slate-900">{listing.type === "Event" ? "Tickets Confirmed!" : "Booking Confirmed!"}</h2>
+      <p className="mt-0.5 text-[11px] sm:text-xs text-slate-500">{listing.type === "Event" ? `Your tickets for ${listing.title} are confirmed.` : `Your slot at ${listing.title} is locked in.`}</p>
 
       <div className="mt-2 sm:mt-2.5 rounded-xl border border-slate-100 bg-slate-50/80 p-2.5 sm:p-3 text-left text-xs sm:text-xs">
         <Row label="Order ID" value={<span className="font-mono font-bold break-all text-slate-900">{booking.orderId}</span>} />
-        <Row label="Venue" value={`${listing.title} · ${listing.categories.map(categoryLabel).join(", ") || listing.type}`} />
+        <Row label={listing.type === "Event" ? "Event" : "Venue"} value={`${listing.title} · ${listing.categories.map(categoryLabel).join(", ") || listing.type}`} />
         <Row label="Date & Time" value={new Date(booking.dateTime).toLocaleString("en-GB")} />
+        {listing.type === "Event" && booking.ticketSelections?.map((ticket) => (
+          <Row key={ticket.priceTierId} label={eventTierName(ticket.label)} value={`${ticket.quantity} × ₹${ticket.amount.toLocaleString("en-IN")}`} />
+        ))}
         {(booking.courtNames?.length || booking.courtName) && (
           <Row
             label={booking.courtNames && booking.courtNames.length > 1 ? "Courts" : "Court"}
@@ -2975,7 +3076,7 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
       ) : (
         <div className="mt-2 sm:mt-2.5 flex items-center gap-2 rounded-xl border-l-4 border-brand-400 bg-brand-50 px-2.5 py-1.5 text-left text-[11px] text-brand-800">
           <span>
-            <span className="font-black">Fully Paid Online</span> — zero balance due at venue.
+            <span className="font-black">Fully Paid Online</span>{listing.type === "Event" ? " — your event entry is confirmed." : " — zero balance due at venue."}
           </span>
         </div>
       )}
@@ -2983,7 +3084,7 @@ function ConfirmedStep({ listing, booking, onClose, embedded = false }: { listin
       <div className="mt-2 sm:mt-2.5 flex items-center gap-2 rounded-xl border-l-4 border-brand-400 bg-brand-50 px-2.5 py-1.5 text-left text-[11px] text-slate-600">
         <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-brand-500" />
         <span>
-          Show Order ID at venue — owner scans it to check you in as <span className="font-bold">{booking.orderId}</span>.
+          {listing.type === "Event" ? "Show this QR at the event entrance for check-in" : "Show Order ID at venue — owner scans it to check you in"} as <span className="font-bold">{booking.orderId}</span>.
         </span>
       </div>
 

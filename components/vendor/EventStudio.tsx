@@ -32,13 +32,20 @@ const STEPS = [
   { id: 5, label: "Launch", hint: "Publish your event" },
 ] as const;
 
-const EVENT_SUBCATEGORIES = [
-  { id: "alcoholic-party", label: "Alcoholic Party" },
-  { id: "non-alcoholic-party", label: "Non-Alcoholic Party" },
-  { id: "business", label: "Business" },
-  { id: "sports", label: "Sports" },
-  { id: "performance", label: "Performance" },
-];
+const EVENT_CATEGORY_GROUPS = [
+  { label: "Social & Entertainment", items: ["Party", "Night Party", "Club Event", "DJ Night", "Concert", "Live Music", "Festival", "Comedy Show", "Cultural Event"] },
+  { label: "Sports", items: ["Cricket", "Football", "Badminton", "Basketball", "Running / Marathon", "Adventure Sports", "Tournament"] },
+  { label: "Business & Professional", items: ["Conference", "Seminar", "Workshop", "Networking", "Exhibition", "Trade Show", "Corporate Event"] },
+  { label: "Performing Arts", items: ["Theatre", "Dance", "Stand-up Comedy", "Musical", "Live Performance"] },
+  { label: "Cultural & Community", items: ["Cultural Festival", "Religious Event", "Community Gathering", "Fair / Mela", "Parade"] },
+  { label: "Education", items: ["Course", "Training", "Lecture", "Coaching", "Educational Workshop"] },
+  { label: "Family & Kids", items: ["Kids Event", "Family Event", "Birthday", "School Event", "Family Festival"] },
+  { label: "Food & Lifestyle", items: ["Food Festival", "Food Tasting", "Cooking Workshop", "Lifestyle Event", "Flea Market"] },
+  { label: "Wellness", items: ["Yoga", "Meditation", "Fitness", "Health Workshop", "Wellness Retreat"] },
+  { label: "Travel & Adventure", items: ["Trekking", "Camping", "Hiking", "Outdoor Adventure", "Trip / Excursion"] },
+] as const;
+
+const STANDARD_EVENT_CATEGORIES = new Set(EVENT_CATEGORY_GROUPS.flatMap((group) => group.items));
 
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
@@ -52,6 +59,7 @@ function emptyListing(): Listing {
     type: "Event",
     categories: ["Events"],
     subCategories: [],
+    alcoholAvailable: false,
     price: 0,
     listedOn: now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
     status: "Active",
@@ -768,9 +776,12 @@ function LocationStep({ draft, update, updateMany }: StepProps) {
     const delayDebounceFn = setTimeout(() => {
       setLoadingSuggestions(true);
       const cc = draft.country === "India" ? "in" : "in";
+      const normalizedVenue = venueInput.trim().replace(/\brode\b/gi, "road").replace(/\brd\.?\b/gi, "road");
+      const cityContext = draft.cityMode === "multiple" ? draft.cities?.[0] : draft.city;
+      const locationQuery = [normalizedVenue, cityContext, draft.state].filter(Boolean).join(", ");
       fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          venueInput
+          locationQuery
         )}&countrycodes=${cc}&limit=5&addressdetails=1`,
         // Force the Referer header — see note in PackageStudio's identical call.
         { headers: { "Accept-Language": "en" }, referrerPolicy: "origin" }
@@ -788,7 +799,7 @@ function LocationStep({ draft, update, updateMany }: StepProps) {
     }, 450);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [venueInput, draft.country]);
+  }, [venueInput, draft.country, draft.city, draft.cityMode, draft.cities, draft.state]);
 
   function handleSelectSuggestion(item: any) {
     const address = item.display_name;
@@ -836,6 +847,7 @@ function LocationStep({ draft, update, updateMany }: StepProps) {
       : null;
 
   const currentSubCat = draft.categories[0] === "Events" ? (draft.subCategories[0] || "") : (draft.categories[0] || "");
+  const selectedCategory = STANDARD_EVENT_CATEGORIES.has(currentSubCat as never) ? currentSubCat : currentSubCat ? "Other" : "";
 
   return (
     <div className="space-y-6">
@@ -1031,23 +1043,27 @@ function LocationStep({ draft, update, updateMany }: StepProps) {
         <div>
           <FieldLabel>Category *</FieldLabel>
           <select
-            value={currentSubCat}
+            value={selectedCategory}
             onChange={(e) => {
               const val = e.target.value;
               updateMany({
                 categories: ["Events"],
-                subCategories: [val],
+                subCategories: val === "Other" ? [""] : [val],
               });
             }}
             className={inputClass}
           >
             <option value="">Select event sub-category</option>
-            {EVENT_SUBCATEGORIES.map((cat) => (
-              <option key={cat.id} value={cat.label}>
-                {cat.label}
-              </option>
-            ))}
+            {EVENT_CATEGORY_GROUPS.map((group) => <optgroup key={group.label} label={group.label}>{group.items.map((item) => <option key={item} value={item}>{item}</option>)}</optgroup>)}
+            <option value="Other">Other</option>
           </select>
+          {selectedCategory === "Other" && <input value={currentSubCat} onChange={(e) => update("subCategories", [e.target.value])} placeholder="Enter custom event category" className={`${inputClass} mt-2`} />}
+        </div>
+
+        <div className="sm:col-start-2">
+          <FieldLabel>Alcohol available?</FieldLabel>
+          <ToggleGroup value={draft.alcoholAvailable ? "yes" : "no"} options={[{ value: "no", label: "No" }, { value: "yes", label: "Yes" }]} onChange={(value) => update("alcoholAvailable", value === "yes")} />
+          <p className="mt-1.5 text-[11px] text-ink-faint">Stored as an event attribute, not a category.</p>
         </div>
       </div>
     </div>
@@ -1571,13 +1587,14 @@ function LaunchStep({ draft, update, updateMany }: StepProps) {
   const category = draft.categories[0] === "Events" ? (draft.subCategories[0] || "") : (draft.categories[0] || "");
 
   function handleApplyLaunchDetails(data: GeneratedLaunchDetails) {
+    const generatedFaqs = (data.faqs ?? []).filter((faq) => faq.question.trim() && faq.answer.trim());
     updateMany({
       description: data.description || draft.description,
       inclusions: data.inclusions.length > 0 ? data.inclusions : draft.inclusions,
       exclusions: data.exclusions.length > 0 ? data.exclusions : draft.exclusions,
       highlights: data.highlights.length > 0 ? data.highlights : draft.highlights,
       tags: data.tags.length > 0 ? data.tags : draft.tags,
-      faqs: data.faqs.length > 0 ? data.faqs : draft.faqs,
+      faqs: generatedFaqs.length > 0 ? generatedFaqs : draft.faqs,
     });
   }
 

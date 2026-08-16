@@ -25,6 +25,7 @@ import { getVenueById, getListingImage } from "@/lib/api/venues";
 import { ApiError } from "@/lib/api/client";
 import type { Booking } from "@/lib/api/types";
 import { categoryLabel } from "@/lib/taxonomy";
+import { eventTierName } from "@/lib/eventPricing";
 
 type Tab = "overview" | "registrations" | "agenda" | "media";
 
@@ -191,8 +192,10 @@ export default function ListingDetailPage() {
                     ))}
                   </div>
                 </InfoField>
-                <InfoField label="Base Price">
-                  <p className="font-semibold text-slate-800">₹{listing.price}</p>
+                <InfoField label={listing.type === "Event" ? "Ticket Prices" : "Base Price"}>
+                  {listing.type === "Event" && listing.priceTiers.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5">{listing.priceTiers.map((tier) => <span key={tier.id} className="rounded-full border border-violet-100 bg-violet-50 px-2 py-1 text-[11px] font-bold text-violet-800">{eventTierName(tier.label)} ₹{tier.amount.toLocaleString("en-IN")}</span>)}</div>
+                  ) : <p className="font-semibold text-slate-800">₹{listing.price}</p>}
                 </InfoField>
                 <InfoField label="Status">
                   <Badge tone={listing.status === "Active" ? "success" : "neutral"} className="!text-[10px] !px-1.5 !py-0.5">
