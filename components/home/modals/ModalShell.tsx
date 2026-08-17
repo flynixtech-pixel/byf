@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 
@@ -12,14 +16,35 @@ export function ModalShell({
   title: string;
   subtitle?: string;
 }) {
-  return (
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
+
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[200] flex items-center justify-center overflow-y-auto bg-black/55 p-4 backdrop-blur-sm"
       onClick={onClose}
+      role="presentation"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative max-h-[calc(100dvh-1rem)] w-full max-w-md overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl sm:max-h-[92vh] sm:rounded-3xl sm:p-8"
+        className="relative my-auto max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-5 shadow-2xl sm:max-h-[92dvh] sm:p-8"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="auth-modal-title"
       >
         <button
           type="button"
@@ -36,11 +61,12 @@ export function ModalShell({
             showText={false}
           />
         </div>
-        <h2 className="text-2xl font-extrabold text-slate-900">{title}</h2>
+        <h2 id="auth-modal-title" className="text-2xl font-extrabold text-slate-900">{title}</h2>
         {subtitle && <p className="mt-1 text-sm text-slate-500">{subtitle}</p>}
         <div className="mt-6">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

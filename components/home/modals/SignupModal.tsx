@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Building2, Footprints, Sandwich, Eye, EyeOff, type LucideIcon } from "lucide-react";
+import { Footprints, Eye, EyeOff, type LucideIcon } from "lucide-react";
 import type { Role } from "../types";
 import { GhostButton, PrimaryButton } from "../ui";
 import { FieldLabel, inputClass, ModalShell } from "./ModalShell";
