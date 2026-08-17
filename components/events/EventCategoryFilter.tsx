@@ -6,6 +6,7 @@ export interface EventCategory {
   id: string;
   label: string;
   icon: React.ReactNode;
+  iconFallback?: string;
 }
 
 export const EVENT_CATEGORIES: EventCategory[] = [
@@ -13,31 +14,37 @@ export const EVENT_CATEGORIES: EventCategory[] = [
     id: "all",
     label: "All Events",
     icon: <Layers className="h-3.5 w-3.5" />,
+    iconFallback: "🎟️",
   },
   {
     id: "alcoholic-party",
     label: "Nightlife & Mixers",
     icon: <Flame className="h-3.5 w-3.5" />,
+    iconFallback: "🥂",
   },
   {
     id: "non-alcoholic-party",
     label: "Sober & Chill",
     icon: <Coffee className="h-3.5 w-3.5" />,
+    iconFallback: "☕",
   },
   {
     id: "business",
     label: "Business & Tech",
     icon: <Briefcase className="h-3.5 w-3.5" />,
+    iconFallback: "💼",
   },
   {
     id: "sports",
     label: "Sports & Fitness",
     icon: <Activity className="h-3.5 w-3.5" />,
+    iconFallback: "🏆",
   },
   {
     id: "performance",
     label: "Live Shows",
     icon: <Mic className="h-3.5 w-3.5" />,
+    iconFallback: "🎤",
   },
 ];
 
