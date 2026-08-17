@@ -552,7 +552,7 @@ export default function VenueDetailPage() {
             <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-200/40">
               <div className="flex items-start justify-between gap-3">
                 <div className="relative">
-                  <h1 className="text-2xl font-extrabold text-slate-900 leading-tight">
+                  <h1 className="font-display text-3xl font-black tracking-tight text-slate-950 leading-tight">
                     {venue.title}
                   </h1>
                 </div>
@@ -846,7 +846,7 @@ function VenueSummaryCard({ description, title }: { description?: string; title?
   return (
     <section className="mt-5 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm h-full">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-extrabold text-slate-900">About this venue</h2>
+        <h2 className="font-display text-lg tracking-tight font-black text-slate-950">About this venue</h2>
         {isLong && (
           <button
             type="button"
@@ -874,7 +874,7 @@ function HighlightsSection({ highlights }: { highlights: string[] }) {
   return (
     <section className="mt-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-extrabold text-slate-900">Highlights</h2>
+        <h2 className="font-display text-lg tracking-tight font-black text-slate-950">Highlights</h2>
         {highlights.length > 4 && (
           <button
             type="button"
@@ -910,7 +910,7 @@ function AmenitiesSection({ amenities }: { amenities: { label: string; Icon: typ
   return (
     <section className="mt-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-extrabold text-slate-900">Amenities</h2>
+        <h2 className="font-display text-lg tracking-tight font-black text-slate-950">Amenities</h2>
         {amenities.length > 4 && (
           <button
             type="button"
@@ -1105,7 +1105,7 @@ function VenueInfoSections({
       >
         {/* Col 1: Highlights */}
         <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm h-full">
-          <h2 className="text-sm font-extrabold text-slate-900">Highlights</h2>
+          <h2 className="font-display text-lg tracking-tight font-black text-slate-950">Highlights</h2>
           <div className="mt-4 flex flex-col gap-3">
             {highlights.slice(0, 4).map((h) => {
               let Icon = CheckCircle2;
@@ -1132,7 +1132,7 @@ function VenueInfoSections({
 
         {/* Col 2: Technical Specs */}
         <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm h-full">
-          <h2 className="text-sm font-extrabold text-slate-900">Technical Specifications</h2>
+          <h2 className="font-display text-lg tracking-tight font-black text-slate-950">Technical Specifications</h2>
           <div className="mt-4 flex flex-col gap-4">
             {((venue.technicalSpecs && venue.technicalSpecs.length > 0) ? venue.technicalSpecs : DEFAULT_TECHNICAL_SPECS).map((spec) => {
               const IconComponent = getSpecIcon(spec.icon);
@@ -1154,7 +1154,7 @@ function VenueInfoSections({
         {/* Col 3: Weather & Location Stacked */}
         <div className="flex flex-col gap-3 h-full">
           <div className="rounded-3xl border border-red-900 bg-gradient-to-br from-[#7f1d1d] to-[#450a0a] p-5 text-white shadow-lg flex flex-col gap-4">
-            <h2 className="text-[11px] font-extrabold text-white/90">Local Weather</h2>
+            <h2 className="font-display text-[13px] tracking-widest uppercase font-black text-white/90">Local Weather</h2>
             <div className="flex items-center justify-between">
               <div>
                 <motion.p initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-3xl font-black">
@@ -1187,7 +1187,7 @@ function VenueInfoSections({
 
           <div className="rounded-3xl border border-slate-100 bg-white shadow-sm flex flex-col flex-1 overflow-hidden">
             <div className="p-4 pb-2 min-w-0">
-              <h2 className="text-sm font-extrabold text-slate-900 leading-tight">Location</h2>
+              <h2 className="font-display text-lg tracking-tight font-black text-slate-950 leading-tight">Location</h2>
               {(venue.address || venue.city) && (
                 <p className="mt-0.5 text-[10px] text-slate-500 truncate">{venue.address || venue.city}</p>
               )}
@@ -1213,7 +1213,7 @@ function VenueInfoSections({
         {/* Reviews & Community */}
         <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm flex flex-col h-full">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-extrabold text-slate-900">Reviews &amp; Community</h2>
+            <h2 className="font-display text-lg tracking-tight font-black text-slate-950">Reviews &amp; Community</h2>
           </div>
           <div className="flex items-start gap-4">
             <div className="shrink-0 flex flex-col items-center">
@@ -1269,7 +1269,7 @@ function VenueInfoSections({
         {/* Write Review Form */}
         <div className="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm flex flex-col justify-between h-full">
           <div>
-            <h3 className="text-sm font-extrabold text-slate-900">Be the first to review this venue</h3>
+            <h3 className="font-display text-lg tracking-tight font-black text-slate-950">Be the first to review this venue</h3>
             <p className="mt-1 text-[10px] text-slate-500">Your experience helps other players choose better.</p>
           </div>
 
@@ -1596,16 +1596,20 @@ function MobileVenueDetail({
   return (
     <div className="pb-8">
       {/* Hero gallery with floating header */}
-      <div className="relative h-72 w-full bg-slate-900 overflow-hidden rounded-b-3xl">
-        <ImageCarousel images={galleryImages} alt={venue.title} className="h-full w-full" />
-        <div className="absolute inset-x-0 top-0 flex items-center justify-between p-4">
+      <div className="relative h-[340px] w-full bg-slate-900 overflow-hidden">
+        <ImageCarousel images={galleryImages} alt={venue.title} className="h-full w-full object-cover" />
+        
+        {/* Soft gradient overlay for top buttons */}
+        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 via-black/20 to-transparent pointer-events-none" />
+
+        <div className="absolute inset-x-0 top-0 flex items-center justify-between p-4 z-10">
           <button
             type="button"
             onClick={() => router.back()}
             aria-label="Back"
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur-md border border-white/10 shadow-sm transition active:scale-95"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-5 w-5" />
           </button>
           <div className="flex items-center gap-2">
             <button
@@ -1623,7 +1627,7 @@ function MobileVenueDetail({
                 }
               }}
               aria-label="Share venue"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm transition hover:bg-black/60"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-black/20 text-white backdrop-blur-md border border-white/10 shadow-sm transition hover:bg-black/40 active:scale-95"
             >
               <Share2 className="h-4 w-4" />
             </button>
@@ -1631,22 +1635,26 @@ function MobileVenueDetail({
         </div>
       </div>
 
-      <div className="rounded-t-[2.25rem] -mt-6 relative z-10 bg-white px-5 pt-6 shadow-[0_-12px_30px_-5px_rgba(0,0,0,0.08)] border-t border-slate-100/60">
-        <div className="flex items-start justify-between gap-3">
-          <h1 className="text-xl font-extrabold text-slate-900">{venue.title}</h1>
+      <div className="rounded-t-[2rem] -mt-6 relative z-10 bg-white px-5 pt-8 shadow-[0_-8px_30px_-5px_rgba(0,0,0,0.12)] border-t border-slate-100/50">
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 h-[5px] w-12 rounded-full bg-slate-200/80" />
+        <div className="flex items-start justify-between gap-4">
+          <h1 className="font-display text-3xl leading-[1.1] tracking-tight font-black text-slate-950">{venue.title}</h1>
+          <div className="shrink-0 mt-1">
           {venue.reviewCount && venue.reviewCount > 0 ? (
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-900 px-2.5 py-1 text-xs font-bold text-white">
-              <Star className="h-3 w-3 fill-amber-400 text-amber-400" /> {venue.rating?.toFixed(1)}
+            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-amber-200/50 bg-gradient-to-br from-amber-50 to-orange-50 px-3 py-1.5 text-xs font-black text-amber-600 shadow-sm">
+              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" /> {venue.rating?.toFixed(1)}
             </span>
           ) : (
-            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500">
+            <span className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-100 bg-slate-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-500 shadow-sm">
               No ratings
             </span>
           )}
+          </div>
         </div>
 
-        {/* Premium Mobile Sticky Booking Bar */}
-        <div id="price-block" className="sticky top-[76px] z-40 mt-5 mb-6 flex items-center justify-between gap-3 overflow-hidden rounded-[1.35rem] border border-brand-200 bg-gradient-to-r from-white via-[#fff8f8] to-[#fff1f2] p-3.5 shadow-[0_14px_34px_-12px_rgba(127,29,29,0.38)] ring-1 ring-white transition-all duration-300 lg:hidden">
+        {/* Premium Mobile Sticky Booking Bar Wrapper */}
+        <div className="sticky top-[52px] sm:top-[60px] z-40 -mx-5 px-5 bg-white/95 backdrop-blur-md pt-5 pb-4 mt-2 lg:hidden shadow-[0_8px_20px_-10px_rgba(0,0,0,0.05)] border-b border-slate-50">
+          <div id="price-block" className="flex items-center justify-between gap-3 overflow-hidden rounded-[1.35rem] border border-brand-200 bg-gradient-to-r from-white via-[#fff8f8] to-[#fff1f2] p-3.5 shadow-[0_14px_34px_-12px_rgba(127,29,29,0.38)] ring-1 ring-white transition-all duration-300">
           <div className="min-w-0 flex-1 flex flex-col justify-center">
             {venue.type === "Event" && venue.priceTiers.length > 0 && <div className="flex flex-wrap gap-1.5">{venue.priceTiers.map((tier) => <span key={tier.id} className="rounded-lg border border-rose-100 bg-white px-2 py-1 text-[10px] font-bold text-slate-800">{eventTierName(tier.label)} ₹{tier.amount.toLocaleString("en-IN")}</span>)}</div>}
             {venue.strikePrice && venue.strikePrice > venue.price && (
@@ -1684,6 +1692,7 @@ function MobileVenueDetail({
           >
             Book Now
           </button>
+          </div>
         </div>
 
         {/* ── TURF / GAME — show specs, weather, sports, amenities, players, reviews ── */}
@@ -1799,7 +1808,7 @@ function MobileVenueDetail({
         {/* Video — shown for all types when videoUrl exists */}
         {venue.videoUrl && (
           <section className="mt-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-            <h2 className="text-sm font-extrabold text-slate-900">🎥 {venue.type === "Event" ? "Event Video" : "Venue Video"}</h2>
+            <h2 className="font-display text-lg tracking-tight font-black text-slate-950">🎥 {venue.type === "Event" ? "Event Video" : "Venue Video"}</h2>
             <div className="mt-3 aspect-video w-full overflow-hidden rounded-2xl bg-black border border-slate-100 shadow-sm">
               {venue.videoUrl.includes("youtube.com") || venue.videoUrl.includes("youtu.be") ? (
                 <iframe

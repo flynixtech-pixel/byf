@@ -19,10 +19,11 @@ import {
 } from "lucide-react";
 
 import { SiteHeader } from "../../components/site-header";
-import { MobileCard, MobileTopBar } from "@/components/mobile/ui";
+import { MobileTopBar } from "@/components/mobile/ui";
 import { browseVenues } from "@/lib/api/venues";
 import { Listing } from "@/lib/api/types";
 import { AnimatedSportIcon } from "@/components/sports/AnimatedSportIcon";
+import { VenuePosterCard, VenuePosterCardSkeleton } from "@/components/venue-poster-card";
 
 export interface SportCatalogItem {
   id: string;
@@ -145,9 +146,10 @@ export default function GamesPage() {
   const [venues, setVenues] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<FilterCategory>("all");
+  const [showAllSports, setShowAllSports] = useState(false);
 
   useEffect(() => {
-    browseVenues({ type: "Turf", limit: 8 })
+    browseVenues({ type: "Turf", limit: 20 })
       .then((res) => {
         setVenues(res.items);
       })
@@ -161,317 +163,157 @@ export default function GamesPage() {
   }, [activeFilter]);
 
   return (
-    <div className="min-h-screen bg-slate-50/50 text-slate-900 selection:bg-brand-500 selection:text-white">
-      {/* Header */}
+    <div className="min-h-screen bg-slate-50/50 text-slate-900 selection:bg-brand-500 selection:text-white pb-6 sm:pb-10">
       <div className="hidden sm:block">
         <SiteHeader />
       </div>
-
-      {/* Mobile Top Header */}
       <div className="sm:hidden px-4 pt-3 pb-1 bg-white border-b border-slate-100 sticky top-0 z-40 shadow-xs">
         <MobileTopBar />
       </div>
 
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
-        {/* ================================================================= */}
-        {/* HERO SECTION - PICK A SPORT                                      */}
-        {/* ================================================================= */}
-        <section className="relative overflow-hidden rounded-[2rem] sm:rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6 sm:p-10 lg:p-12 text-white shadow-2xl shadow-slate-900/20 border border-slate-800">
-          {/* Ambient Glow Accents */}
-          <div className="absolute -top-24 -left-24 h-80 w-80 rounded-full bg-brand-500/20 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-sky-500/20 blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-            {/* Left Content Column */}
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 backdrop-blur-md">
-                <Sparkles className="h-4 w-4 text-amber-400 animate-pulse" />
-                <span className="text-xs font-black uppercase tracking-wider text-amber-300">
-                  Instant Game Finder
-                </span>
-              </div>
-
-              <h1 className="mt-4 text-3xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl leading-[1.1]">
-                Pick a sport, then jump straight to the right venue.
-              </h1>
-
-              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base sm:leading-7">
-                We keep booking effortless. Select your sport to view active courts, check live slot availability, and complete your booking in seconds.
-              </p>
-
-              {/* Value Props & Stat Pills */}
-              <div className="mt-6 flex flex-wrap items-center gap-2.5 sm:gap-3">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-500/10 border border-brand-500/30 px-3.5 py-1.5 text-xs sm:text-sm font-bold text-brand-400">
-                  <Trophy className="h-3.5 w-3.5" />
-                  {SPORTS_ITEMS.length} Sports Ready
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-1.5 text-xs sm:text-sm font-bold text-emerald-400">
-                  <Activity className="h-3.5 w-3.5" />
-                  Live Slot Availability
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-500/10 border border-sky-500/30 px-3.5 py-1.5 text-xs sm:text-sm font-bold text-sky-400">
-                  <Zap className="h-3.5 w-3.5" />
-                  Instant Confirmation
-                </span>
-              </div>
-            </div>
-
-            {/* Right Interactive Animated Feature Cards (Desktop Spotlight) */}
-            <div className="hidden sm:block">
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl shadow-inner">
-                <div className="flex items-center justify-between mb-4 px-1">
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                    <Zap className="h-3.5 w-3.5 text-amber-400" /> Trending Right Now
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  {SPORTS_ITEMS.slice(0, 4).map((s, idx) => (
-                    <div
-                      key={s.id}
-                      onClick={() => router.push(`/venues?category=${s.id === "box-cricket" || s.id === "cricket-nets" ? "cricket" : s.id}`)}
-                      className="group relative flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-900/60 p-3 backdrop-blur-md transition-all duration-300 hover:border-brand-500/50 hover:bg-slate-900/90 hover:shadow-lg cursor-pointer"
-                    >
-                      <AnimatedSportIcon
-                        id={s.id}
-                        label={s.label}
-                        image={s.image}
-                        alt={s.alt}
-                        bubble={s.bubble}
-                        index={idx}
-                        className="!h-14 !w-14 sm:!h-16 sm:!w-16 shrink-0"
-                      />
-                      <div className="min-w-0 flex-1">
-                        <h3 className="text-xs sm:text-sm font-extrabold text-white truncate group-hover:text-brand-400 transition">
-                          {s.label}
-                        </h3>
-                        <p className="text-[10px] text-slate-400 truncate mt-0.5 font-medium">
-                          {s.venuesCount}+ Active Turfs
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+        
+        {/* Compact, Premium Header */}
+        <section className="mb-8">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="h-2 w-2 rounded-full bg-brand-500 animate-pulse" />
+            <p className="text-[10px] font-black uppercase tracking-widest text-brand-600">
+              What's the play?
+            </p>
           </div>
+          <h1 className="font-display text-2xl font-black tracking-tight text-slate-950 sm:text-4xl">
+            Pick your game. Lock the vibe.
+          </h1>
+          <p className="mt-1.5 text-xs text-slate-500 sm:text-sm">
+            Less scrolling, more scoring. Find a fire turf, assemble the squad, and show up to play.
+          </p>
         </section>
 
-        {/* ================================================================= */}
-        {/* SPORTS CATALOG & CATEGORY FILTERING                              */}
-        {/* ================================================================= */}
-        <section className="mt-10 sm:mt-14">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-brand-500 animate-ping" />
-                <p className="text-xs font-black uppercase tracking-widest text-brand-600">
-                  Browse Catalog
-                </p>
-              </div>
-              <h2 className="mt-1 text-2xl font-black text-slate-950 sm:text-3xl tracking-tight">
-                Select Your Favorite Sport
-              </h2>
-            </div>
+        {/* Filter Tabs */}
+        <div className="mb-5 flex items-center gap-2.5 overflow-x-auto pb-2 px-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          {[
+            { id: "all", label: "All Sports", icon: <Layers className="h-3.5 w-3.5" /> },
+            { id: "turf", label: "Field & Turf", icon: <Activity className="h-3.5 w-3.5" /> },
+            { id: "racket", label: "Racket Sports", icon: <Zap className="h-3.5 w-3.5" /> },
+            { id: "indoor", label: "Indoor & Leisure", icon: <Trophy className="h-3.5 w-3.5" /> },
+          ].map((tab) => {
+            const isActive = activeFilter === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setActiveFilter(tab.id as FilterCategory);
+                  setShowAllSports(false);
+                }}
+                className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-[11px] font-black uppercase tracking-wider transition-all duration-300 cursor-pointer ${isActive
+                    ? "bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-md shadow-brand-500/25 border border-brand-500 scale-105"
+                    : "bg-white text-slate-500 border border-slate-200/80 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300"
+                  }`}
+              >
+                <span className={isActive ? "text-white opacity-90" : "text-brand-500 opacity-80"}>
+                  {tab.icon}
+                </span>
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
 
-            {/* Filter Tabs */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              {[
-                { id: "all", label: "All Sports", count: SPORTS_ITEMS.length },
-                { id: "turf", label: "🏏 Field & Turf", count: 4 },
-                { id: "racket", label: "🏸 Racket Sports", count: 4 },
-                { id: "indoor", label: "🎱 Indoor & Leisure", count: 2 },
-              ].map((tab) => {
-                const isActive = activeFilter === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveFilter(tab.id as FilterCategory)}
-                    className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-extrabold whitespace-nowrap transition-all duration-200 cursor-pointer ${isActive
-                        ? "bg-slate-950 text-white shadow-md shadow-slate-950/20 ring-2 ring-slate-950/30 scale-[1.02]"
-                        : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-100/70"
-                      }`}
-                  >
-                    <span>{tab.label}</span>
-                    <span
-                      className={`rounded-full px-1.5 py-0.5 text-[10px] font-black ${isActive ? "bg-brand-500 text-white" : "bg-slate-100 text-slate-500"
-                        }`}
-                    >
-                      {tab.count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Animated Sports Grid */}
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {/* Compact Sports Grid */}
+        <section>
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {filteredSports.map((sport, index) => {
-              const categoryQuery =
-                sport.id === "box-cricket" || sport.id === "cricket-nets" ? "cricket" : sport.id;
+              const categoryQuery = sport.id === "box-cricket" || sport.id === "cricket-nets" ? "cricket" : sport.id;
+              const isHiddenOnMobile = !showAllSports && index >= 4;
 
               return (
                 <Link
                   key={sport.id}
                   href={`/venues?category=${categoryQuery}`}
-                  className="group relative flex flex-col justify-between overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white p-5 shadow-xs transition-all duration-300 hover:-translate-y-1.5 hover:border-brand-500/40 hover:shadow-xl hover:shadow-brand-500/5"
+                  className={`${isHiddenOnMobile ? "hidden sm:flex" : "flex"} group items-center gap-2.5 rounded-2xl border border-slate-100 bg-white p-2 shadow-xs transition hover:shadow-md hover:border-brand-200`}
                 >
-                  {/* Decorative background gradient */}
-                  <div
-                    className={`absolute inset-0 opacity-0 bg-gradient-to-br ${sport.bubble} transition-opacity duration-300 group-hover:opacity-10 pointer-events-none`}
-                  />
-
-                  <div>
-                    {/* Top Row: Animated Icon + Venue Count Tag */}
-                    <div className="flex items-start justify-between gap-3">
-                      <AnimatedSportIcon
-                        id={sport.id}
-                        label={sport.label}
-                        image={sport.image}
-                        alt={sport.alt}
-                        bubble={sport.bubble}
-                        index={index}
-                        className="!h-20 !w-20 sm:!h-24 sm:!w-24 shrink-0"
-                      />
-
-                      <div className="flex flex-col items-end gap-1.5">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-700 group-hover:bg-brand-50 group-hover:text-brand-700 transition">
-                          <MapPin className="h-3 w-3 text-brand-500" />
-                          {sport.venuesCount} Venues
-                        </span>
-                        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/50">
-                          Slots Open
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Title & Description */}
-                    <div className="mt-4">
-                      <h3 className="text-xl font-black tracking-tight text-slate-950 group-hover:text-brand-600 transition-colors">
-                        {sport.label}
-                      </h3>
-                      <p className="mt-1 text-xs font-semibold leading-relaxed text-slate-500">
-                        {sport.note}
-                      </p>
-                    </div>
+                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-[10px] bg-slate-50 flex items-center justify-center">
+                    <AnimatedSportIcon
+                      id={sport.id}
+                      label={sport.label}
+                      image={sport.image}
+                      alt={sport.alt}
+                      bubble={sport.bubble}
+                      index={index}
+                      className="!h-7 !w-7"
+                    />
                   </div>
-
-                  {/* Bottom Action Footer */}
-                  <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-3">
-                    <span className="text-xs font-bold text-slate-600 group-hover:text-brand-600 transition">
-                      View Available Courts
-                    </span>
-                    <div className="grid h-8 w-8 place-items-center rounded-full bg-slate-100 text-slate-700 transition-all duration-300 group-hover:bg-brand-500 group-hover:text-white group-hover:translate-x-1 group-hover:shadow-md group-hover:shadow-brand-500/30">
-                      <ArrowRight className="h-4 w-4" />
-                    </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-display text-[11px] sm:text-xs font-bold text-slate-900 truncate group-hover:text-brand-600 transition-colors">
+                      {sport.label}
+                    </h3>
+                    <p className="text-[9px] text-slate-500 font-medium truncate mt-0.5">
+                      {sport.note}
+                    </p>
                   </div>
                 </Link>
               );
             })}
           </div>
+
+          {filteredSports.length > 4 && (
+            <div className="mt-4 flex justify-center sm:hidden">
+              <button
+                type="button"
+                onClick={() => setShowAllSports(!showAllSports)}
+                className="rounded-full border border-slate-200 bg-white px-5 py-2 text-[11px] font-bold text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50"
+              >
+                {showAllSports ? "View Less" : `View ${filteredSports.length - 4} More`}
+              </button>
+            </div>
+          )}
         </section>
 
-        {/* ================================================================= */}
-        {/* FEATURED VENUES SECTION                                           */}
-        {/* ================================================================= */}
-        <section className="mt-14 sm:mt-20">
-          <div className="flex items-center justify-between gap-4 mb-6">
+        {/* Featured Venues Section */}
+        <section className="mt-12 sm:mt-16">
+          <div className="mb-6 flex items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-black uppercase tracking-widest text-brand-600">
-                Top Rated Arenas
+              <p className="text-[10px] font-black uppercase tracking-widest text-brand-600 mb-1">
+                Top Arenas
               </p>
-              <h2 className="mt-1 text-2xl font-black text-slate-950 sm:text-3xl tracking-tight">
-                Book a Court, Turf, or Table Near You
+              <h2 className="font-display text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
+                Book a court near you
               </h2>
             </div>
             <Link
               href="/venues"
-              className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-brand-600 hover:text-brand-700 hover:underline transition shrink-0"
+              className="text-xs font-bold text-brand-600 hover:underline shrink-0"
             >
-              View All Venues <ChevronRight className="h-4 w-4" />
+              View All
             </Link>
           </div>
 
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            {venues.map((venue) => (
-              <Link
-                key={venue._id}
-                href={`/venues/${venue.slug || venue._id}`}
-                className="group relative flex flex-col overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-xs transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-slate-300"
-              >
-                {/* Cover Image Container */}
-                <div className="relative h-48 w-full overflow-hidden bg-slate-950">
-                  {venue.coverImage ? (
-                    <Image
-                      src={venue.coverImage}
-                      alt={venue.title}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      className="object-cover transition-transform duration-500 group-hover:scale-105 opacity-90"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-slate-900 text-slate-600 font-bold text-xs">
-                      Venue Preview
-                    </div>
-                  )}
-
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
-
-                  {/* Rating & Sport Pills */}
-                  <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 z-10">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-white/90 backdrop-blur-md px-2.5 py-1 text-[11px] font-black text-slate-900 shadow-sm">
-                      <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                      4.8
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-slate-950/70 backdrop-blur-md px-2.5 py-1 text-[10px] font-bold text-white border border-white/20">
-                      Turf & Court
-                    </span>
-                  </div>
-
-                  {/* Bottom Image Title Overlay */}
-                  <div className="absolute bottom-3 left-4 right-4 z-10">
-                    <h3 className="text-base font-black text-white leading-tight drop-shadow-sm group-hover:text-amber-300 transition">
-                      {venue.title}
-                    </h3>
-                  </div>
-                </div>
-
-                {/* Details Footer */}
-                <div className="p-4 flex items-center justify-between gap-3 bg-white">
-                  <div>
-                    <p className="flex items-center gap-1 text-xs font-semibold text-slate-500">
-                      <MapPin className="h-3.5 w-3.5 text-brand-500" /> {venue.city || "Udaipur"}
-                    </p>
-                    <p className="mt-1 text-sm font-black text-slate-950">
-                      ₹{venue.price?.toLocaleString("en-IN") ?? 800} <span className="text-[11px] font-semibold text-slate-400">/ hr</span>
-                    </p>
-                  </div>
-
-                  <span className="rounded-xl bg-brand-50 px-3 py-2 text-xs font-bold text-brand-700 group-hover:bg-brand-500 group-hover:text-white transition">
-                    Book Slot
-                  </span>
-                </div>
-              </Link>
-            ))}
-
-            {/* Skeleton Loading State */}
-            {loading &&
-              Array.from({ length: 4 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="animate-pulse rounded-[2rem] border border-slate-200 bg-white p-4 h-64 flex flex-col justify-between"
-                >
-                  <div className="h-36 rounded-xl bg-slate-200" />
-                  <div className="space-y-2">
-                    <div className="h-4 w-3/4 rounded bg-slate-200" />
-                    <div className="h-3 w-1/2 rounded bg-slate-200" />
-                  </div>
-                </div>
-              ))}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+            {loading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <VenuePosterCardSkeleton key={i} />
+              ))
+            ) : venues.length > 0 ? (
+              venues.map((venue) => (
+                <VenuePosterCard
+                  key={venue._id}
+                  id={venue._id}
+                  href={`/venues/${venue.slug || venue._id}`}
+                  title={venue.title}
+                  image={venue.coverImage}
+                  city={venue.city}
+                  price={venue.price}
+                />
+              ))
+            ) : (
+              <p className="col-span-full rounded-2xl bg-white p-8 text-center text-sm text-slate-500">
+                No venues found.
+              </p>
+            )}
           </div>
         </section>
+
       </main>
     </div>
   );

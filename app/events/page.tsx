@@ -185,14 +185,14 @@ export default function EventsPage() {
         <main className="flex flex-col gap-4 px-4 pt-3 pb-5">
           {/* Header */}
           <div>
-            <span className="inline-block rounded-full bg-rose-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-rose-500 border border-rose-100/80">
-              EVENTS
+            <span className="inline-block rounded-full bg-brand-50 px-2.5 py-0.5 text-[9.5px] font-black uppercase tracking-wider text-brand-600 border border-brand-100/80">
+              THE VIBE RADAR
             </span>
-            <h1 className="mt-1 text-2xl font-black text-slate-900 tracking-tight leading-tight">
-              Marathons, workshops, and everything past turf time.
+            <h1 className="font-display mt-1 text-xl font-bold text-slate-900 tracking-tight leading-tight">
+              The scene. The squad. The vibe.
             </h1>
-            <p className="mt-0.5 text-xs font-semibold text-slate-500">
-              RSVP in a couple of taps — same flow as booking a slot.
+            <p className="mt-1 text-xs font-semibold text-slate-500">
+              From high-energy mix-ups to underground parties—RSVP in seconds and skip the line.
             </p>
           </div>
 
@@ -265,13 +265,12 @@ export default function EventsPage() {
 
       <main className="mx-auto hidden max-w-7xl px-4 py-10 sm:block sm:px-6 sm:py-14">
         <div className="max-w-2xl">
-          <p className="text-xs font-bold uppercase tracking-[0.25em] text-brand-600">Events</p>
-          <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-            Any event a venue hosts — RSVP the same way you book a slot.
+          <p className="text-xs font-bold uppercase tracking-[0.25em] text-brand-600">The Vibe Radar</p>
+          <h1 className="font-display mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+            The scene. The squad. The vibe.
           </h1>
           <p className="mt-4 text-sm leading-7 text-slate-500 sm:text-base">
-            Marathons, tournaments, workshops, corporate offsites — hosted through the same booking
-            engine as turf time, with the same QR check-in.
+            From high-energy mix-ups to underground parties—RSVP in seconds and skip the line.
           </p>
         </div>
 

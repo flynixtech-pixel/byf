@@ -38,22 +38,27 @@ export function filterPillClass(active: boolean): string {
 }
 
 /** Shared sport/price/distance/sort filtering used by both the mobile bottom-sheet and desktop filters modal. */
-export function useVenueFilters(venues: Venue[], searchValue: string) {
-  const [selectedSports, setSelectedSports] = useState<Set<string>>(new Set());
+export function useVenueFilters(venues: Venue[], searchValue: string, initialCategory?: string) {
+  const [selectedSports, setSelectedSports] = useState<Set<string>>(() => {
+    const s = new Set<string>();
+    if (initialCategory) {
+      // Find the label for the id
+      const cat = SPORT_CATEGORIES.find(c => c.id === initialCategory);
+      if (cat) s.add(cat.label);
+      else s.add(initialCategory); // fallback
+    }
+    return s;
+  });
   const [maxPrice, setMaxPrice] = useState<number | null>(null);
   const [maxDistance, setMaxDistance] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<SortBy>("recommended");
 
-  // Always expose every sport supported on BYV, then retain any custom sports
-  // that are currently offered by a venue. Each sport gets its own filter chip.
+  // Only expose sports that are currently offered by the loaded venues.
   const sportOptions = useMemo(() => {
-    const supportedSports = SPORT_CATEGORIES
-      .filter((category) => category.id !== "indoor-games")
-      .map((category) => category.label);
     const venueSports = venues
       .flatMap((venue) => sportsForVenue(venue.sport))
-      .filter((sport) => sport !== "Indoor Games");
-    return Array.from(new Set([...supportedSports, ...venueSports]));
+      .filter((sport) => sport !== "Indoor Games" && sport.length > 0);
+    return Array.from(new Set(venueSports)).sort();
   }, [venues]);
 
   const toggleSport = (sport: string) =>

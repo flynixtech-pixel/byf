@@ -1,57 +1,43 @@
 "use client";
 
-import Image from "next/image";
+import { Layers, Flame, Coffee, Briefcase, Activity, Mic } from "lucide-react";
 
 export interface EventCategory {
   id: string;
   label: string;
-  imageSrc: string;
-  iconFallback: string;
-  color: string;
+  icon: React.ReactNode;
 }
 
 export const EVENT_CATEGORIES: EventCategory[] = [
   {
     id: "all",
     label: "All Events",
-    imageSrc: "/categories/all.png",
-    iconFallback: "✨",
-    color: "from-amber-500 to-orange-500",
+    icon: <Layers className="h-3.5 w-3.5" />,
   },
   {
     id: "alcoholic-party",
-    label: "Alcoholic Party",
-    imageSrc: "/categories/alcoholic-party.png",
-    iconFallback: "🍾",
-    color: "from-purple-600 to-pink-600",
+    label: "Nightlife & Mixers",
+    icon: <Flame className="h-3.5 w-3.5" />,
   },
   {
     id: "non-alcoholic-party",
-    label: "Non-Alcoholic Party",
-    imageSrc: "/categories/non-alcoholic-party.png",
-    iconFallback: "🥤",
-    color: "from-emerald-500 to-teal-600",
+    label: "Sober & Chill",
+    icon: <Coffee className="h-3.5 w-3.5" />,
   },
   {
     id: "business",
-    label: "Business",
-    imageSrc: "/categories/business.png",
-    iconFallback: "💼",
-    color: "from-blue-600 to-indigo-600",
+    label: "Business & Tech",
+    icon: <Briefcase className="h-3.5 w-3.5" />,
   },
   {
     id: "sports",
-    label: "Sports",
-    imageSrc: "/categories/sports.png",
-    iconFallback: "🏆",
-    color: "from-orange-500 to-amber-600",
+    label: "Sports & Fitness",
+    icon: <Activity className="h-3.5 w-3.5" />,
   },
   {
     id: "performance",
-    label: "Performance",
-    imageSrc: "/categories/performance.png",
-    iconFallback: "🎭",
-    color: "from-rose-500 to-red-600",
+    label: "Live Shows",
+    icon: <Mic className="h-3.5 w-3.5" />,
   },
 ];
 
@@ -65,7 +51,7 @@ export function EventCategoryFilter({ selectedCategoryId, onSelectCategory, clas
   return (
     <div className={`w-full ${className}`}>
       {/* Scrollable Container on Mobile, Flex Row on Desktop */}
-      <div className="-mx-4 flex items-center gap-2.5 overflow-x-auto px-4 py-2 scroll-smooth scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-start">
+      <div className="-mx-4 flex items-center gap-2.5 overflow-x-auto px-4 pb-2 scroll-smooth scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0 sm:flex-wrap sm:justify-start">
         {EVENT_CATEGORIES.map((cat) => {
           const isSelected = selectedCategoryId === cat.id;
 
@@ -74,35 +60,16 @@ export function EventCategoryFilter({ selectedCategoryId, onSelectCategory, clas
               key={cat.id}
               type="button"
               onClick={() => onSelectCategory(cat.id)}
-              className={`group relative flex h-[72px] min-w-[84px] shrink-0 flex-col items-center justify-center gap-1 rounded-[16px] border px-2.5 py-1.5 text-center transition-all duration-300 ease-in-out transform active:scale-95 cursor-pointer ${
+              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-[11px] font-black uppercase tracking-wider transition-all duration-300 cursor-pointer ${
                 isSelected
-                  ? "border-rose-500 bg-rose-50/50 ring-2 ring-rose-500/20 shadow-md shadow-rose-500/10 scale-[1.02]"
-                  : "border-slate-100 bg-white text-slate-700 hover:border-slate-300 hover:shadow-xs"
+                  ? "bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-md shadow-brand-500/25 border border-brand-500 scale-105"
+                  : "bg-white text-slate-500 border border-slate-200/80 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300"
               }`}
             >
-              <span className="flex items-center justify-center text-[22px] leading-none transition group-hover:scale-110">
-                {cat.imageSrc ? (
-                  <div className="relative h-6 w-6 shrink-0">
-                    <Image
-                      src={cat.imageSrc}
-                      alt={cat.label}
-                      fill
-                      className="object-contain"
-                      sizes="24px"
-                      priority
-                    />
-                  </div>
-                ) : (
-                  <span>{cat.iconFallback}</span>
-                )}
+              <span className={isSelected ? "text-white opacity-90" : "text-brand-500 opacity-80"}>
+                {cat.icon}
               </span>
-              <span
-                className={`text-[10.5px] font-extrabold tracking-tight whitespace-nowrap ${
-                  isSelected ? "text-rose-600 font-black" : "text-slate-800"
-                }`}
-              >
-                {cat.label}
-              </span>
+              <span>{cat.label}</span>
             </button>
           );
         })}

@@ -68,27 +68,29 @@ function VenueCard({
         </div>
       </div>
       
-      <div className="flex flex-1 flex-col gap-0.5 p-3 sm:p-3.5">
-        <h3 className="truncate text-sm font-bold text-slate-900" title={venue.name}>{venue.name}</h3>
-        <p className="flex items-center gap-1 text-[11px] text-slate-500">
-          <MapPin className="h-3 w-3" aria-hidden /> <span className="truncate">{venue.area}</span>
+      <div className="flex flex-1 flex-col p-2.5 sm:p-3">
+        <h3 className="line-clamp-2 text-[13px] font-display font-bold leading-tight text-slate-900 drop-shadow-sm mb-1" title={venue.name}>
+          {venue.name}
+        </h3>
+        <p className="flex items-center gap-1 text-[10px] font-medium text-slate-500 mb-2">
+          <MapPin className="h-3 w-3 shrink-0 text-brand-500" aria-hidden /> <span className="truncate">{venue.area}</span>
         </p>
-        <div className="mt-2.5 flex items-center justify-between">
+        <div className="mt-auto flex items-end justify-between border-t border-slate-100/50 pt-2">
           <div className="flex flex-col justify-center">
             {venue.strikePrice && venue.strikePrice > venue.pricePerHour && (
               <div className="mb-0.5 flex items-center gap-1.5">
                 <span className="text-[10px] font-semibold text-slate-400 line-through">₹{venue.strikePrice}</span>
-                <span className="text-[8px] font-bold text-emerald-600 bg-emerald-50 px-1 py-0.5 rounded-sm uppercase tracking-wide">
+                <span className="text-[8px] font-extrabold text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded border border-emerald-100/50 uppercase tracking-wider">
                   {Math.round(((venue.strikePrice - venue.pricePerHour) / venue.strikePrice) * 100)}% OFF
                 </span>
               </div>
             )}
-            <p className="text-sm font-bold text-slate-900">
+            <p className="text-[13px] font-black text-slate-900">
               ₹{venue.pricePerHour}
-              <span className="font-normal text-slate-400 text-[10px]"> /hr</span>
+              <span className="font-bold text-slate-400 text-[9px]"> /hr</span>
             </p>
           </div>
-          <PrimaryButton onClick={onBook} className="!px-3 !py-1.5 text-[11px] font-bold shadow-sm">
+          <PrimaryButton onClick={onBook} className="!px-3 !py-1.5 text-[10px] sm:text-[11px] font-black uppercase tracking-wide shadow-sm active:scale-95 transition-transform">
             Book
           </PrimaryButton>
         </div>
@@ -117,8 +119,8 @@ export function TrendingVenues({
   return (
     <section id="venues" className="mx-auto mt-4 sm:mt-6 max-w-7xl px-4 sm:px-6 lg:px-8">
       <SectionHeading
-        eyebrow="Booked the most this week"
-        title="Trending Venues"
+        eyebrow="What everyone's booking"
+        title="Top Tier Turfs"
         icon={Flame}
         actionLabel="View All Venues"
         onAction={onViewAll}

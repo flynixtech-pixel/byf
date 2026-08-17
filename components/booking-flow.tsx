@@ -2465,7 +2465,7 @@ function ReviewStep(props: {
             </div>
             
             {/* Next Button for Step 1 */}
-            <div className="mt-4 pb-2">
+            <div className="mt-4 pb-2 hidden lg:block">
               <button
                 type="button"
                 disabled={selectedSlotIndices.length === 0}
@@ -2486,7 +2486,7 @@ function ReviewStep(props: {
             <div className="rounded-3xl border border-slate-100 bg-white p-5 lg:p-6">
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="text-sm font-extrabold text-slate-900">{listing.title}</h3>
+                  <h3 className="font-display text-lg tracking-tight font-black text-slate-950 leading-tight">{listing.title}</h3>
                   <p className="mt-0.5 text-xs font-medium text-slate-500 truncate max-w-[220px] sm:max-w-none">
                     {selectedSport ? `${selectedSport} • ` : ""}{listing.type}
                     {selectedCourtDisplay ? ` • ${selectedCourtDisplay}` : ""}
@@ -2532,7 +2532,7 @@ function ReviewStep(props: {
               <button type="button" className="flex items-center justify-between rounded-3xl border border-slate-100 bg-white p-5 lg:p-6 transition hover:bg-slate-50">
                 <div className="flex items-center gap-2">
                   <div className="text-brand-500 text-lg">🏷️</div>
-                  <span className="text-sm font-bold text-slate-800">Apply Coupon Code</span>
+                  <span className="font-display text-[13px] font-black tracking-wide text-slate-900">Apply Coupon Code</span>
                 </div>
                 <ChevronRight className="h-4 w-4 text-slate-400" />
               </button>
@@ -2543,7 +2543,7 @@ function ReviewStep(props: {
             <div className="rounded-3xl border border-slate-100 bg-white p-5 lg:p-6 shadow-xs">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-bold text-slate-800 flex items-center gap-1.5">Game Reminders <span className="text-orange-500 text-sm">🔔</span></p>
+                  <p className="font-display text-base tracking-tight font-black text-slate-950 flex items-center gap-1.5">Game Reminders <span className="text-orange-500 text-sm">🔔</span></p>
                   <p className="text-xs text-slate-500 mt-1">Get an SMS/Push notification 1 hr before your slot.</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -2585,7 +2585,7 @@ function ReviewStep(props: {
               return (
                 <div className="rounded-3xl border border-slate-100 bg-white p-5 lg:p-6">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-bold text-slate-800">Add-ons &amp; Equipment</p>
+                    <p className="font-display text-base tracking-tight font-black text-slate-950">Add-ons &amp; Equipment</p>
                     {selectedSport && (
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
                         {categoryLabel(selectedSport) || selectedSport}
@@ -2618,7 +2618,7 @@ function ReviewStep(props: {
                                 </span>
                               )}
                               <div>
-                                <p className="text-xs font-bold text-slate-800">{addOn.label}</p>
+                                <p className="font-display text-[13px] tracking-tight font-black text-slate-950 leading-snug">{addOn.label}</p>
                                 <p className="text-[10px] font-semibold text-slate-500">₹{addOn.price.toLocaleString("en-IN")}</p>
                               </div>
                             </div>
@@ -2649,7 +2649,7 @@ function ReviewStep(props: {
                   <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-600 text-white text-xs font-bold shadow-xs">
                     💳
                   </span>
-                  <span className="text-xs font-extrabold text-slate-800 uppercase tracking-wide">
+                  <span className="font-display text-[12px] font-black uppercase tracking-widest text-slate-900">
                     Select Payment Option
                   </span>
                 </div>
@@ -2670,7 +2670,7 @@ function ReviewStep(props: {
                       }`}
                   >
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-black text-slate-900">Partial Payment</span>
+                      <span className="font-display text-[13px] tracking-tight font-black text-slate-900">Partial Payment</span>
                       <span className={`rounded-full px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider ${paymentOption === "partial" ? "bg-brand-600 text-white" : "bg-brand-100 text-brand-800"
                         }`}>
                         {partialConfig.type === "fixed" ? `₹${partialConfig.value} Deposit` : `${partialConfig.value}% Deposit`}
@@ -2694,7 +2694,7 @@ function ReviewStep(props: {
                       }`}
                   >
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-black text-slate-900">Full Payment</span>
+                      <span className="font-display text-[13px] tracking-tight font-black text-slate-900">Full Payment</span>
                       <span className={`rounded-full px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider ${paymentOption === "full" ? "bg-brand-600 text-white" : "bg-brand-100 text-brand-800"
                         }`}>
                         100% Online
@@ -2749,16 +2749,16 @@ function ReviewStep(props: {
                   </>
                 )}
                 <div className="flex items-center justify-between text-slate-600">
-                  <span>{listing.type === "Event" ? "Total payable" : "Total Booking Amount"}</span>
-                  <span className="font-bold text-slate-900">₹{activePrice.toLocaleString("en-IN")}</span>
+                  <span className="font-medium">{listing.type === "Event" ? "Total payable" : "Total Booking Amount"}</span>
+                  <span className="font-display text-[14px] font-black tracking-tight text-slate-950">₹{activePrice.toLocaleString("en-IN")}</span>
                 </div>
 
-                <div className="flex items-center justify-between rounded-lg bg-brand-100/90 px-3 py-2 text-brand-950 font-bold">
-                  <span className="flex items-center gap-1.5">
-                    <span className="h-2 w-2 rounded-full bg-brand-600 animate-pulse" />
+                <div className="flex items-center justify-between rounded-lg bg-brand-50 border border-brand-100/50 px-3 py-2 text-brand-950">
+                  <span className="flex items-center gap-1.5 font-bold text-[11px] uppercase tracking-wider text-brand-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand-600 animate-pulse" />
                     Pay Now ({paymentOption === "full" || !canPartial ? "Full Payment" : "Advance Deposit"})
                   </span>
-                  <span className="text-sm font-black text-brand-800">₹{payNowAmount.toLocaleString("en-IN")}</span>
+                  <span className="font-display text-base font-black text-brand-700">₹{payNowAmount.toLocaleString("en-IN")}</span>
                 </div>
 
                 {listing.type !== "Event" && (payAtVenueAmount > 0 ? (
@@ -2802,7 +2802,7 @@ function ReviewStep(props: {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center justify-between gap-1">
-                    <p className="text-sm font-black text-slate-900 tracking-wide flex items-center gap-1.5">
+                    <p className="font-display text-[14px] font-black tracking-tight text-slate-950 flex items-center gap-1.5">
                       Play Protect <ShieldCheck className="h-4 w-4 text-brand-500" strokeWidth={2.5} />
                     </p>
                     <span className="text-[10px] font-extrabold text-brand-500 bg-brand-500/10 px-2 py-0.5 rounded-full border border-brand-500/20 shrink-0">+ ₹19 added to total</span>
@@ -2819,7 +2819,7 @@ function ReviewStep(props: {
             {flowStep === "details" && (
             <div className="mt-3">
               <div className="mb-4">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-3">Contact Details</p>
+                <p className="font-display text-[12px] font-black uppercase tracking-widest text-brand-600 mb-3">Contact Details</p>
                 <div className="flex flex-col gap-3">
                   <div>
                     <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
@@ -2866,7 +2866,7 @@ function ReviewStep(props: {
               </div>
               {error && <p className="mb-3 rounded-lg bg-rose-50 px-3 py-1.5 text-[11px] text-rose-600">{error}</p>}
               
-              <div className="mt-4">
+              <div className="mt-4 hidden lg:block">
                 <button
                   type="button"
                   disabled={!contactValid}
@@ -2881,6 +2881,7 @@ function ReviewStep(props: {
 
             {/* Pay Button (Step 3) */}
             {flowStep === "checkout" && !embedded && (
+              <div className="hidden lg:block">
               <button
                 type="button"
                 disabled={!canPay || submitting}
@@ -2896,6 +2897,7 @@ function ReviewStep(props: {
                     ? `Confirm ${eventTicketCount} ${eventTicketCount === 1 ? "ticket" : "tickets"}`
                     : `PAY ₹${payNowAmount.toLocaleString("en-IN")} TO CONFIRM`}
               </button>
+              </div>
             )}
 
             {embedded && (
@@ -2909,14 +2911,15 @@ function ReviewStep(props: {
 
       {/* Mobile Sticky Footers */}
       {!embedded && flowStep === "slots" && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 flex items-center justify-between z-20 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] rounded-t-3xl">
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold text-brand-500 uppercase">Pay Now: ₹{payNowAmount.toLocaleString("en-IN")} • Total: ₹{activePrice.toLocaleString("en-IN")}</p>
-            <p className="text-2xl font-black text-slate-900">₹{payNowAmount.toLocaleString("en-IN")}</p>
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100/50 p-4 pb-6 flex items-center justify-between z-[60] shadow-[0_-12px_40px_rgba(0,0,0,0.12)] rounded-t-[2.5rem]">
+          <div className="min-w-0 pr-4">
+            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+              Pay: <span className="text-brand-500">₹{payNowAmount.toLocaleString("en-IN")}</span> • Total: ₹{activePrice.toLocaleString("en-IN")}
+            </p>
+            <p className="font-display text-3xl font-black text-slate-950 mt-0.5 leading-none tracking-tight">₹{payNowAmount.toLocaleString("en-IN")}</p>
             {listing.type === "Turf" && courtsForSport.length > 0 && selectedSlotIndices.length > 0 && (
-              <p className="truncate text-[11px] font-semibold text-slate-500">
-                {selectedCourtIds.length} {selectedCourtIds.length === 1 ? "court" : "courts"} selected ·{" "}
-                {selectedSlotSummaryText}
+              <p className="truncate text-[10px] font-semibold text-slate-400 mt-1">
+                {selectedCourtIds.length} {selectedCourtIds.length === 1 ? "court" : "courts"} · {selectedSlotSummaryText}
               </p>
             )}
           </div>
@@ -2929,7 +2932,7 @@ function ReviewStep(props: {
                 (selectedSlotIndices.length === 0 ||
                   (courtsForSport.length > 0 && selectedCourtIds.length === 0)))
             }
-            className="rounded-2xl bg-brand-600 hover:bg-brand-700 px-8 py-3.5 text-sm font-bold uppercase tracking-wide text-white shadow-md shadow-brand-500/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="shrink-0 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 hover:to-brand-700 px-7 py-4 text-sm font-bold uppercase tracking-widest text-white shadow-xl shadow-brand-500/30 transition hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             CONTINUE
           </button>
@@ -2937,30 +2940,30 @@ function ReviewStep(props: {
       )}
 
       {!embedded && flowStep === "details" && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 flex items-center justify-between z-20 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] rounded-t-3xl">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100/50 p-4 pb-6 flex items-center justify-between z-[60] shadow-[0_-12px_40px_rgba(0,0,0,0.12)] rounded-t-[2.5rem]">
           <button
             onClick={() => setFlowStep("checkout")}
             disabled={!contactValid}
-            className="w-full rounded-2xl bg-brand-500 py-4 text-base font-bold tracking-wide text-white shadow-lg shadow-brand-500/30 flex items-center justify-between px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 py-4.5 text-sm font-black uppercase tracking-widest text-white shadow-xl shadow-brand-500/30 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed transition hover:scale-[1.01] active:scale-[0.99]"
           >
-            <span>
-              PROCEED TO PAYMENT
-            </span>
+            PROCEED TO PAYMENT
             <ArrowRight className="h-5 w-5" />
           </button>
         </div>
       )}
 
       {!embedded && flowStep === "checkout" && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 flex items-center justify-between z-20 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] rounded-t-3xl">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-100/50 p-4 pb-6 flex items-center justify-between z-[60] shadow-[0_-12px_40px_rgba(0,0,0,0.12)] rounded-t-[2.5rem]">
           <button
             onClick={onPay}
             disabled={!canPay || submitting}
-            className="w-full rounded-2xl bg-brand-500 py-4 text-base font-bold tracking-wide text-white shadow-lg shadow-brand-500/30 flex items-center justify-between px-6 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-2xl bg-gradient-to-r from-brand-600 to-accent-600 py-4.5 text-sm font-black uppercase tracking-widest text-white shadow-xl shadow-brand-600/30 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed transition hover:scale-[1.01] active:scale-[0.99]"
           >
-            <span>
-              PAY ₹{payNowAmount.toLocaleString("en-IN")} TO CONFIRM
-            </span>
+            {submitting
+              ? "Booking..."
+              : eventTicketCount > 0
+                ? `Confirm ${eventTicketCount} ${eventTicketCount === 1 ? "ticket" : "tickets"}`
+                : `PAY ₹${payNowAmount.toLocaleString("en-IN")} TO CONFIRM`}
             <ArrowRight className="h-5 w-5" />
           </button>
         </div>

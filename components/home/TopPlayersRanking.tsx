@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { MapPin, Trophy, User, ChevronDown, Check } from "lucide-react";
+import Link from "next/link";
+import { MapPin, Trophy, User, ChevronDown, Check, ArrowRight, Crown, Medal, Award } from "lucide-react";
 import { getTopPlayersLeaderboard, type RankedPlayer } from "@/lib/api/leaderboard";
 import { restoreCustomerSession, type CustomerProfile } from "@/lib/api/auth";
 import { SectionHeading } from "./ui";
@@ -37,10 +38,11 @@ function areaHashtagsFor(player: RankedPlayer): string[] {
 }
 
 /** Gold / silver / bronze for podium, plain slate below it. */
-function rankBadgeStyle(rank: number | string): { style: string; emoji?: string; wrapperStyle?: string } {
-  if (rank === 1) return { style: "bg-amber-400 text-amber-950 font-black shadow-2xs", emoji: "🥇", wrapperStyle: "bg-gradient-to-r from-amber-50 to-white border-amber-200 shadow-[0_4px_12px_-4px_rgba(251,191,36,0.3)]" };
-  if (rank === 2) return { style: "bg-slate-300 text-slate-800 font-black shadow-2xs", emoji: "🥈", wrapperStyle: "bg-gradient-to-r from-slate-50 to-white border-slate-200 shadow-sm" };
-  if (rank === 3) return { style: "bg-amber-600/20 text-amber-900 font-black border border-amber-500/30", emoji: "🥉", wrapperStyle: "bg-gradient-to-r from-amber-50/50 to-white border-amber-100/60 shadow-sm" };
+/** Gold / silver / bronze for podium, plain slate below it. */
+function rankBadgeStyle(rank: number | string) {
+  if (rank === 1) return { style: "bg-gradient-to-br from-amber-300 to-amber-500 text-amber-950 font-black shadow-md", icon: <Crown className="h-3.5 w-3.5 sm:h-4 sm:w-4 drop-shadow-sm" />, wrapperStyle: "bg-gradient-to-r from-amber-50 to-white border-amber-200 shadow-[0_4px_12px_-4px_rgba(251,191,36,0.3)]" };
+  if (rank === 2) return { style: "bg-gradient-to-br from-slate-200 to-slate-400 text-slate-800 font-black shadow-sm", icon: <Medal className="h-3.5 w-3.5 sm:h-4 sm:w-4 drop-shadow-sm" />, wrapperStyle: "bg-gradient-to-r from-slate-50 to-white border-slate-200 shadow-sm" };
+  if (rank === 3) return { style: "bg-gradient-to-br from-orange-300 to-orange-500 text-orange-950 font-black shadow-sm", icon: <Award className="h-3.5 w-3.5 sm:h-4 sm:w-4 drop-shadow-sm" />, wrapperStyle: "bg-gradient-to-r from-orange-50/30 to-white border-orange-200 shadow-sm" };
   if (typeof rank === "string") return { style: "bg-slate-100 text-slate-500 font-bold text-[10px]", wrapperStyle: "bg-brand-50 border-brand-200 shadow-sm" };
   return { style: "bg-slate-100 text-slate-600 font-bold" };
 }
@@ -167,19 +169,19 @@ function PlayerRankRow({
       type="button"
       onClick={onOpen}
       disabled={!onOpen}
-      className={`group flex w-full items-center gap-3 rounded-2xl border p-2.5 text-left transition duration-200 ${
-        isMe ? "border-brand-400 bg-brand-50/50 shadow-sm ring-1 ring-brand-100/50" : "border-slate-100 bg-white hover:border-brand-300 hover:shadow-md active:scale-[0.99]"
+      className={`group flex w-full items-center gap-2 sm:gap-2.5 rounded-xl border p-1.5 sm:p-2 text-left transition duration-200 ${
+        isMe ? "border-brand-300 bg-gradient-to-r from-brand-50/80 to-white shadow-sm shadow-brand-500/10" : "border-slate-100 bg-white hover:border-brand-200 hover:shadow-sm active:scale-[0.99]"
       } ${badge.wrapperStyle || ""} ${!onOpen ? "cursor-default" : ""}`}
     >
       <span
-        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs ${badge.style}`}
+        className={`flex h-6 w-6 sm:h-7 sm:w-7 shrink-0 items-center justify-center rounded-lg text-[9px] sm:text-[10px] ${badge.style}`}
       >
-        {badge.emoji || `#${player.rank}`}
+        {badge.icon || (typeof player.rank === 'number' ? `#${player.rank}` : player.rank)}
       </span>
 
       <span
         className={`relative shrink-0 overflow-hidden rounded-full border border-slate-200 bg-slate-100 ${
-          compact ? "h-11 w-11" : "h-12 w-12"
+          compact ? "h-8 w-8" : "h-9 w-9 sm:h-10 sm:w-10"
         }`}
       >
         {player.profileImage ? (
@@ -205,15 +207,15 @@ function PlayerRankRow({
 
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-1.5 truncate">
-          <span className="truncate text-sm font-extrabold text-slate-900 group-hover:text-brand-600 transition-colors">
+          <span className="truncate text-[13px] sm:text-[15px] font-display italic font-bold text-slate-900 group-hover:text-brand-600 transition-colors drop-shadow-sm">
             {player.name}
           </span>
           {player.username && (
-            <span className="truncate text-xs font-medium text-slate-400">{player.username}</span>
+            <span className="truncate text-[9px] sm:text-[10px] font-medium text-slate-400">{player.username}</span>
           )}
         </span>
 
-        <span className="mt-0.5 flex items-center gap-1 truncate text-[11px] font-medium text-slate-500">
+        <span className="mt-0.5 flex items-center gap-1 truncate text-[10px] sm:text-[11px] font-medium text-slate-500">
           <MapPin className="h-3 w-3 shrink-0 text-slate-400" aria-hidden />
           {player.area || "Fatehpura"}, {player.city || "Udaipur"}
         </span>
@@ -233,8 +235,8 @@ function PlayerRankRow({
       </span>
 
       <span className="shrink-0 text-right pr-1">
-        <span className="block text-sm font-black text-slate-900">{player.completedBookings}</span>
-        <span className="block text-[10px] font-bold uppercase tracking-wide text-slate-400">
+        <span className="block text-xs sm:text-sm font-black text-slate-900">{player.completedBookings}</span>
+        <span className="block text-[8px] sm:text-[10px] font-bold uppercase tracking-wide text-slate-400">
           {player.completedBookings === 1 ? "BOOKING" : "BOOKINGS"}
         </span>
       </span>
@@ -244,26 +246,27 @@ function PlayerRankRow({
 
 export function TopPlayersRanking({
   variant = "desktop",
+  fullPage = false,
 }: {
   /** "mobile" drops section chrome down to compact home-feed styling. */
   variant?: "desktop" | "mobile";
+  fullPage?: boolean;
 }) {
   const router = useRouter();
   const [area, setArea] = useState(ALL_AREAS);
-  const [isViewAll, setIsViewAll] = useState(false);
   const { items, areas, loading, currentUser } = usePlayerRankings(area);
 
   const openPlayerProfile = (player: RankedPlayer) => router.push(`/players/${player.playerId}`);
 
   const top3 = items.slice(0, 3);
-  const displayItems = isViewAll ? items : top3;
+  const displayItems = fullPage ? items : top3;
 
   const userRankData = currentUser ? items.find(p => p.playerId === currentUser.id) : null;
   const meInTop3 = userRankData && top3.some((p) => p.playerId === userRankData.playerId);
   const me: RankedPlayer | null = currentUser
     ? (userRankData || {
         playerId: currentUser.id,
-        name: currentUser.name,
+        name: currentUser.name || "You",
         profileImage: currentUser.avatarUrl,
         city: "",
         completedBookings: 0,
@@ -271,15 +274,15 @@ export function TopPlayersRanking({
       } as any)
     : null;
 
-  const showPinnedMe = me && (!isViewAll ? !meInTop3 : !userRankData);
+  const showPinnedMe = me && (!fullPage ? !meInTop3 : !userRankData);
   const hasMore = items.length > 3;
 
   const boardContent = (
     <div className="flex flex-col">
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         {loading ? (
           Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-[68px] animate-pulse rounded-2xl bg-slate-100" />
+            <div key={i} className="h-[52px] animate-pulse rounded-xl bg-slate-100" />
           ))
         ) : items.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center">
@@ -305,21 +308,20 @@ export function TopPlayersRanking({
             player={me!}
             compact={variant === "mobile"}
             isMe={true}
-            onOpen={userRankData ? () => openPlayerProfile(me as RankedPlayer) : undefined}
+            onOpen={currentUser && userRankData ? () => openPlayerProfile(me as RankedPlayer) : undefined}
           />
         </div>
       )}
 
-      {hasMore && !loading && (
+      {hasMore && !loading && !fullPage && (
         <div className="mt-4 flex justify-center">
-          <button
-            type="button"
-            onClick={() => setIsViewAll(!isViewAll)}
+          <Link
+            href="/leaderboard"
             className="flex items-center gap-1.5 rounded-full bg-slate-50 px-4 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-100 active:scale-95"
           >
-            {isViewAll ? "Show Top 3 Only" : "View All Players"}
-            <ChevronDown className={`h-4 w-4 transition-transform ${isViewAll ? "rotate-180" : ""}`} />
-          </button>
+            View All Players
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
       )}
     </div>
@@ -366,16 +368,17 @@ export function TopPlayersRanking({
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-6 sm:py-8 mt-4 sm:px-6 lg:px-8">
-      <SectionHeading
-        eyebrow="BYV Leaderboard"
-        title="Top Players Ranking 🏅"
-        subtitle="Top 20 most active players based on completed bookings."
-        icon={Trophy}
-      />
-      <div className="w-full rounded-3xl border border-slate-100 bg-white p-5 shadow-sm">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+    <section className="mx-auto max-w-7xl px-3 py-4 sm:py-8 mt-2 sm:mt-4 sm:px-6 lg:px-8">
+      <div className="hidden sm:block">
+        <SectionHeading
+          eyebrow="Hall of Fame"
+          title="Top Players 🏅"
+          subtitle="The elite. Top 20 most active players based on bookings."
+        />
+      </div>
+      <div className="w-full rounded-2xl sm:rounded-3xl border border-slate-100 bg-white p-3.5 sm:p-5 shadow-sm">
+        <div className="mb-3 sm:mb-4 flex items-center justify-between gap-2 sm:gap-3">
+          <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wide text-slate-400">
             Ranked by completed bookings
           </p>
           <CustomAreaDropdown value={area} options={areas} onChange={setArea} />

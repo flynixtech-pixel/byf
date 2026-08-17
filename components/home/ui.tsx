@@ -103,7 +103,7 @@ export function SectionHeading({
           </p>
         )}
         <h2
-          className={`flex items-center gap-2 text-xl font-extrabold sm:text-3xl ${
+          className={`flex items-center gap-2 text-xl font-black font-display tracking-tight sm:text-3xl ${
             light ? "text-white" : "text-slate-900"
           }`}
         >

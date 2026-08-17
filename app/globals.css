@@ -16,6 +16,12 @@
 }
 @font-face {
   font-family: 'Axiforma';
+  src: url('/fonts/Axiforma-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Axiforma';
   src: url('/fonts/Axiforma-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
@@ -48,6 +54,12 @@
   font-family: 'Axiforma';
   src: url('/fonts/Axiforma-Black.ttf') format('truetype');
   font-weight: 900;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'TrajanPro';
+  src: url('/fonts/TrajanPro-Regular.ttf') format('truetype');
+  font-weight: 400;
   font-style: normal;
 }
 
@@ -267,7 +279,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: "Axiforma", var(--font-inter), "Avenir Next", "Segoe UI", "Trebuchet MS", Arial, sans-serif;
-  --font-display: "Axiforma", var(--font-space-grotesk), "Avenir Next", "Segoe UI", "Trebuchet MS", Arial, sans-serif;
+  --font-display: "TrajanPro", "Axiforma", var(--font-space-grotesk), "Avenir Next", "Segoe UI", "Trebuchet MS", Arial, sans-serif;
   --font-mono: var(--font-plex-mono), "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
   --color-cream-100: #ffffff;
   --color-cream-200: #fbf7f1;

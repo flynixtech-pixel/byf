@@ -30,6 +30,7 @@ import { EventsAndOffers } from "./EventsAndOffers";
 import { WhyBookYourVibe } from "./WhyBookYourVibe";
 import { AboutUs } from "./AboutUs";
 import { Testimonials } from "./Testimonials";
+
 import { AppDownloadCTA } from "./AppDownloadCTA";
 import { Footer } from "./Footer";
 import { FiltersModal } from "./modals/FiltersModal";
@@ -39,6 +40,7 @@ import { useVenueFilters } from "./useVenueFilters";
 import { useCustomerAuth } from "@/components/providers/CustomerAuthProvider";
 import { SPORTS_CATALOG } from "./data";
 import { AnimatedSportIcon } from "../sports/AnimatedSportIcon";
+import { FadeIn } from "../ui/FadeIn";
 
 const FALLBACK_VENUES: Venue[] = [
   { id: "mock-1", slug: "box-cricket", name: "Box Cricket Arena", area: "Udaipur", distanceKm: 0, rating: 4.8, pricePerHour: 800, status: "Available", sport: "Cricket", image: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&q=80" },
@@ -174,17 +176,19 @@ export default function HomePage() {
           </p>
         )}
 
-        <TrendingVenues
-          venues={venues}
-          favorites={favorites}
-          onToggleFavorite={toggleFavorite}
-          onViewVenue={openVenue}
-          onBookVenue={openVenue}
-          onViewAll={() => router.push("/venues")}
-        />
+        <FadeIn>
+          <TrendingVenues
+            venues={venues}
+            favorites={favorites}
+            onToggleFavorite={toggleFavorite}
+            onViewVenue={openVenue}
+            onBookVenue={openVenue}
+            onViewAll={() => router.push("/venues")}
+          />
+        </FadeIn>
 
-        {/* Find A Venue - Sports Section */}
-        <section className="relative z-10 mx-auto max-w-7xl pt-1 pb-1 sm:pt-4 sm:px-6 lg:px-8">
+        {/* Find A Venue - temporarily hidden */}
+        <section className="hidden relative z-10 mx-auto max-w-7xl pt-1 pb-1 sm:pt-4 sm:px-6 lg:px-8">
           <div className="sm:rounded-[2.5rem] sm:border sm:border-slate-100 sm:bg-white sm:p-8 sm:shadow-xl sm:shadow-slate-200/50 relative">
             
             <div className="relative z-10 flex items-center justify-between gap-3 mb-4 px-4 sm:px-0 sm:mb-8">
@@ -234,36 +238,58 @@ export default function HomePage() {
           </div>
         </section>
 
-        <HomeEvents events={events} />
+        <FadeIn delay={0.1}>
+          <HomeEvents events={events} />
+        </FadeIn>
 
         {tournaments.length > 0 && (
-          <EventsAndOffers
-            tournaments={tournaments}
-            onViewAllEvents={() => router.push("/tournaments")}
-          />
+          <FadeIn delay={0.1}>
+            <EventsAndOffers
+              tournaments={tournaments}
+              onViewAllEvents={() => router.push("/tournaments")}
+            />
+          </FadeIn>
         )}
 
-        {foodOutlets.length > 0 && <FoodAndBeverages foodOutlets={foodOutlets} />}
+        {foodOutlets.length > 0 && (
+          <FadeIn delay={0.1}>
+            <FoodAndBeverages foodOutlets={foodOutlets} />
+          </FadeIn>
+        )}
 
-        <TopPlayersRanking />
+        <FadeIn delay={0.1}>
+          <TopPlayersRanking />
+        </FadeIn>
 
-        <CommunityMatches
-          onJoin={() => showToast("Joining Badminton Doubles match…")}
-          onHost={() => router.push("/community")}
-          onBookCoach={() => router.push("/coaches")}
-          onViewAll={() => router.push("/community")}
-          onLaunchChallenge={() => setChallengeOpen(true)}
-        />
+        <FadeIn delay={0.1}>
+          <CommunityMatches
+            onJoin={() => showToast("Joining Badminton Doubles match…")}
+            onHost={() => router.push("/community")}
+            onBookCoach={() => router.push("/coaches")}
+            onViewAll={() => router.push("/community")}
+            onLaunchChallenge={() => setChallengeOpen(true)}
+          />
+        </FadeIn>
 
-        <HowItWorks />
+        <FadeIn delay={0.1}>
+          <HowItWorks />
+        </FadeIn>
 
-        <WhyBookYourVibe />
+        <FadeIn delay={0.1}>
+          <WhyBookYourVibe />
+        </FadeIn>
 
-        <AboutUs />
+        <FadeIn delay={0.1}>
+          <AboutUs />
+        </FadeIn>
 
-        <Testimonials />
+        <FadeIn delay={0.1}>
+          <Testimonials />
+        </FadeIn>
 
-        <AppDownloadCTA />
+        <FadeIn delay={0.1}>
+          <AppDownloadCTA />
+        </FadeIn>
 
       <Footer />
 
@@ -290,5 +316,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-

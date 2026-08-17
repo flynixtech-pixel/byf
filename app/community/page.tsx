@@ -39,9 +39,7 @@ const INITIAL_MATCHES: Match[] = [
 ];
 
 const INITIAL_CLUBS: Club[] = [
-  { id: "c-1", name: "Udaipur Smashers Badminton Club", members: 142, sport: "Badminton", place: "Shobhagpura" },
-  { id: "c-2", name: "Mewar Turf Cricket Association", members: 89, sport: "Cricket", place: "Bhawani Nagar" },
-  { id: "c-3", name: "Hiran Magri TT Spinners", members: 54, sport: "Table Tennis", place: "Hiran Magri" },
+  { id: "c-byv", name: "Book Your Vibe Official Club", members: 1250, sport: "All Sports", place: "Udaipur" },
 ];
 
 const TESTIMONIALS = [

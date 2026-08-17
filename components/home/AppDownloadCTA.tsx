@@ -1,4 +1,7 @@
 export function AppDownloadCTA() {
+  // TODO: Re-enable when the app is published to the Play Store and App Store.
+  return null;
+  
   return (
     <section className="mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8">
       <div

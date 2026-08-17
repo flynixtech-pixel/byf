@@ -27,5 +27,9 @@ export function eventTierGst(label: string): number {
 }
 
 export function eventTierSummary(tiers: EventPriceTierLike[]): string {
-  return tiers.map((tier) => `${eventTierName(tier.label)} ₹${tier.amount.toLocaleString("en-IN")}`).join(" · ");
+  if (!tiers || tiers.length === 0) return "Free";
+  const highestTier = tiers.reduce((max, tier) => tier.amount > max.amount ? tier : max, tiers[0]);
+  let name = eventTierName(highestTier.label);
+  if (name.length > 12) name = name.substring(0, 10) + "…";
+  return `${name} ₹${highestTier.amount.toLocaleString("en-IN")}`;
 }

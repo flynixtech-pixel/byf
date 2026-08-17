@@ -96,7 +96,7 @@ export function Footer({ className = "mt-20" }: { className?: string }) {
 
           {FOOTER_COLUMNS.map((col) => (
             <div key={col.title} className="space-y-4">
-              <p className="text-sm font-bold uppercase tracking-[0.26em] text-white">{col.title}</p>
+              <p className="font-display text-[13px] font-black uppercase tracking-[0.26em] text-white">{col.title}</p>
               <ul className="space-y-2.5">
                 {col.items.map((item) => (
                   <li key={item.label}>

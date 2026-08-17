@@ -103,7 +103,7 @@ export function Hero({
   };
 
   return (
-    <section id="home" className="relative z-50">
+    <section id="home" className="relative z-30">
       <div
         className="relative sm:bg-[linear-gradient(135deg,#15101f_0%,#211731_35%,#2b1f3d_60%,#3a2a1a_100%)] bg-transparent"
       >
@@ -142,11 +142,10 @@ export function Hero({
         <div className="pointer-events-none absolute -bottom-40 right-0 h-[28rem] w-[28rem] rounded-full bg-fuchsia-500/15 blur-3xl hidden sm:block" />
         <div className="pointer-events-none absolute right-1/4 top-10 h-56 w-56 rounded-full bg-sky-500/10 blur-3xl hidden sm:block" />
 
-        <div className="relative z-10 mx-auto max-w-7xl px-4 pb-2 pt-2 sm:px-6 sm:pt-12 sm:pb-4 lg:pt-14">
-          <div className="max-w-2xl mt-0 sm:mt-4">
+        <div className="relative z-10 mx-auto max-w-7xl px-4 pb-4 pt-4 sm:px-6 sm:pt-12 sm:pb-4 lg:pt-14">
+          <div className="max-w-2xl mt-2 sm:mt-4">
             <h1
-              className="hidden sm:block mt-4 text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl"
-              style={{ fontFamily: "var(--font-space-grotesk), sans-serif", lineHeight: 1.1 }}
+              className="hidden sm:block mt-4 text-4xl font-display font-black tracking-tight text-white sm:text-5xl lg:text-6xl lg:leading-[1.1]"
             >
               Play. Book. <span className="text-brand-400">Vibe.</span>
             </h1>

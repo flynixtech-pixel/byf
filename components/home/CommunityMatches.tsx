@@ -19,9 +19,9 @@ export function CommunityMatches({
   return (
     <section id="community" className="mx-auto mt-6 sm:mt-8 max-w-7xl px-4 sm:px-6 lg:px-8">
       <SectionHeading
-        eyebrow="Open right now"
-        title="Community Matches & Challenges"
-        subtitle="Find active players, join an open match, and challenge a friend when you're ready."
+        eyebrow="Squad Up"
+        title="Matches & Challenges 🏆"
+        subtitle="Find active players, crash an open match, or send a challenge."
         actionLabel="View All"
         onAction={onViewAll}
       />

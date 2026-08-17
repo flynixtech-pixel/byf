@@ -82,7 +82,7 @@ export function SiteHeader() {
             <Link
               key={link.href}
               href={link.href}
-              className={`text-sm font-semibold transition ${
+              className={`font-display text-[11px] uppercase tracking-[0.15em] font-black transition ${
                 isActive(link.href) ? "text-brand-600" : "text-slate-600 hover:text-slate-900"
               }`}
             >
