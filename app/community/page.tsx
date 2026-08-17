@@ -474,18 +474,12 @@ export default function CommunityPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="mt-2">
             <button
               onClick={() => setHostMatchModalOpen(true)}
-              className="flex items-center justify-center gap-1.5 rounded-2xl bg-brand-600 py-3 text-xs font-bold text-white shadow-md shadow-brand-500/20"
+              className="w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 py-3.5 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-brand-500/20 active:scale-[0.98] transition-transform"
             >
               <Plus className="h-4 w-4" /> Host Match
-            </button>
-            <button
-              onClick={() => setClubModalOpen(true)}
-              className="flex items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-white py-3 text-xs font-bold text-slate-700 shadow-sm"
-            >
-              <Users className="h-4 w-4 text-brand-500" /> Start Club
             </button>
           </div>
 
@@ -509,7 +503,7 @@ export default function CommunityPage() {
 
             {/* REAL LIVE HOSTED MATCHES FEED (MOBILE) */}
             {realHostedMatches.length > 0 && (
-              <div className="mb-4 space-y-3">
+              <div className="mb-6 space-y-3">
                 {realHostedMatches.map((m) => {
                   const turfTitle = typeof m.listingId === "object" ? m.listingId.title : "Sports Venue";
                   const turfLocation = typeof m.listingId === "object" ? `${m.listingId.city || ""}` : "";
@@ -524,46 +518,45 @@ export default function CommunityPage() {
                   const btnState = getMatchButtonState(m, (customer as any)?._id || customer?.id, savedPhone);
 
                   return (
-                    <MobileCard key={m._id} className="flex flex-col gap-2.5 border-emerald-100 bg-gradient-to-br from-emerald-50/30 to-white">
+                    <MobileCard key={m._id} className="group relative flex flex-col gap-3 rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50/50 via-white to-white p-5 shadow-sm overflow-hidden">
                       <div className="flex items-center justify-between">
-                        <span className="rounded-full bg-brand-50 px-2.5 py-0.5 text-[10px] font-extrabold text-brand-700 uppercase tracking-wider">
+                        <span className="font-display rounded-full bg-brand-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-brand-600 ring-1 ring-brand-500/20">
                           {m.sport}
                         </span>
                         {m.entryFeePerPlayer === 0 ? (
-                          <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-black text-emerald-800 uppercase tracking-wider">
-                            FREE JOIN
+                          <span className="font-display rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-600 ring-1 ring-emerald-500/20">
+                            FREE
                           </span>
                         ) : (
-                          <span className="text-xs font-black text-emerald-700">
-                            ₹{m.entryFeePerPlayer} / player
+                          <span className="font-display text-xs font-black text-emerald-600">
+                            ₹{m.entryFeePerPlayer}
                           </span>
                         )}
                       </div>
 
                       <div>
-                        <h3 className="text-base font-extrabold text-slate-900 leading-snug">{turfTitle}</h3>
-                        <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                        <h3 className="font-display text-[17px] font-black text-slate-950 leading-tight tracking-tight">{turfTitle}</h3>
+                        <p className="mt-1 text-[11px] font-medium text-slate-500 flex items-center gap-1.5">
                           <MapPin className="h-3 w-3 text-slate-400 shrink-0" /> {turfLocation || "Venue Location"} • Host: <span className="font-bold text-slate-700">{m.hostName}</span>
                         </p>
                       </div>
 
-                      <div className="flex items-center justify-between text-xs border-t border-slate-100 pt-2 mt-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-bold text-slate-600 flex items-center gap-1">
-                            <Clock className="h-3 w-3 text-brand-500" /> {m.startTime} – {m.endTime}
-                          </span>
-                          <span className="text-[11px] font-bold text-emerald-700">
-                            {spotsAvailable} / {m.maxPlayers} Spots Left
-                          </span>
-                        </div>
+                      <div className="flex w-max items-center gap-1.5 rounded-xl bg-slate-50 border border-slate-100 px-2.5 py-1.5 text-[11px] font-bold text-slate-600">
+                        <Clock className="h-3.5 w-3.5 text-brand-500 shrink-0" />
+                        <span>{m.startTime} – {m.endTime}</span>
+                      </div>
 
+                      <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-1">
+                        <span className="font-display text-[11px] font-black uppercase tracking-widest text-slate-500">
+                          <span className="text-brand-600">{spotsAvailable}</span> / {m.maxPlayers} Spots
+                        </span>
                         <button
                           type="button"
                           disabled={btnState.disabled}
                           onClick={() => handleMatchClick(m)}
-                          className={`rounded-full px-4 py-1.5 text-xs transition ${btnState.className}`}
+                          className={`font-display rounded-2xl px-5 py-2.5 text-[10px] font-black uppercase tracking-widest transition-all ${btnState.className}`}
                         >
-                          {btnState.text}
+                          {btnState.text.replace('Request to Join', 'Join')}
                         </button>
                       </div>
                     </MobileCard>
@@ -576,32 +569,34 @@ export default function CommunityPage() {
               {matches.map((match) => {
                 const isJoined = joinedMatches.includes(match.id);
                 return (
-                  <MobileCard key={match.id} className="flex flex-col gap-2">
+                  <MobileCard key={match.id} className="group relative flex flex-col gap-3 rounded-3xl border border-slate-100 bg-white p-5 shadow-sm overflow-hidden">
                     <div className="flex items-center justify-between">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-600">
-                        {match.sport} Match
-                      </p>
-                      <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[9px] font-bold text-sky-700">
-                        {match.time}
+                      <span className="font-display rounded-full bg-slate-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-slate-600 ring-1 ring-slate-200">
+                        {match.sport}
+                      </span>
+                      <span className="font-display text-[10px] font-black tracking-widest text-brand-500 flex items-center gap-1">
+                        <Calendar className="h-3 w-3" /> {match.time}
                       </span>
                     </div>
-                    <h2 className="text-base font-extrabold text-slate-950">{match.title}</h2>
-                    <p className="text-xs text-slate-500 flex items-center gap-1">
-                      <MapPin className="h-3 w-3" /> {match.place}
-                    </p>
-                    <div className="mt-2 flex items-center justify-between gap-3">
-                      <span className="text-xs font-semibold text-slate-500">
-                        {match.spotsLeft > 0 ? `${match.spotsLeft} spots left` : "Lobby Full"}
+                    <div>
+                      <h2 className="font-display text-[17px] font-black text-slate-950 leading-tight tracking-tight">{match.title}</h2>
+                      <p className="mt-1 text-[11px] font-medium text-slate-500 flex items-center gap-1.5">
+                        <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" /> {match.place}
+                      </p>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between border-t border-slate-100 pt-3">
+                      <span className="font-display text-[11px] font-black uppercase tracking-widest text-slate-500">
+                        <span className="text-brand-600">{match.spotsLeft}</span> Spots
                       </span>
                       <button
                         onClick={() => openJoinModal(match)}
-                        className={`rounded-full px-4 py-1.5 text-xs font-bold transition ${
+                        className={`font-display rounded-2xl px-5 py-2.5 text-[10px] font-black uppercase tracking-widest transition-all ${
                           isJoined
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            : "bg-slate-950 text-white"
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200 ring-1 ring-emerald-500/20"
+                            : "bg-slate-900 text-white shadow-md shadow-slate-900/20 active:scale-95"
                         }`}
                       >
-                        {isJoined ? "Joined ✓" : "Join Match"}
+                        {isJoined ? "Joined ✓" : "Join"}
                       </button>
                     </div>
                   </MobileCard>
@@ -611,34 +606,38 @@ export default function CommunityPage() {
           </div>
 
           <div>
-            <h2 className="mb-3 text-base font-extrabold text-slate-900">Sports Clubs & Groups</h2>
+            <h2 className="font-display mb-4 text-[19px] font-black tracking-tight text-slate-950">Sports Clubs & Groups</h2>
             <div className="flex flex-col gap-3">
               {clubs.map((club) => {
                 const isJoined = joinedClubs.includes(club.id);
                 return (
-                  <MobileCard key={club.id} className="flex flex-col gap-2">
+                  <MobileCard key={club.id} className="group relative flex flex-col gap-3 rounded-3xl border border-slate-100 bg-white p-5 shadow-sm overflow-hidden">
                     <div className="flex items-center justify-between">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-sky-600">
-                        {club.sport} Club
-                      </p>
-                      <span className="flex items-center gap-1 text-[10px] font-bold text-slate-500">
+                      <span className="font-display rounded-full bg-slate-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-slate-600 ring-1 ring-slate-200">
+                        {club.sport}
+                      </span>
+                      <span className="font-display text-[10px] font-black tracking-widest text-brand-500 flex items-center gap-1">
                         <Users className="h-3 w-3" /> {club.members}
                       </span>
                     </div>
-                    <h2 className="text-base font-extrabold text-slate-950">{club.name}</h2>
-                    <p className="text-xs text-slate-500 flex items-center gap-1">
-                      <MapPin className="h-3 w-3" /> {club.place}
-                    </p>
-                    <button
-                      onClick={() => handleJoinClub(club.id, club.name)}
-                      className={`mt-2 w-full rounded-xl py-2 text-xs font-bold transition ${
-                        isJoined
-                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                          : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                      }`}
-                    >
-                      {isJoined ? "Member ✓" : "Join Club"}
-                    </button>
+                    <div>
+                      <h2 className="font-display text-[17px] font-black text-slate-950 leading-tight tracking-tight">{club.name}</h2>
+                      <p className="mt-1 text-[11px] font-medium text-slate-500 flex items-center gap-1.5">
+                        <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" /> {club.place}
+                      </p>
+                    </div>
+                    <div className="mt-1 border-t border-slate-100 pt-3">
+                      <button
+                        onClick={() => handleJoinClub(club.id, club.name)}
+                        className={`font-display w-full rounded-2xl py-3 text-[10px] font-black uppercase tracking-widest transition-all ${
+                          isJoined
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200 ring-1 ring-emerald-500/20"
+                            : "bg-slate-100 text-slate-700 active:scale-95 hover:bg-slate-200"
+                        }`}
+                      >
+                        {isJoined ? "Member ✓" : "Join Club"}
+                      </button>
+                    </div>
                   </MobileCard>
                 );
               })}
@@ -659,39 +658,34 @@ export default function CommunityPage() {
         </main>
       </div>
 
-      <main className="mx-auto hidden max-w-7xl px-4 py-10 sm:block sm:px-6 sm:py-14">
-        <section className="rounded-[2rem] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-[0_30px_90px_rgba(15,23,42,0.26)] sm:p-10">
-          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+      <main className="mx-auto hidden max-w-7xl px-4 py-8 sm:block sm:px-6 sm:py-10">
+        <section className="rounded-[2rem] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-2xl sm:p-8 border border-slate-800/50 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-brand-500/10 blur-[100px] rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none" />
+          <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-sky-300">Community</p>
-              <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">
-                Find players, matches, and sports groups.
+              <p className="font-display text-[11px] font-black uppercase tracking-widest text-brand-400">Community</p>
+              <h1 className="font-display mt-2 text-3xl font-black tracking-tight sm:text-4xl leading-tight">
+                Find players, matches, <br className="hidden sm:block" />and sports groups.
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-300">
                 Discover active match lobbies, join player-managed clubs near you, or host your own community games.
               </p>
             </div>
-            <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
+            <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center">
               <button
                 onClick={() => setHostMatchModalOpen(true)}
-                className="flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-brand-500 to-accent-500 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-brand-500/20 transition hover:scale-[1.02]"
+                className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-brand-500/20 transition hover:scale-[1.02] hover:shadow-brand-500/30"
               >
-                <Plus className="h-4 w-4" /> Host Match Lobby
-              </button>
-              <button
-                onClick={() => setClubModalOpen(true)}
-                className="flex items-center justify-center gap-2 rounded-full border border-slate-700 bg-slate-900/60 px-6 py-3.5 text-sm font-bold text-slate-200 transition hover:bg-slate-900"
-              >
-                <Users className="h-4 w-4 text-brand-400" /> Create Sports Club
+                <Plus className="h-4 w-4" /> Host Lobby
               </button>
             </div>
           </div>
         </section>
 
-        <section className="mt-12">
+        <section className="mt-10">
           <div className="mb-6">
-            <h2 className="text-2xl font-extrabold text-slate-900">Active Match Lobbies</h2>
-            <p className="text-sm text-slate-500">Jump into open spots or team up for upcoming matches</p>
+            <h2 className="font-display text-2xl font-black tracking-tight text-slate-950">Active Match Lobbies</h2>
+            <p className="text-sm font-medium text-slate-500 mt-1">Jump into open spots or team up for upcoming matches</p>
           </div>
 
           {/* REAL LIVE HOSTED MATCHES FEED (DESKTOP) */}
@@ -772,41 +766,36 @@ export default function CommunityPage() {
               return (
                 <article
                   key={match.id}
-                  className="flex flex-col justify-between rounded-[1.75rem] border border-slate-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+                  className="group flex flex-col justify-between rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-brand-100 relative overflow-hidden"
                 >
-                  <div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-brand-50/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none" />
+                  <div className="relative">
                     <div className="flex items-center justify-between">
-                      <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-700">
+                      <span className="font-display rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-widest text-slate-600 ring-1 ring-slate-200">
                         {match.sport}
                       </span>
-                      <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
+                      <span className="font-display text-[11px] font-black tracking-widest text-brand-500 flex items-center gap-1">
                         <Calendar className="h-3.5 w-3.5" /> {match.time}
                       </span>
                     </div>
-                    <h3 className="mt-4 text-xl font-extrabold text-slate-950">{match.title}</h3>
-                    <p className="mt-2 text-sm text-slate-500 flex items-center gap-1.5">
-                      <MapPin className="h-4 w-4 text-slate-400" /> {match.place}
+                    <h3 className="font-display mt-4 text-xl font-black text-slate-950 leading-tight tracking-tight group-hover:text-brand-600 transition-colors">{match.title}</h3>
+                    <p className="mt-1.5 text-xs font-medium text-slate-500 flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" /> {match.place}
                     </p>
                   </div>
-                  <div className="mt-6 flex items-center justify-between border-t border-slate-50 pt-4">
-                    <span className="text-xs font-bold text-slate-500">
-                      {match.spotsLeft > 0 ? `${match.spotsLeft} spots remaining` : "Lobby full"}
+                  <div className="relative mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
+                    <span className="font-display text-[12px] font-black text-slate-500 uppercase tracking-widest">
+                      <span className="text-brand-600">{match.spotsLeft}</span> Spots
                     </span>
                     <button
                       onClick={() => openJoinModal(match)}
-                      className={`flex items-center gap-1 rounded-full px-5 py-2 text-xs font-bold transition ${
+                      className={`font-display rounded-2xl px-5 py-2.5 text-[11px] font-black uppercase tracking-widest transition-all ${
                         isJoined
-                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                          : "bg-slate-950 text-white hover:bg-brand-500"
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200 ring-1 ring-emerald-500/20"
+                          : "bg-slate-900 text-white shadow-md shadow-slate-900/20 hover:bg-brand-600 hover:shadow-brand-500/30"
                       }`}
                     >
-                      {isJoined ? (
-                        <>
-                          <Check className="h-3.5 w-3.5" /> Joined
-                        </>
-                      ) : (
-                        "Join Match"
-                      )}
+                      {isJoined ? "Joined ✓" : "Join"}
                     </button>
                   </div>
                 </article>
@@ -815,10 +804,10 @@ export default function CommunityPage() {
           </div>
         </section>
 
-        <section className="mt-12">
+        <section className="mt-10">
           <div className="mb-6">
-            <h2 className="text-2xl font-extrabold text-slate-900">Featured Sports Clubs</h2>
-            <p className="text-sm text-slate-500">Join dedicated local sports clubs to network with players</p>
+            <h2 className="font-display text-2xl font-black tracking-tight text-slate-950">Featured Sports Clubs</h2>
+            <p className="text-sm font-medium text-slate-500 mt-1">Join dedicated local sports clubs to network with players</p>
           </div>
           <div className="grid gap-4 lg:grid-cols-3">
             {clubs.map((club) => {
@@ -826,38 +815,33 @@ export default function CommunityPage() {
               return (
                 <article
                   key={club.id}
-                  className="flex flex-col justify-between rounded-[1.75rem] border border-slate-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+                  className="group flex flex-col justify-between rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-brand-100 relative overflow-hidden"
                 >
-                  <div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-brand-50/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none" />
+                  <div className="relative">
                     <div className="flex items-center justify-between">
-                      <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700">
+                      <span className="font-display rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-widest text-slate-600 ring-1 ring-slate-200">
                         {club.sport}
                       </span>
-                      <span className="text-xs font-bold text-slate-500 flex items-center gap-1">
+                      <span className="font-display text-[11px] font-black tracking-widest text-brand-500 flex items-center gap-1">
                         <Users className="h-3.5 w-3.5" /> {club.members} Members
                       </span>
                     </div>
-                    <h3 className="mt-4 text-xl font-extrabold text-slate-950">{club.name}</h3>
-                    <p className="mt-2 text-sm text-slate-500 flex items-center gap-1.5">
-                      <MapPin className="h-4 w-4 text-slate-400" /> Udaipur, {club.place}
+                    <h3 className="font-display mt-4 text-xl font-black text-slate-950 leading-tight tracking-tight group-hover:text-brand-600 transition-colors">{club.name}</h3>
+                    <p className="mt-1.5 text-xs font-medium text-slate-500 flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" /> {club.place}
                     </p>
                   </div>
-                  <div className="mt-6 border-t border-slate-50 pt-4">
+                  <div className="relative mt-6 border-t border-slate-100 pt-4">
                     <button
                       onClick={() => handleJoinClub(club.id, club.name)}
-                      className={`w-full flex items-center justify-center gap-1.5 rounded-full py-2.5 text-xs font-bold transition ${
+                      className={`font-display w-full flex items-center justify-center gap-1.5 rounded-2xl py-3 text-[11px] font-black uppercase tracking-widest transition-all ${
                         isJoined
-                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200 ring-1 ring-emerald-500/20"
                           : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                       }`}
                     >
-                      {isJoined ? (
-                        <>
-                          <Check className="h-3.5 w-3.5" /> Club Member
-                        </>
-                      ) : (
-                        "Join Club"
-                      )}
+                      {isJoined ? "Member ✓" : "Join Club"}
                     </button>
                   </div>
                 </article>
