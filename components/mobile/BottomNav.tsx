@@ -139,7 +139,7 @@ export function BottomNav() {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <nav className="grid grid-cols-2 gap-2">
+            <nav className="flex flex-col gap-2">
               {MORE_LINKS.map((link) => {
                 const Icon = link.icon;
                 return (
@@ -178,15 +178,6 @@ export function BottomNav() {
                   <LogIn className="h-4 w-4" /> Login / Sign Up
                 </button>
               )}
-              <div>
-                <Link
-                  href="/vendor/login"
-                  onClick={() => setMoreOpen(false)}
-                  className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-700"
-                >
-                  <Store className="h-4 w-4 text-brand-500" /> Vendor Panel
-                </Link>
-              </div>
             </div>
           </div>
         </>

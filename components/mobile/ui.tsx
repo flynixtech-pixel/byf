@@ -147,13 +147,6 @@ export function MobileTopBar() {
                   <LogIn className="h-4 w-4" /> Login / Sign Up
                 </button>
               )}
-              <Link
-                href="/vendor/login"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-700"
-              >
-                <Store className="h-4 w-4 text-brand-500" /> Vendor Panel
-              </Link>
             </div>
           </div>
         </>
