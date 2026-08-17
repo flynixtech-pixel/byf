@@ -298,7 +298,6 @@ export default function GamesPage() {
               venues.map((venue) => (
                 <VenuePosterCard
                   key={venue._id}
-                  id={venue._id}
                   href={`/venues/${venue.slug || venue._id}`}
                   title={venue.title}
                   image={venue.coverImage}
