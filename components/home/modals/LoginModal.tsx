@@ -125,8 +125,30 @@ export function LoginModal({
   }
 
   return (
-    <ModalShell onClose={onClose} title="Welcome back" subtitle="Login to continue your vibe.">
-      <div className="mb-5 grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1">
+    <ModalShell
+      onClose={onClose}
+      title={
+        <>
+          Vibe Check <span className="text-brand-600">Passed</span> ✅
+        </>
+      }
+      subtitle={
+        <span className="relative inline-block">
+          Time to get back on the court.
+          <svg className="animate-draw-line absolute -bottom-2.5 left-0 w-20 h-3" preserveAspectRatio="none" viewBox="0 0 100 20">
+            <defs>
+              <linearGradient id="swoosh-gradient-login" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#ef4444" />
+                <stop offset="100%" stopColor="#f97316" />
+              </linearGradient>
+            </defs>
+            <path d="M0,15 Q50,20 100,5" fill="none" stroke="url(#swoosh-gradient-login)" strokeWidth="8" strokeLinecap="round"/>
+          </svg>
+        </span>
+      }
+      imagePanel={{ src: "/images/loginimage.png", alt: "Play. Book. Vibe." }}
+    >
+      <div className="mb-4 sm:mb-6 grid grid-cols-2 gap-2 rounded-2xl bg-slate-100/80 p-1.5 backdrop-blur-sm">
         {(["otp", "email"] as const).map((m) => (
           <button
             key={m}
@@ -134,8 +156,8 @@ export function LoginModal({
               setMethod(m);
               setError("");
             }}
-            className={`rounded-lg py-2 text-sm font-semibold transition ${
-              method === m ? "bg-white text-brand-600 shadow" : "text-slate-500"
+            className={`rounded-xl py-2.5 text-sm font-bold transition-all duration-200 ${
+              method === m ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-900/5" : "text-slate-500 hover:bg-slate-200/50 hover:text-slate-700"
             }`}
           >
             {m === "otp" ? "Email OTP" : "Email & Password"}
@@ -143,7 +165,7 @@ export function LoginModal({
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:gap-4">
         {method === "otp" ? (
           <div>
             <FieldLabel>Email</FieldLabel>
@@ -163,7 +185,7 @@ export function LoginModal({
                   type="button"
                   onClick={sendOtp}
                   disabled={submitting}
-                  className="whitespace-nowrap rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
+                  className="whitespace-nowrap rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white shadow-md transition-all hover:bg-slate-800 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 disabled:opacity-60 disabled:hover:scale-100 disabled:hover:bg-slate-900"
                 >
                   Resend code
                 </button>
@@ -240,12 +262,13 @@ export function LoginModal({
         </PrimaryButton>
 
         {GOOGLE_SIGN_IN_ENABLED && (
-          <>
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <span className="h-px flex-1 bg-slate-200" /> or continue with{" "}
-              <span className="h-px flex-1 bg-slate-200" />
+          <div className="mt-3 sm:mt-4">
+            <div className="relative mb-4 sm:mb-6 flex items-center justify-center gap-4">
+              <div className="h-[1px] flex-grow bg-gradient-to-r from-transparent via-slate-200 to-slate-200"></div>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Or continue with</span>
+              <div className="h-[1px] flex-grow bg-gradient-to-l from-transparent via-slate-200 to-slate-200"></div>
             </div>
-            <div className="flex justify-center w-full">
+            <div className="flex w-full justify-center transform transition-transform hover:-translate-y-0.5">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={() => setError("Google sign-in failed. Please try again.")}
@@ -253,9 +276,10 @@ export function LoginModal({
                 theme="outline"
                 size="large"
                 text="continue_with"
+                width="100%"
               />
             </div>
-          </>
+          </div>
         )}
 
         <p className="text-center text-sm text-slate-500">
