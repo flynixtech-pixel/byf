@@ -13,11 +13,11 @@ import { CustomerNotificationBell } from "./notifications/CustomerNotificationBe
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Sports", href: "/games" },
-  { label: "Dineout", href: "/food" },
   { label: "Events", href: "/events" },
   { label: "Coaches", href: "/coaches" },
   { label: "Community", href: "/community" },
   { label: "Tournaments", href: "/tournaments" },
+  { label: "Dineout", href: "/food", isComingSoon: true },
   { label: "Blog", href: "/blogs" },
 ];
 
@@ -78,17 +78,34 @@ export function SiteHeader() {
         />
 
         <nav className="hidden flex-1 items-center justify-center gap-5 lg:flex">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`font-display text-[11px] uppercase tracking-[0.15em] font-black transition ${
-                isActive(link.href) ? "text-brand-600" : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {NAV_LINKS.map((link) => {
+            if (link.isComingSoon) {
+              return (
+                <div
+                  key={link.label}
+                  className="group relative flex items-center gap-1.5 cursor-not-allowed"
+                >
+                  <span className="font-display text-[11px] uppercase tracking-[0.15em] font-black text-slate-400 transition">
+                    {link.label}
+                  </span>
+                  <span className="rounded bg-brand-50 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-wider text-brand-500 shadow-sm transition-transform group-hover:scale-105 group-hover:bg-brand-100 group-hover:text-brand-600">
+                    Soon
+                  </span>
+                </div>
+              );
+            }
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`font-display text-[11px] uppercase tracking-[0.15em] font-black transition ${
+                  isActive(link.href) ? "text-brand-600" : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
@@ -179,18 +196,35 @@ export function SiteHeader() {
       
       <div className="p-6 overflow-y-auto flex-1 flex flex-col">
         <nav className="flex flex-col gap-4">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMobileOpen(false)}
-              className={`text-base font-bold pb-3 border-b border-slate-50 transition-colors ${
-                isActive(link.href) ? "text-brand-600" : "text-slate-700 hover:text-brand-600"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {NAV_LINKS.map((link) => {
+            if (link.isComingSoon) {
+               return (
+                <div
+                  key={link.label}
+                  className="flex items-center gap-2 pb-3 border-b border-slate-50 cursor-not-allowed"
+                >
+                  <span className="text-base font-bold text-slate-400">
+                    {link.label}
+                  </span>
+                  <span className="rounded bg-brand-50 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-brand-500 shadow-sm">
+                    Coming Soon
+                  </span>
+                </div>
+               );
+            }
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className={`text-base font-bold pb-3 border-b border-slate-50 transition-colors ${
+                  isActive(link.href) ? "text-brand-600" : "text-slate-700 hover:text-brand-600"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
         
         <div className="mt-8 pt-6 border-t border-slate-100">

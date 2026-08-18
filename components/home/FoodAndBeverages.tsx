@@ -18,11 +18,10 @@ export function FoodAndBeverages({ foodOutlets }: { foodOutlets?: FoodOutlet[] }
         eyebrow="Refuel the squad"
         title="Eat & Chill 🍕"
         subtitle="Reserve tables at top spots and split the bill without the awkward group chat."
-        actionLabel="View All"
-        onAction={() => router.push("/food")}
       />
 
-      <div className="mt-6 grid grid-cols-2 gap-3 pb-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+      <div className="relative mt-6">
+        <div className="grid grid-cols-2 gap-3 pb-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4 blur-[3px] opacity-70 pointer-events-none select-none">
         {foodOutlets.slice(0, 4).map((outlet, index) => {
           const meta = getDiningMeta(outlet, index);
           return (
@@ -90,9 +89,17 @@ export function FoodAndBeverages({ foodOutlets }: { foodOutlets?: FoodOutlet[] }
             </article>
           );
         })}
+        </div>
+        <div className="absolute inset-0 z-10 flex items-center justify-center">
+          <div className="rounded-2xl border border-white/20 bg-slate-900/80 px-8 py-5 backdrop-blur-md shadow-2xl flex flex-col items-center transform transition-all hover:scale-105">
+            <span className="text-3xl font-black text-white uppercase tracking-[0.2em] drop-shadow-lg text-center">Coming Soon</span>
+            <div className="mt-2 h-1 w-12 rounded-full bg-brand-500"></div>
+            <span className="text-brand-400 font-bold text-sm mt-3 text-center">Get ready to dine out!</span>
+          </div>
+        </div>
       </div>
-      <button type="button" onClick={() => router.push("/food")} className="mt-5 w-full rounded-2xl border border-slate-200 py-2.5 text-[13px] font-bold text-slate-600 sm:hidden">
-        View More Food &amp; Beverages
+      <button type="button" disabled className="mt-5 w-full rounded-2xl border border-slate-200 py-2.5 text-[13px] font-bold text-slate-400 bg-slate-50 cursor-not-allowed sm:hidden">
+        Coming Soon
       </button>
     </section>
   );

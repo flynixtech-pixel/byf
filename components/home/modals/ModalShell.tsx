@@ -64,8 +64,8 @@ export function ModalShell({
         aria-labelledby="auth-modal-title"
       >
         {imagePanel && (
-          <div className="hidden relative w-full shrink-0 md:block md:h-auto md:w-[55%] bg-slate-900 overflow-hidden md:rounded-l-3xl md:rounded-tr-none">
-             <img src={imagePanel.src} alt={imagePanel.alt} className="absolute inset-0 h-full w-full object-cover object-center" />
+          <div className="hidden relative w-full shrink-0 md:block md:h-auto md:w-[55%] bg-[#0a0a0a] overflow-hidden md:rounded-l-3xl md:rounded-tr-none">
+             <img src={imagePanel.src} alt={imagePanel.alt} className="absolute inset-0 h-full w-full object-contain object-center" />
           </div>
         )}
         <div className={`relative ${imagePanel ? "flex flex-col flex-1 px-5 py-6 sm:p-10 md:w-[45%] md:py-12 z-10" : ""}`}>

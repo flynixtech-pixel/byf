@@ -84,19 +84,27 @@ export const VenuePosterCard = memo(function VenuePosterCard({
         </svg>
       </button>
 
-      <div className="absolute inset-x-0 bottom-0 p-3.5 z-10">
-        <h3 className="line-clamp-1 text-sm sm:text-base font-black leading-tight text-white">{title}</h3>
-        {subtitle && (
-          <p className="mt-0.5 truncate text-[11px] font-semibold text-white/75">{subtitle}</p>
-        )}
-        <div className="mt-1.5 flex items-center justify-between gap-2">
+      <div className="absolute inset-x-0 bottom-0 p-3.5 z-10 flex flex-col gap-1">
+        <div>
+          <h3 className="line-clamp-2 text-[15px] sm:text-[17px] font-display font-black uppercase tracking-[0.05em] leading-tight text-white drop-shadow-md">
+            {title}
+          </h3>
+          {subtitle && (
+            <p className="mt-1.5 truncate text-[9.5px] font-extrabold uppercase tracking-[0.1em] text-brand-400 drop-shadow-sm">
+              {subtitle}
+            </p>
+          )}
+        </div>
+        <div className="mt-1 flex items-end justify-between gap-2 border-t border-white/15 pt-2.5">
           {city && (
-            <span className="flex min-w-0 items-center gap-1 truncate text-[11px] font-semibold text-white/80">
-              <MapPin className="h-3 w-3 shrink-0 text-white/70" /> <span className="truncate">{city}</span>
+            <span className="flex min-w-0 items-center gap-1.5 truncate text-[10px] font-bold uppercase tracking-wider text-white/90">
+              <MapPin className="h-3 w-3 shrink-0 text-brand-500" /> <span className="truncate">{city}</span>
             </span>
           )}
           {price !== undefined && (
-            <span className="shrink-0 text-sm font-black text-white">₹{price.toLocaleString("en-IN")}</span>
+            <span className="shrink-0 text-[13px] sm:text-[14px] font-display font-black tracking-wider text-white drop-shadow-sm">
+              ₹{price.toLocaleString("en-IN")}
+            </span>
           )}
         </div>
       </div>

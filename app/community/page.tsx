@@ -659,24 +659,30 @@ export default function CommunityPage() {
       </div>
 
       <main className="mx-auto hidden max-w-7xl px-4 py-8 sm:block sm:px-6 sm:py-10">
-        <section className="rounded-[2rem] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-2xl sm:p-8 border border-slate-800/50 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-[40rem] h-[40rem] bg-brand-500/10 blur-[100px] rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none" />
-          <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="font-display text-[11px] font-black uppercase tracking-widest text-brand-400">Community</p>
-              <h1 className="font-display mt-2 text-3xl font-black tracking-tight sm:text-4xl leading-tight">
-                Find players, matches, <br className="hidden sm:block" />and sports groups.
+        <section className="relative overflow-hidden rounded-[1.5rem] bg-slate-950 p-6 sm:p-7 shadow-2xl border border-white/10 mt-2">
+          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay pointer-events-none" />
+          <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-brand-500/15 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+          
+          <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="max-w-2xl">
+              <span className="inline-block rounded-full bg-brand-500/10 border border-brand-500/20 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-brand-400 mb-2.5">
+                Community Hub
+              </span>
+              <h1 className="font-display text-2xl font-black tracking-tight sm:text-3xl leading-tight text-white">
+                Find players, matches, and sports groups.
               </h1>
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-300">
-                Discover active match lobbies, join player-managed clubs near you, or host your own community games.
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-400 font-medium max-w-lg">
+                Discover active match lobbies, join player-managed clubs near you, or host your own community games instantly.
               </p>
             </div>
-            <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex shrink-0">
               <button
                 onClick={() => setHostMatchModalOpen(true)}
-                className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-brand-500/20 transition hover:scale-[1.02] hover:shadow-brand-500/30"
+                className="group relative flex items-center justify-center gap-2 rounded-xl bg-brand-600 px-6 py-3 text-[11px] font-black uppercase tracking-wider text-white shadow-lg transition-all hover:bg-brand-500 hover:shadow-brand-500/25 active:scale-95 overflow-hidden"
               >
-                <Plus className="h-4 w-4" /> Host Lobby
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
+                <Plus className="h-4 w-4 relative z-10" /> 
+                <span className="relative z-10">Host Lobby</span>
               </button>
             </div>
           </div>
