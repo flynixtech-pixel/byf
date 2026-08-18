@@ -79,18 +79,23 @@ export default function BlogsPage() {
         </main>
       </div>
 
-      <main className="mx-auto hidden max-w-7xl px-4 py-10 sm:block sm:px-6 sm:py-14">
-        <section className="rounded-[2rem] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-[0_30px_90px_rgba(15,23,42,0.26)] sm:p-10">
-          <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-brand-300">
-            <Newspaper className="h-3.5 w-3.5" /> Blog
-          </p>
-          <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">
-            Stories, guides and updates from Book Your Vibe.
-          </h1>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-            Venue guides, sport tips and community stories, written by our team so you can
-            plan your next game with confidence.
-          </p>
+      <main className="mx-auto hidden max-w-7xl px-4 py-6 sm:block sm:px-6 sm:py-8">
+        <section className="relative overflow-hidden rounded-[1.5rem] bg-slate-950 p-5 sm:p-6 shadow-2xl border border-white/10">
+          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay pointer-events-none" />
+          <div className="absolute top-0 right-0 w-[30rem] h-[30rem] bg-brand-500/15 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+          
+          <div className="relative max-w-2xl">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 px-2.5 py-1 text-[9px] font-black uppercase tracking-widest text-brand-400 mb-2">
+              <Newspaper className="h-3 w-3" /> The BYV Blog
+            </span>
+            <h1 className="font-display text-2xl font-black tracking-tight sm:text-3xl leading-tight text-white">
+              Stories, guides and updates from Book Your Vibe.
+            </h1>
+            <p className="mt-1.5 text-sm leading-relaxed text-slate-400 font-medium max-w-xl">
+              Venue guides, sport tips and community stories, written by our team so you can
+              plan your next game with confidence.
+            </p>
+          </div>
         </section>
 
         <section className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -113,14 +118,14 @@ export default function BlogsPage() {
                 )}
               </div>
               <div className="p-5">
-                <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-400">
-                  <CalendarDays className="h-3.5 w-3.5" /> {formatDate(post.publishedOn)}
+                <p className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">
+                  <CalendarDays className="h-3 w-3" /> {formatDate(post.publishedOn)}
                 </p>
-                <h2 className="mt-2 line-clamp-2 text-xl font-black text-slate-950">{post.title}</h2>
-                <p className="mt-2 line-clamp-2 text-sm text-slate-500">{stripMarkdown(post.content)}</p>
-                <span className="mt-4 inline-block text-sm font-semibold text-brand-600 group-hover:text-brand-700">
-                  Read more &rarr;
-                </span>
+                <h2 className="line-clamp-2 font-display text-[19px] font-black text-slate-950 leading-tight tracking-tight group-hover:text-brand-600 transition-colors">{post.title}</h2>
+                <p className="mt-2 line-clamp-2 text-[13px] font-medium text-slate-500 leading-relaxed">{stripMarkdown(post.content)}</p>
+                <div className="mt-4 flex items-center gap-1 text-[11px] font-black uppercase tracking-widest text-brand-600 transition-all group-hover:gap-2 group-hover:text-brand-700">
+                  Read more <span>&rarr;</span>
+                </div>
               </div>
             </Link>
           ))}

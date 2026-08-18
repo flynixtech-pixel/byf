@@ -75,7 +75,7 @@ export default function BlogDetailPage() {
         <MobileTopBar />
       </div>
 
-      <main className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-10">
+      <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-10">
         <button
           type="button"
           onClick={() => router.back()}
@@ -84,21 +84,34 @@ export default function BlogDetailPage() {
           <ArrowLeft className="h-4 w-4" /> Back to blog
         </button>
 
-        <article className="mt-4">
-          <div className="h-56 w-full overflow-hidden rounded-3xl border border-slate-100 bg-slate-100 sm:h-96">
+        <article className="mt-5">
+          <div className="relative h-64 w-full overflow-hidden rounded-[2rem] border border-slate-100 bg-slate-900 sm:h-[450px]">
             {post.thumbnail && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={post.thumbnail} alt={post.title} className="h-full w-full object-cover"
-            loading="lazy"
-            decoding="async"
-          />
+              <>
+                {/* Blurred background for wide images */}
+                <img 
+                  src={post.thumbnail} 
+                  alt="" 
+                  className="absolute inset-0 h-full w-full object-cover opacity-40 blur-2xl saturate-150"
+                  aria-hidden="true"
+                />
+                {/* Actual image */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src={post.thumbnail} 
+                  alt={post.title} 
+                  className="relative z-10 h-full w-full object-contain drop-shadow-2xl"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </>
             )}
           </div>
 
-          <p className="mt-6 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-600">
+          <p className="mt-6 flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-brand-500">
             <CalendarDays className="h-3.5 w-3.5" /> {formatDate(post.publishedOn)}
           </p>
-          <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-4xl">
+          <h1 className="mt-2 font-display text-3xl font-black tracking-tight text-slate-950 sm:text-5xl leading-tight">
             {post.title}
           </h1>
 
@@ -109,9 +122,9 @@ export default function BlogDetailPage() {
         </article>
 
         {morePosts.length > 0 && (
-          <section className="mt-12 border-t border-slate-100 pt-8">
-            <h2 className="text-lg font-extrabold text-slate-900">More stories</h2>
-            <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <section className="mt-16 border-t border-slate-100 pt-8 pb-10">
+            <h2 className="font-display text-xl font-black tracking-tight text-slate-900">More stories</h2>
+            <div className="mt-5 grid gap-4 sm:grid-cols-3">
               {morePosts.map((p) => (
                 <Link
                   key={p._id}
@@ -127,9 +140,9 @@ export default function BlogDetailPage() {
           />
                     )}
                   </div>
-                  <div className="p-3">
-                    <p className="line-clamp-2 text-sm font-bold text-slate-900">{p.title}</p>
-                    <p className="mt-1 line-clamp-1 text-xs text-slate-400">{stripMarkdown(p.content)}</p>
+                  <div className="p-4">
+                    <p className="line-clamp-2 font-display text-base font-black text-slate-950 leading-tight group-hover:text-brand-600 transition-colors">{p.title}</p>
+                    <p className="mt-1.5 line-clamp-2 text-[11px] font-medium text-slate-500 leading-relaxed">{stripMarkdown(p.content)}</p>
                   </div>
                 </Link>
               ))}
