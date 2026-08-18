@@ -306,7 +306,7 @@ export function deleteVendorListing(id: string) {
 
 /* ---- Bookings ---- */
 
-export function getVendorBookings(params: { status?: BookingStatus; page?: number; limit?: number } = {}) {
+export function getVendorBookings(params: { status?: BookingStatus; listingId?: string; page?: number; limit?: number } = {}) {
   return apiRequest<Paginated<Booking>>("/vendor/bookings", { query: params, audience: AUD });
 }
 

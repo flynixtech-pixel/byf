@@ -78,7 +78,7 @@ export default function ListingDetailPage() {
         const mock = apiListingToMock(l);
         currentTitle = mock.title;
         setListing(mock);
-        return getVendorBookings();
+        return getVendorBookings({ listingId: params.id, limit: 10 });
       })
       .then((res) => {
         if (res && res.items) {
@@ -943,13 +943,13 @@ function AgendaTab({ listing, onSeeBookings }: { listing: Listing; onSeeBookings
 
   useEffect(() => {
     setLoading(true);
-    getVendorBookings({ limit: 500 })
+    getVendorBookings({ listingId: listing.id, limit: 10 })
       .then((b) => {
         setBookings(b.items as unknown as ApiBooking[]);
       })
       .catch((e) => console.error(e))
       .finally(() => setLoading(false));
-  }, []);
+  }, [listing.id]);
 
   const dateOptions = useMemo(() => {
     const list: Date[] = [];
@@ -1078,7 +1078,7 @@ function AgendaTab({ listing, onSeeBookings }: { listing: Listing; onSeeBookings
         payment: "Cash (Offline)",
         status: "Pending",
       });
-      const fresh = await getVendorBookings({ limit: 500 });
+      const fresh = await getVendorBookings({ listingId: localListing.id, limit: 10 });
       setBookings(fresh.items as unknown as ApiBooking[]);
       setActiveSlot(null);
     } catch { alert("Failed to hold slot"); }
@@ -1099,7 +1099,7 @@ function AgendaTab({ listing, onSeeBookings }: { listing: Listing; onSeeBookings
         payment: "Cash (Offline)",
         status: "Confirmed",
       });
-      const fresh = await getVendorBookings({ limit: 500 });
+      const fresh = await getVendorBookings({ listingId: localListing.id, limit: 10 });
       setBookings(fresh.items as unknown as ApiBooking[]);
       setOfflineModal(false);
       setActiveSlot(null);
