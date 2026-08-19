@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -11,8 +11,17 @@ import {
   Store,
   User,
   X,
+  Home,
+  Gamepad2,
+  Calendar,
+  Users,
+  UtensilsCrossed,
+  GraduationCap,
+  Trophy,
+  BookOpen,
   type LucideIcon,
 } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { BrandLogo } from "@/components/brand-logo";
 import { useCustomerAuth } from "@/components/providers/CustomerAuthProvider";
 import { LoginModal } from "@/components/home/modals/LoginModal";
@@ -29,58 +38,149 @@ const MOBILE_NAV_LINKS = [
   { label: "Blog", href: "/blogs" },
 ];
 
+const MOBILE_ICON_NAV = [
+  { label: "Your Vibe", href: "/", icon: Home },
+  { label: "Games", href: "/games", icon: Gamepad2 },
+  { label: "Events", href: "/events", icon: Calendar },
+  { label: "Community", href: "/community", icon: Users },
+  { label: "Tournaments", href: "/tournaments", icon: Trophy },
+  { label: "Dineout", href: "#", icon: UtensilsCrossed, isComingSoon: true },
+  { label: "Blog", href: "/blogs", icon: BookOpen },
+];
+
 export function MobileTopBar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [authView, setAuthView] = useState<"login" | "signup" | null>(null);
   const { customer, status, logout } = useCustomerAuth();
   const isLoggedIn = status === "authenticated";
 
+  const pathname = usePathname();
+
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 80);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <>
-      <div className="flex items-center justify-between gap-2">
-        <BrandLogo
-          logoBoxClassName="h-11 w-11 rounded-xl"
-          imageClassName="p-1"
-          titleClassName="text-slate-900 text-xs"
-          subtitleClassName="text-slate-400 text-[8px]"
-          priority
-        />
-        <div className="flex shrink-0 items-center gap-2">
-          <CustomerNotificationBell />
-          {isLoggedIn ? (
-            <Link
-              href="/profile"
-              aria-label="My Profile"
-              title="My Profile"
-              className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand-200 bg-brand-50 text-xs font-black text-brand-700 shadow-2xs transition active:scale-95"
-            >
-              {customer?.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={customer.avatarUrl} alt="Profile" className="h-full w-full object-cover" />
-              ) : (
-                customer?.name?.charAt(0).toUpperCase() || <User className="h-4 w-4 text-brand-600" />
-              )}
-            </Link>
-          ) : (
+      <div className="h-[60px] w-full sm:hidden" aria-hidden />
+      <div className="fixed inset-x-0 top-0 z-50 flex flex-col bg-white w-full sm:hidden border-b border-slate-100 shadow-xs">
+        <div className="flex items-center justify-between gap-2 px-4 py-2">
+          <BrandLogo
+            logoBoxClassName="h-11 w-11 rounded-xl"
+            imageClassName="p-1"
+            titleClassName="text-slate-900 text-xs"
+            subtitleClassName="text-slate-400 text-[8px]"
+            priority
+          />
+          <div className="flex shrink-0 items-center gap-2">
+            <CustomerNotificationBell />
+            {isLoggedIn ? (
+              <Link
+                href="/profile"
+                aria-label="My Profile"
+                title="My Profile"
+                className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand-200 bg-brand-50 text-xs font-black text-brand-700 shadow-2xs transition active:scale-95"
+              >
+                {customer?.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={customer.avatarUrl} alt="Profile" className="h-full w-full object-cover" />
+                ) : (
+                  customer?.name?.charAt(0).toUpperCase() || <User className="h-4 w-4 text-brand-600" />
+                )}
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setAuthView("login")}
+                aria-label="Profile / Login"
+                title="Profile / Login"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-2xs transition hover:border-brand-300 hover:text-brand-600 active:scale-95"
+              >
+                <User className="h-4 w-4 text-slate-700" />
+              </button>
+            )}
             <button
-              type="button"
-              onClick={() => setAuthView("login")}
-              aria-label="Profile / Login"
-              title="Profile / Login"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-2xs transition hover:border-brand-300 hover:text-brand-600 active:scale-95"
+              aria-label="Toggle menu"
+              onClick={() => setMenuOpen((v) => !v)}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition active:scale-95"
             >
-              <User className="h-4 w-4 text-slate-700" />
+              {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
-          )}
-          <button
-            aria-label="Toggle menu"
-            onClick={() => setMenuOpen((v) => !v)}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition active:scale-95"
-          >
-            {menuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-          </button>
+          </div>
         </div>
       </div>
+
+      <nav
+        aria-label="Explore Book Your Vibe"
+        className="overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-slate-50/30 sm:hidden"
+      >
+        <div className="flex w-max min-w-full gap-2 pb-2 pt-3">
+          {MOBILE_ICON_NAV.map(({ label, href, icon: Icon, isComingSoon }, index) => {
+            const isActive = href === "/" ? pathname === "/" : pathname?.startsWith(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={isComingSoon ? (e) => e.preventDefault() : undefined}
+                className={`group relative flex min-w-[70px] shrink-0 flex-col items-center gap-1.5 rounded-2xl border px-2.5 py-2.5 transition ${isComingSoon ? "opacity-70" : "active:scale-95"} ${
+                  isActive
+                    ? "border-brand-300 bg-gradient-to-br from-brand-500 to-accent-500 text-white shadow-[0_8px_22px_rgba(220,38,38,0.22)]"
+                    : "border-slate-200/80 bg-white text-slate-600 shadow-[0_6px_18px_rgba(15,23,42,0.07)]"
+                }`}
+              >
+                <span className={`relative grid h-8 w-8 place-items-center rounded-xl ${isActive ? "bg-white/20" : "bg-slate-50 group-hover:bg-brand-50"}`}>
+                  <Icon className={`h-[18px] w-[18px] ${isActive ? "text-white" : "text-slate-600 group-hover:text-brand-600"}`} strokeWidth={2.2} />
+                  {isComingSoon && (
+                    <span className="absolute -right-4 -top-1 rounded-full bg-rose-500 px-1.5 py-[1px] text-[7px] font-black uppercase text-white shadow-sm">
+                      Soon
+                    </span>
+                  )}
+                </span>
+                <span className="font-display text-[11px] font-black tracking-tight">{label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
+
+      {/* Compact sliding nav */}
+      <div
+        className={`fixed inset-x-0 top-[60px] z-40 border-b border-slate-200/70 bg-white/92 px-3 py-1.5 shadow-[0_8px_26px_rgba(15,23,42,0.09)] backdrop-blur-xl transition-all duration-300 sm:hidden ${
+          isScrolled ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-full opacity-0"
+        }`}
+      >
+        <nav className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="Quick navigation">
+          <div className="flex w-max min-w-full items-center gap-1">
+            {MOBILE_ICON_NAV.map(({ label, href, icon: Icon, isComingSoon }) => {
+              const isActive = href === "/" ? pathname === "/" : pathname?.startsWith(href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={isComingSoon ? (e) => e.preventDefault() : undefined}
+                  className={`flex shrink-0 items-center gap-1.5 rounded-xl px-4 py-2 font-display text-[13px] font-black transition ${isComingSoon ? "opacity-70" : "active:scale-95"} ${
+                    isActive ? "bg-brand-50 text-brand-700" : "text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  <span>{label}</span>
+                  {isComingSoon && (
+                    <span className="rounded-full bg-rose-500 px-1.5 py-[1px] text-[7px] font-black uppercase text-white shadow-sm">
+                      Soon
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      </div>
+
 
       {menuOpen && (
         <>

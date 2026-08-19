@@ -36,7 +36,7 @@ export const VenuePosterCard = memo(function VenuePosterCard({
   return (
     <Link
       href={href}
-      className="group relative block aspect-[4/5] w-full overflow-hidden rounded-2xl bg-slate-900 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
+      className="group relative block aspect-[16/9] sm:aspect-square w-full overflow-hidden rounded-2xl bg-slate-900 shadow-sm transition hover:-translate-y-1 hover:shadow-xl"
     >
       {image ? (
         <Image
@@ -114,7 +114,7 @@ export const VenuePosterCard = memo(function VenuePosterCard({
 
 export function VenuePosterCardSkeleton() {
   return (
-    <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-slate-800 animate-pulse shadow-sm">
+    <div className="relative aspect-[16/9] sm:aspect-[4/5] w-full overflow-hidden rounded-2xl bg-slate-800 animate-pulse shadow-sm">
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-slate-800" />
       <div className="absolute left-2.5 top-2.5 h-5 w-16 rounded-full bg-slate-700/80" />
       <div className="absolute right-2.5 top-2.5 h-7 w-7 rounded-full bg-slate-700/80" />

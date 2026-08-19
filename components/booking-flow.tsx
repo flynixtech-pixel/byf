@@ -1162,6 +1162,7 @@ export default function BookingFlow({
         playProtect: listing.type === "Turf" ? playProtect : false,
         gameReminders: listing.type === "Event" ? false : gameReminders,
         durationMinutes,
+        quotedAmount: activePrice,
       });
 
       if (listing.type !== "Event" && gameReminders) {

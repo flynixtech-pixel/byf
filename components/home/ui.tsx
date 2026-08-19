@@ -81,6 +81,7 @@ export function SectionHeading({
   onAction,
   icon: Icon,
   light,
+  hideActionOnMobile,
 }: {
   eyebrow?: string;
   title: string;
@@ -89,6 +90,7 @@ export function SectionHeading({
   onAction?: () => void;
   icon?: LucideIcon;
   light?: boolean;
+  hideActionOnMobile?: boolean;
 }) {
   return (
     <div className="mb-4 sm:mb-8 flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -119,7 +121,7 @@ export function SectionHeading({
       {actionLabel && (
         <button
           onClick={onAction}
-          className={`inline-flex items-center gap-1 whitespace-nowrap text-xs sm:text-sm font-semibold transition ${
+          className={`${hideActionOnMobile ? 'hidden sm:inline-flex' : 'inline-flex'} items-center gap-1 whitespace-nowrap text-xs sm:text-sm font-semibold transition ${
             light ? "text-brand-300 hover:text-brand-200" : "text-brand-600 hover:text-brand-700"
           }`}
         >

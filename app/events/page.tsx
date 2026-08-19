@@ -8,6 +8,7 @@ import { browseVenues, getVendorProfile, getListingImage, type VendorPublicProfi
 import { Listing } from "@/lib/api/types";
 import { EventCategoryFilter, EVENT_CATEGORIES } from "@/components/events/EventCategoryFilter";
 import { AllEventsModal } from "@/components/events/AllEventsModal";
+import { MobileTopBar } from "@/components/mobile/ui";
 
 function eventBadge(event: Listing): string | undefined {
   if (typeof event.spotsLeft === "number") return `${event.spotsLeft} spots left`;
@@ -163,9 +164,12 @@ export default function EventsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50/60">
-      <SiteHeader />
+      <div className="hidden sm:block">
+        <SiteHeader />
+      </div>
 
       <div className="sm:hidden">
+        <MobileTopBar />
         {/* Top Location Selector Pill */}
         <div className="flex items-center justify-between gap-2 px-4 py-2.5 bg-white border-b border-slate-100">
           <div className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50/80 px-3.5 py-1.5 text-xs font-bold text-slate-800 shadow-2xs cursor-pointer hover:bg-slate-100 transition">

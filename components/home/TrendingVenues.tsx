@@ -119,11 +119,11 @@ export function TrendingVenues({
   return (
     <section id="venues" className="mx-auto mt-4 sm:mt-6 max-w-7xl px-4 sm:px-6 lg:px-8">
       <SectionHeading
-        eyebrow="What everyone's booking"
         title="Top Tier Turfs"
         icon={Flame}
-        actionLabel="View All Venues"
+        actionLabel="View More"
         onAction={onViewAll}
+        hideActionOnMobile={true}
       />
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
         {venues.slice(0, 4).map((v) => (

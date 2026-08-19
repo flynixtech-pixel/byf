@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Search, Settings, Star, Menu, Moon, Sun, X, FileText } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
+import { Search, Settings, Star, Menu, Moon, Sun, X, FileText, Home, Gamepad2, Calendar, Users, UtensilsCrossed, GraduationCap, Trophy, BookOpen } from "lucide-react";
 import { HERO_IMAGES, HERO_SLIDE_DURATION_MS } from "./data";
 import { PrimaryButton } from "./ui";
 import { SearchSuggestions } from "./SearchSuggestions";
@@ -16,16 +16,23 @@ import { SignupModal } from "./modals/SignupModal";
 
 const NAV_ITEMS = [
   { label: "Home", href: "/" },
-  { label: "Sports", href: "/games" },
+  { label: "Games", href: "/games" },
   { label: "Dineout", href: "/food" },
   { label: "Events", href: "#tournaments" },
-  { label: "Coaches", href: "#coaches" },
   { label: "Community", href: "#community" },
   { label: "Tournaments", href: "#tournaments" },
   { label: "Blog", href: "/blogs" },
 ];
 
-
+const MOBILE_ICON_NAV = [
+  { label: "Your Vibe", href: "/", icon: Home },
+  { label: "Games", href: "/games", icon: Gamepad2 },
+  { label: "Events", href: "/events", icon: Calendar },
+  { label: "Community", href: "/community", icon: Users },
+  { label: "Tournaments", href: "/tournaments", icon: Trophy },
+  { label: "Dineout", href: "#", icon: UtensilsCrossed, isComingSoon: true },
+  { label: "Blog", href: "/blogs", icon: BookOpen },
+];
 export function Hero({
   searchValue,
   onSearchChange,
@@ -42,6 +49,7 @@ export function Hero({
   venues?: any[];
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [heroSlide, setHeroSlide] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
@@ -52,6 +60,15 @@ export function Hero({
   const { customer, status, logout } = useCustomerAuth();
   const [authView, setAuthView] = useState<"login" | "signup" | null>(null);
   const [imgError, setImgError] = useState(false);
+  const [compactMobileNav, setCompactMobileNav] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setCompactMobileNav(window.scrollY > 250);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     setImgError(false);
@@ -105,6 +122,36 @@ export function Hero({
   return (
     <section id="home" className="relative z-30">
       <div
+        className={`fixed inset-x-0 top-[48px] z-40 border-b border-slate-200/70 bg-white/92 px-3 py-1.5 shadow-[0_8px_26px_rgba(15,23,42,0.09)] backdrop-blur-xl transition-all duration-300 sm:hidden ${
+          compactMobileNav ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-full opacity-0"
+        }`}
+      >
+        <nav className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="Quick navigation">
+          <div className="flex w-max min-w-full items-center gap-1">
+            {MOBILE_ICON_NAV.map(({ label, href, icon: Icon, isComingSoon }) => {
+              const isActive = href === "/" ? pathname === "/" : pathname?.startsWith(href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={isComingSoon ? (e) => e.preventDefault() : undefined}
+                  className={`flex shrink-0 items-center gap-1.5 rounded-xl px-4 py-2 font-display text-[13px] font-black transition ${isComingSoon ? "opacity-70" : "active:scale-95"} ${
+                    isActive ? "bg-brand-50 text-brand-700" : "text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  <span>{label}</span>
+                  {isComingSoon && (
+                    <span className="rounded-full bg-rose-500 px-1.5 py-[1px] text-[7px] font-black uppercase text-white shadow-sm">
+                      Soon
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+      </div>
+      <div
         className="relative sm:bg-[linear-gradient(135deg,#15101f_0%,#211731_35%,#2b1f3d_60%,#3a2a1a_100%)] bg-transparent"
       >
         {/* rotating background slideshow - hidden on mobile */}
@@ -155,32 +202,35 @@ export function Hero({
               restaurants, and never argue about who owes what - all from one app.
             </p>
 
-            {/* Search bar & Instant Recommendations */}
             <div ref={searchContainerRef} className="relative mt-2 sm:mt-6">
-              <form onSubmit={handleSubmit} className="flex flex-row items-center gap-2 rounded-full bg-white p-1.5 pl-3 sm:pl-5 shadow-sm border border-slate-200 sm:shadow-2xl sm:shadow-black/30 sm:border-none">
-                <span aria-hidden className="text-slate-400">
-                  <Search className="h-4 w-4" />
-                </span>
-                <input
-                  value={searchValue}
-                  onChange={(e) => {
-                    onSearchChange(e.target.value);
-                    setSuggestionsOpen(true);
-                  }}
-                  onFocus={() => setSuggestionsOpen(true)}
-                  placeholder="Let's find your vibe"
-                  className="w-full flex-1 bg-transparent px-2 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400 sm:px-0"
-                />
-                <div className="flex items-center gap-2">
+              <form onSubmit={handleSubmit} className="flex w-full items-center gap-2 rounded-2xl bg-white p-1.5 shadow-sm border border-slate-200 transition-shadow focus-within:border-brand-300 focus-within:ring-4 focus-within:ring-brand-500/10 sm:rounded-[28px] sm:p-2.5 sm:shadow-2xl sm:shadow-black/30 sm:border-none">
+                <div className="flex flex-1 items-center gap-2 pl-2 sm:gap-3 sm:pl-4">
+                  <Search className="h-5 w-5 shrink-0 text-slate-400 sm:h-6 sm:w-6" />
+                  <input
+                    type="text"
+                    value={searchValue}
+                    onChange={(e) => {
+                      onSearchChange(e.target.value);
+                      setSuggestionsOpen(true);
+                    }}
+                    onFocus={() => setSuggestionsOpen(true)}
+                    placeholder="Let's find your vibe"
+                    className="w-full bg-transparent py-2 text-[15px] font-medium text-slate-800 outline-none placeholder:font-normal placeholder:text-slate-400 sm:text-base sm:py-1.5"
+                  />
+                </div>
+                <div className="flex shrink-0 items-center pr-1 sm:pr-0 gap-2">
                   <button
                     type="button"
                     aria-label="Filters"
-                    onClick={onOpenFilters}
-                    className="relative flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200"
+                    onClick={() => {
+                      setSuggestionsOpen(false);
+                      onOpenFilters();
+                    }}
+                    className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 border border-slate-100 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 active:scale-95 sm:h-12 sm:w-12 sm:rounded-2xl sm:bg-slate-100/80 sm:border-none"
                   >
-                    <Settings className="h-4 w-4" />
+                    <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
                     {activeFilterCount > 0 && (
-                      <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-500 text-[9px] font-bold text-white ring-2 ring-white">
+                      <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-brand-500 text-[10px] font-bold text-white shadow-sm">
                         {activeFilterCount}
                       </span>
                     )}
@@ -200,6 +250,38 @@ export function Hero({
               />
             </div>
 
+            <nav
+              aria-label="Explore Book Your Vibe"
+              className="-mx-4 mt-3 overflow-x-auto px-4 sm:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            >
+              <div className="flex w-max min-w-full gap-2 pb-2">
+                {MOBILE_ICON_NAV.map(({ label, href, icon: Icon, isComingSoon }, index) => {
+                  const isActive = href === "/" ? pathname === "/" : pathname?.startsWith(href);
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={isComingSoon ? (e) => e.preventDefault() : undefined}
+                      className={`group relative flex min-w-[70px] shrink-0 flex-col items-center gap-1.5 rounded-2xl border px-2.5 py-2.5 transition ${isComingSoon ? "opacity-70" : "active:scale-95"} ${
+                        isActive
+                          ? "border-brand-300 bg-gradient-to-br from-brand-500 to-accent-500 text-white shadow-[0_8px_22px_rgba(220,38,38,0.22)]"
+                          : "border-slate-200/80 bg-white text-slate-600 shadow-[0_6px_18px_rgba(15,23,42,0.07)]"
+                      }`}
+                    >
+                      <span className={`relative grid h-8 w-8 place-items-center rounded-xl ${isActive ? "bg-white/20" : "bg-slate-50 group-hover:bg-brand-50"}`}>
+                        <Icon className={`h-[18px] w-[18px] ${isActive ? "text-white" : "text-slate-600 group-hover:text-brand-600"}`} strokeWidth={2.2} />
+                        {isComingSoon && (
+                          <span className="absolute -right-4 -top-1 rounded-full bg-rose-500 px-1.5 py-[1px] text-[7px] font-black uppercase text-white shadow-sm">
+                            Soon
+                          </span>
+                        )}
+                      </span>
+                      <span className="font-display text-[11px] font-black tracking-tight">{label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </nav>
             {/* trust row */}
             <div className="hidden sm:flex mt-4 items-center gap-x-5 text-xs font-medium text-slate-300">
               <span className="flex items-center gap-1.5">

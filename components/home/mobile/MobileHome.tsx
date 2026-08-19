@@ -10,17 +10,22 @@ import {
   Feather,
   Flame,
   GraduationCap,
+  Gamepad2,
   Handshake,
   Heart,
+  Home,
   LayoutGrid,
   MapPin,
   Medal,
+  Menu,
   Search,
   SlidersHorizontal,
   Sparkles,
   Star,
   Swords,
   Trophy,
+  Users,
+  UtensilsCrossed,
   Waves,
   X,
   Zap,
@@ -33,6 +38,15 @@ import { MobileCard, MobileChip, MobileSectionRow, MobileTopBar } from "@/compon
 import { AdBanner } from "../AdBanner";
 import { LastMinuteDealsSection } from "../LastMinuteDealsSection";
 import { TopPlayersRanking } from "../TopPlayersRanking";
+
+const MOBILE_PRIMARY_NAV = [
+  { label: "Home", href: "/", icon: Home },
+  { label: "Games", href: "/games", icon: Gamepad2 },
+  { label: "Events", href: "/events", icon: Calendar },
+  { label: "Community", href: "/community", icon: Users },
+  { label: "Dineout", href: "/food", icon: UtensilsCrossed },
+  { label: "More", href: "/blogs", icon: Menu },
+];
 
 const MOBILE_QUICK_ACTIONS = [
   {
@@ -253,6 +267,30 @@ export function MobileHome({
           />
           <Search className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
         </div>
+
+        <nav
+          aria-label="Explore Book Your Vibe"
+          className="-mx-4 overflow-x-auto px-4 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          <div className="flex w-max min-w-full items-stretch gap-2 pb-1">
+            {MOBILE_PRIMARY_NAV.map(({ label, href, icon: Icon }, index) => (
+              <Link
+                key={href}
+                href={href}
+                className={`group flex min-w-[72px] shrink-0 flex-col items-center gap-1.5 rounded-2xl border px-3 py-2.5 transition active:scale-95 ${
+                  index === 0
+                    ? "border-brand-200 bg-gradient-to-br from-brand-500 to-accent-500 text-white shadow-[0_8px_22px_rgba(220,38,38,0.22)]"
+                    : "border-slate-100 bg-white text-slate-600 shadow-[0_5px_16px_rgba(15,23,42,0.06)]"
+                }`}
+              >
+                <span className={`grid h-8 w-8 place-items-center rounded-xl ${index === 0 ? "bg-white/18" : "bg-slate-50 group-hover:bg-brand-50"}`}>
+                  <Icon className={`h-[18px] w-[18px] ${index === 0 ? "text-white" : "text-slate-600 group-hover:text-brand-600"}`} strokeWidth={2.2} />
+                </span>
+                <span className="text-[10px] font-extrabold tracking-tight">{label}</span>
+              </Link>
+            ))}
+          </div>
+        </nav>
       </div>
 
       <section>

@@ -183,7 +183,7 @@ export default function HomePage() {
             onToggleFavorite={toggleFavorite}
             onViewVenue={openVenue}
             onBookVenue={openVenue}
-            onViewAll={() => router.push("/venues")}
+            onViewAll={() => router.push("/games")}
           />
         </FadeIn>
 

@@ -22,6 +22,7 @@ export interface CreateBookingInput {
   /** Several courts taken in the same slot. Takes precedence over `courtId`. */
   courtIds?: string[];
   durationMinutes?: number;
+  quotedAmount?: number;
 }
 
 export function createMyBooking(input: CreateBookingInput) {

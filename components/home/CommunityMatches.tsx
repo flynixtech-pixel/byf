@@ -107,7 +107,7 @@ export function CommunityMatches({
             </div>
           </div>
 
-          {/* Card 3: Book a Coach */}
+          {/* Card 3: Book a Coach - HIDDEN FOR NOW
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-3xl border border-slate-100 bg-white p-4 shadow-sm hover:shadow-md transition">
             <div className="flex items-start gap-3">
               <span className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100">
@@ -131,6 +131,7 @@ export function CommunityMatches({
               <PrimaryButton onClick={onBookCoach} className="text-xs px-4 py-2 bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700 shadow-blue-500/10">Book Coach</PrimaryButton>
             </div>
           </div>
+          */}
         </div>
       </div>
     </section>

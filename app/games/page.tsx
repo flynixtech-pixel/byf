@@ -146,7 +146,6 @@ export default function GamesPage() {
   const [venues, setVenues] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<FilterCategory>("all");
-  const [showAllSports, setShowAllSports] = useState(false);
 
   useEffect(() => {
     browseVenues({ type: "Turf", limit: 20 })
@@ -167,7 +166,7 @@ export default function GamesPage() {
       <div className="hidden sm:block">
         <SiteHeader />
       </div>
-      <div className="sm:hidden px-4 pt-3 pb-1 bg-white border-b border-slate-100 sticky top-0 z-40 shadow-xs">
+      <div className="sm:hidden px-4 pt-3 pb-1 bg-white border-b border-slate-100 shadow-xs">
         <MobileTopBar />
       </div>
 
@@ -204,7 +203,6 @@ export default function GamesPage() {
                 type="button"
                 onClick={() => {
                   setActiveFilter(tab.id as FilterCategory);
-                  setShowAllSports(false);
                 }}
                 className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-[11px] font-black uppercase tracking-wider transition-all duration-300 cursor-pointer ${isActive
                     ? "bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-md shadow-brand-500/25 border border-brand-500 scale-105"
@@ -220,20 +218,19 @@ export default function GamesPage() {
           })}
         </div>
 
-        {/* Compact Sports Grid */}
-        <section>
-          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {/* Compact Sports Slider */}
+        <section className="-mx-4 sm:mx-0">
+          <div className="flex gap-3 overflow-x-auto pb-4 px-4 sm:px-0 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {filteredSports.map((sport, index) => {
               const categoryQuery = sport.id === "box-cricket" || sport.id === "cricket-nets" ? "cricket" : sport.id;
-              const isHiddenOnMobile = !showAllSports && index >= 4;
 
               return (
                 <Link
                   key={sport.id}
                   href={`/venues?category=${categoryQuery}`}
-                  className={`${isHiddenOnMobile ? "hidden sm:flex" : "flex"} group items-center gap-2.5 rounded-2xl border border-slate-100 bg-white p-2 shadow-xs transition hover:shadow-md hover:border-brand-200`}
+                  className="flex w-[140px] sm:w-[180px] shrink-0 snap-start group items-center gap-2 rounded-2xl border border-slate-100 bg-white p-2 shadow-xs transition hover:shadow-md hover:border-brand-200"
                 >
-                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-[10px] bg-slate-50 flex items-center justify-center">
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-slate-50 flex items-center justify-center">
                     <AnimatedSportIcon
                       id={sport.id}
                       label={sport.label}
@@ -241,33 +238,18 @@ export default function GamesPage() {
                       alt={sport.alt}
                       bubble={sport.bubble}
                       index={index}
-                      className="!h-7 !w-7"
+                      className="!h-9 !w-9"
                     />
                   </div>
                   <div className="min-w-0 flex-1">
                     <h3 className="font-display text-[11px] sm:text-xs font-bold text-slate-900 truncate group-hover:text-brand-600 transition-colors">
                       {sport.label}
                     </h3>
-                    <p className="text-[9px] text-slate-500 font-medium truncate mt-0.5">
-                      {sport.note}
-                    </p>
                   </div>
                 </Link>
               );
             })}
           </div>
-
-          {filteredSports.length > 4 && (
-            <div className="mt-4 flex justify-center sm:hidden">
-              <button
-                type="button"
-                onClick={() => setShowAllSports(!showAllSports)}
-                className="rounded-full border border-slate-200 bg-white px-5 py-2 text-[11px] font-bold text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50"
-              >
-                {showAllSports ? "View Less" : `View ${filteredSports.length - 4} More`}
-              </button>
-            </div>
-          )}
         </section>
 
         {/* Featured Venues Section */}
@@ -289,7 +271,7 @@ export default function GamesPage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {loading ? (
               Array.from({ length: 8 }).map((_, i) => (
                 <VenuePosterCardSkeleton key={i} />

@@ -11,10 +11,9 @@ import { SignupModal } from "./home/modals/SignupModal";
 import { CustomerNotificationBell } from "./notifications/CustomerNotificationBell";
 
 const NAV_LINKS = [
-  { label: "Home", href: "/" },
-  { label: "Sports", href: "/games" },
+  { label: "Your Vibe", href: "/" },
+  { label: "Games", href: "/games" },
   { label: "Events", href: "/events" },
-  { label: "Coaches", href: "/coaches" },
   { label: "Community", href: "/community" },
   { label: "Tournaments", href: "/tournaments" },
   { label: "Dineout", href: "/food", isComingSoon: true },
